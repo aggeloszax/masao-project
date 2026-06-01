@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+:root {
+  /* Light, minimalist palette matching the printed Masao PDF menu */
+  --background: #ffffff; /* clean white */
+  --surface: #fafafa; /* subtle premium off-white */
+  --foreground: #111111; /* crisp black for names & prices */
+  --muted: #555555; /* muted dark gray for descriptions */
+  --accent: #722f37; /* deep burgundy for category headings */
+  --accent-soft: #8b0000; /* crimson red highlight */
+  --hairline: #e5e7eb; /* thin elegant light-gray divider */
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-hairline: var(--hairline);
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Hide scrollbars on horizontal scroll containers (e.g. the category tab bar). */
+@utility no-scrollbar {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
