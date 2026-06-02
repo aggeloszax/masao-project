@@ -6,11 +6,12 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useState,
+  useSyncExternalStore,
 } from "react";
-import { DEFAULT_LANG, isRtl, UI, type Lang } from "./config";
+import { DEFAULT_LANG, isRtl, LANGUAGES, UI, type Lang } from "./config";
 
 const STORAGE_KEY = "masao-lang";
+const LANGUAGE_CHANGE_EVENT = "masao-language-change";
 
 type LanguageContextValue = {
   lang: Lang;
@@ -22,15 +23,7 @@ type LanguageContextValue = {
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  // Start from the default so SSR and first client render match; hydrate the
-  // stored preference in an effect afterwards.
-  const [lang, setLangState] = useState<Lang>(DEFAULT_LANG);
-
-  useEffect(() => {
-    const stored = window.localStorage.getItem(STORAGE_KEY) as Lang | null;
-    if (stored && stored !== lang) setLangState(stored);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const lang = useSyncExternalStore(subscribeToLanguage, getStoredLanguage, getServerLanguage);
 
   // Keep <html lang/dir> in sync for correct page-level RTL (scrollbars, etc.).
   useEffect(() => {
@@ -40,8 +33,8 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   }, [lang]);
 
   const setLang = useCallback((next: Lang) => {
-    setLangState(next);
     window.localStorage.setItem(STORAGE_KEY, next);
+    window.dispatchEvent(new Event(LANGUAGE_CHANGE_EVENT));
   }, []);
 
   const value = useMemo<LanguageContextValue>(
@@ -60,4 +53,26 @@ export function useLanguage(): LanguageContextValue {
     throw new Error("useLanguage must be used within a LanguageProvider");
   }
   return ctx;
+}
+
+function subscribeToLanguage(callback: () => void): () => void {
+  window.addEventListener("storage", callback);
+  window.addEventListener(LANGUAGE_CHANGE_EVENT, callback);
+  return () => {
+    window.removeEventListener("storage", callback);
+    window.removeEventListener(LANGUAGE_CHANGE_EVENT, callback);
+  };
+}
+
+function getStoredLanguage(): Lang {
+  const stored = window.localStorage.getItem(STORAGE_KEY);
+  return isSupportedLanguage(stored) ? stored : DEFAULT_LANG;
+}
+
+function getServerLanguage(): Lang {
+  return DEFAULT_LANG;
+}
+
+function isSupportedLanguage(value: string | null): value is Lang {
+  return LANGUAGES.some((language) => language.code === value);
 }

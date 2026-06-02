@@ -1,0 +1,30 @@
+app:
+  name: "Masao Restaurant Chatbot API"
+  version: "1.0.0"
+  environment: "development"
+
+restaurant:
+  slug: "masao"
+  display_name: "Masao"
+
+database:
+  url: "postgresql+asyncpg://postgres:postgres@localhost:5432/masao"
+  pool_size: 10
+  max_overflow: 20
+  pool_timeout_seconds: 30
+
+cors:
+  allowed_origins:
+    - "http://localhost:3000"
+    - "http://127.0.0.1:3000"
+    - "http://localhost:3001"
+    - "https://masao.vercel.app"
+  allowed_methods:
+    - "GET"
+    - "POST"
+    - "OPTIONS"
+
+chat:
+  history_limit: 20
+  max_user_message_chars: 1000
+  default_table_number: 1

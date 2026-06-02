@@ -2,7 +2,7 @@
   {
     "id": "UR001",
     "name": "Cucumber Maki",
-    "price": 8.0,
+    "price": 8,
     "description": "αγγούρι | cucumber",
     "category": "Uramaki / Hossomaki (6pcs)",
     "tags": [
@@ -31,18 +31,13 @@
         "name": "Gurk Maki",
         "description": "gurka",
         "category": "Uramaki / Hossomaki (6 bitar)"
-      },
-      "he": {
-        "name": "מאקי מלפפון",
-        "description": "מלפפון",
-        "category": "אורמאקי / הוסומאקי (6 יחידות)"
       }
     }
   },
   {
     "id": "UR002",
     "name": "Avocado Maki",
-    "price": 8.0,
+    "price": 8,
     "description": "αβοκάντο | avocado",
     "category": "Uramaki / Hossomaki (6pcs)",
     "tags": [
@@ -71,11 +66,6 @@
         "name": "Avokado Maki",
         "description": "avokado",
         "category": "Uramaki / Hossomaki (6 bitar)"
-      },
-      "he": {
-        "name": "מאקי אבוקדו",
-        "description": "אבוקדו",
-        "category": "אורמאקי / הוסומאקי (6 יחידות)"
       }
     }
   },
@@ -111,11 +101,6 @@
         "name": "Veggie Roll",
         "description": "gurka, avokado, mango, salladslök, färskost, grön tobiko",
         "category": "Uramaki / Hossomaki (6 bitar)"
-      },
-      "he": {
-        "name": "רול ירקות",
-        "description": "מלפפון, אבוקדו, מנגו, בצל ירוק, גבינת שמנת, טוביקו ירוק",
-        "category": "אורמאקי / הוסומאקי (6 יחידות)"
       }
     }
   },
@@ -151,11 +136,6 @@
         "name": "Vegan Roll",
         "description": "gurka, avokado, mango, salladslök, vegansk majonnäs, sesam",
         "category": "Uramaki / Hossomaki (6 bitar)"
-      },
-      "he": {
-        "name": "רול טבעוני",
-        "description": "מלפפון, אבוקדו, מנגו, בצל ירוק, מיונז טבעוני, שומשום",
-        "category": "אורמאקי / הוסומאקי (6 יחידות)"
       }
     }
   },
@@ -190,11 +170,6 @@
         "name": "California Salmon",
         "description": "lax, gurka, avokado, färskost, sesam",
         "category": "Uramaki / Hossomaki (6 bitar)"
-      },
-      "he": {
-        "name": "קליפורניה סלמון",
-        "description": "סלמון, מלפפון, אבוקדו, גבינת שמנת, שומשום",
-        "category": "אורמאקי / הוסומאקי (6 יחידות)"
       }
     }
   },
@@ -229,11 +204,6 @@
         "name": "California Crab",
         "description": "krabb kanimi, gurka, avokado, krämig majonnäs, sesam",
         "category": "Uramaki / Hossomaki (6 bitar)"
-      },
-      "he": {
-        "name": "קליפורניה סרטן",
-        "description": "סרטן קנימי, מלפפון, אבוקדו, מיונז קרמי, שומשום",
-        "category": "אורמאקי / הוסומאקי (6 יחידות)"
       }
     }
   },
@@ -269,11 +239,6 @@
         "name": "Räkor Tempura",
         "description": "räkor i tempura, avokado, stark majonnäs, röd masago",
         "category": "Uramaki / Hossomaki (6 bitar)"
-      },
-      "he": {
-        "name": "שרימפס טמפורה",
-        "description": "שרימפס בטמפורה, אבוקדו, מיונז חריף, מסאגו אדום",
-        "category": "אורמאקי / הוסומאקי (6 יחידות)"
       }
     }
   },
@@ -309,11 +274,6 @@
         "name": "Tekka Kimchi",
         "description": "tonfisk, gurka, stekt vitlök, kimchi majonnäs, kimchi sesam",
         "category": "Uramaki / Hossomaki (6 bitar)"
-      },
-      "he": {
-        "name": "טקה קימצ'י",
-        "description": "טונה, מלפפון, שום מטוגן, מיונז קימצ'י, שומשום קימצ'י",
-        "category": "אורמאקי / הוסומאקי (6 יחידות)"
       }
     }
   },
@@ -349,11 +309,6 @@
         "name": "Spicy Suzuki",
         "description": "havsabborre, gurka, avokado, chilimajonnäs, yuzu, tobiko",
         "category": "Uramaki / Hossomaki (6 bitar)"
-      },
-      "he": {
-        "name": "סוזוקי חריף",
-        "description": "דג ים, מלפפון, אבוקדו, מיונז צ'ילי, יוזו, טוביקו",
-        "category": "אורמאקי / הוסומאקי (6 יחידות)"
       }
     }
   },
@@ -389,11 +344,6 @@
         "name": "Avokado Nigiri",
         "description": "avokado",
         "category": "Nigiri (2 bitar)"
-      },
-      "he": {
-        "name": "ניגירי אבוקדו",
-        "description": "אבוקדו",
-        "category": "ניגירי (2 יחידות)"
       }
     }
   },
@@ -429,11 +379,6 @@
         "name": "Lax Nigiri",
         "description": "lax",
         "category": "Nigiri (2 bitar)"
-      },
-      "he": {
-        "name": "ניגירי סלמון",
-        "description": "סלמון",
-        "category": "ניגירי (2 יחידות)"
       }
     }
   },
@@ -469,11 +414,6 @@
         "name": "Tonfisk Nigiri",
         "description": "tonfisk",
         "category": "Nigiri (2 bitar)"
-      },
-      "he": {
-        "name": "ניגירי טונה",
-        "description": "טונה",
-        "category": "ניגירי (2 יחידות)"
       }
     }
   },
@@ -508,18 +448,13 @@
         "name": "Havsabborre Nigiri",
         "description": "havsabborre",
         "category": "Nigiri (2 bitar)"
-      },
-      "he": {
-        "name": "ניגירי דג ים",
-        "description": "דג ים",
-        "category": "ניגירי (2 יחידות)"
       }
     }
   },
   {
     "id": "NI005",
     "name": "Shrimp Nigiri",
-    "price": 4.0,
+    "price": 4,
     "description": "Γαρίδα | Shrimp",
     "category": "Nigiri (2pcs)",
     "tags": [
@@ -547,18 +482,13 @@
         "name": "Räk Nigiri",
         "description": "räka",
         "category": "Nigiri (2 bitar)"
-      },
-      "he": {
-        "name": "ניגירי שרימפס",
-        "description": "שרימפס",
-        "category": "ניגירי (2 יחידות)"
       }
     }
   },
   {
     "id": "NI006",
     "name": "Smoked Eel Nigiri",
-    "price": 5.0,
+    "price": 5,
     "description": "Καπνιστό Χέλι | Smoked Eel",
     "category": "Nigiri (2pcs)",
     "tags": [
@@ -587,18 +517,13 @@
         "name": "Rökt Ål Nigiri",
         "description": "rökt ål",
         "category": "Nigiri (2 bitar)"
-      },
-      "he": {
-        "name": "ניגירי צלופח מעושן",
-        "description": "צלופח מעושן",
-        "category": "ניגירי (2 יחידות)"
       }
     }
   },
   {
     "id": "SR001",
     "name": "Mango Mango",
-    "price": 18.0,
+    "price": 18,
     "description": "Μέσα: γαρίδα τεμπούρα, cream cheese. Έξω: μάνγκο, passion fruit μαγιονέζα, σουσάμι, σχοινόπρασο | Inside: shrimp tempura, cream cheese. On top: mango, passion fruit mayo, sesame, chives",
     "category": "Signature Rolls (8pcs)",
     "tags": [
@@ -627,11 +552,6 @@
         "name": "Mango Mango",
         "description": "Inuti: räkor tempura, färskost. Ovanpå: mango, passionsfrukts majonnäs, sesam, gräslök",
         "category": "Signature Rolls (8 bitar)"
-      },
-      "he": {
-        "name": "מנגו מנגו",
-        "description": "מילוי: שרימפס בטמפורה, גבינת שמנת. מעל: מנגו, מיונז פסיפלורה, שומשום, עירית",
-        "category": "רולים מיוחדים (8 יחידות)"
       }
     }
   },
@@ -667,18 +587,13 @@
         "name": "Krabba & Tonfisk",
         "description": "Inuti: tonfisk, avokado, gurka, salladslök. Ovanpå: krabba, stark majonnäs, gräslök, krispig lök",
         "category": "Signature Rolls (8 bitar)"
-      },
-      "he": {
-        "name": "סרטן וטונה",
-        "description": "מילוי: טונה, אבוקדו, מלפפון, בצל ירוק. מעל: סרטן, מיונז חריף, עירית, בצל פריך",
-        "category": "רולים מיוחדים (8 יחידות)"
       }
     }
   },
   {
     "id": "SR003",
     "name": "Spicy Tuna",
-    "price": 18.0,
+    "price": 18,
     "description": "Μέσα: τόνος, αβοκάντο, αγγούρι. Έξω: σασίμι τόνου, καυτερή μαγιονέζα, τογκαράσι, σχοινόπρασο | Inside: tuna, avocado, cucumber. On top: tuna sashimi, spicy mayo, togarashi, chives",
     "category": "Signature Rolls (8pcs)",
     "tags": [
@@ -707,18 +622,13 @@
         "name": "Stark Tonfisk",
         "description": "Inuti: tonfisk, avokado, gurka. Ovanpå: tonfisk sashimi, stark majonnäs, togarashi, gräslök",
         "category": "Signature Rolls (8 bitar)"
-      },
-      "he": {
-        "name": "טונה חריפה",
-        "description": "מילוי: טונה, אבוקדו, מלפפון. מעל: סשימי טונה, מיונז חריף, טוגראשי, עירית",
-        "category": "רולים מיוחדים (8 יחידות)"
       }
     }
   },
   {
     "id": "SR004",
     "name": "Salmon Truffle",
-    "price": 18.0,
+    "price": 18,
     "description": "Μέσα: σολομός, αγγούρι, κρεμμύδι φρέσκο. Έξω: ψημένος σολομός, unagi σως, μαγιονέζα τρούφας, τραγανό σκόρδο, χαβιάρι | Inside: salmon, cucumber, spring onion. On top: seared salmon, unagi sauce, truffle mayo, crispy garlic, caviar",
     "category": "Signature Rolls (8pcs)",
     "tags": [
@@ -747,18 +657,13 @@
         "name": "Lax Tryffel",
         "description": "Inuti: lax, gurka, salladslök. Ovanpå: stekt lax, unagi sås, tryffel majonnäs, krispig vitlök, kaviar",
         "category": "Signature Rolls (8 bitar)"
-      },
-      "he": {
-        "name": "סלמון טרופל",
-        "description": "מילוי: סלמון, מלפפון, בצל ירוק. מעל: סלמון צרוב, רוטב אונאגי, מיונז טרופל, שום פריך, קוויאר",
-        "category": "רולים מיוחדים (8 יחידות)"
       }
     }
   },
   {
     "id": "SR005",
     "name": "Phili Salmon",
-    "price": 18.0,
+    "price": 18,
     "description": "Μέσα: σολομός, τυρί κρέμα Philadelphia, μάνγκο. Έξω: ταρτάρ σολομού, μαγιονέζα γλυκό τσίλι, ικούρα, κρεμμύδι φρέσκο | Inside: salmon, cream cheese, mango. On top: salmon tartare, sweet chili mayo, ikura, spring onions",
     "category": "Signature Rolls (8pcs)",
     "tags": [
@@ -787,11 +692,6 @@
         "name": "Phili Lax",
         "description": "Inuti: lax, färskost, mango. Ovanpå: lax tartar, söt chili majonnäs, ikura, salladslök",
         "category": "Signature Rolls (8 bitar)"
-      },
-      "he": {
-        "name": "פילי סלמון",
-        "description": "מילוי: סלמון, גבינת שמנת, מנגו. מעל: טרטר סלמון, מיונז צ'ילי מתוק, איקורה, בצל ירוק",
-        "category": "רולים מיוחדים (8 יחידות)"
       }
     }
   },
@@ -827,11 +727,6 @@
         "name": "Suzuki & Räkor",
         "description": "Inuti: räkor tempura, färskost, mango. Ovanpå: stekt havsabborre, sötstark majonnäs, teriyaki, salladslök, tobiko",
         "category": "Signature Rolls (8 bitar)"
-      },
-      "he": {
-        "name": "סוזוקי ושרימפס",
-        "description": "מילוי: שרימפס בטמפורה, גבינת שמנת, מנגו. מעל: דג ים צרוב, מיונז מתוק-חריף, טריאקי, בצל ירוק, טוביקו",
-        "category": "רולים מיוחדים (8 יחידות)"
       }
     }
   },
@@ -867,18 +762,13 @@
         "name": "Krispiga Räkor",
         "description": "Inuti: räkor tempura, salladslök, färskost. Ovanpå: avokado, stark majonnäs, krispig lök, gräslök",
         "category": "Signature Rolls (8 bitar)"
-      },
-      "he": {
-        "name": "שרימפס פריך",
-        "description": "מילוי: שרימפס בטמפורה, בצל ירוק, גבינת שמנת. מעל: אבוקדו, מיונז חריף, בצל פריך, עירית",
-        "category": "רולים מיוחדים (8 יחידות)"
       }
     }
   },
   {
     "id": "SR008",
     "name": "Chicken Roll",
-    "price": 18.0,
+    "price": 18,
     "description": "Μέσα: τραγανό κοτόπουλο, μαρούλι iceberg, κρεμμυδάκι φρέσκο. Έξω: αβοκάντο, τραγανό κρεμμύδι, μαγιονέζα hoisin | Inside: crispy chicken, iceberg, spring onion. On top: avocado, crispy onion, hoisin mayo",
     "category": "Signature Rolls (8pcs)",
     "tags": [
@@ -907,18 +797,13 @@
         "name": "Kyckling Roll",
         "description": "Inuti: krispig kyckling, isbergssallad, salladslök. Ovanpå: avokado, krispig lök, hoisin majonnäs",
         "category": "Signature Rolls (8 bitar)"
-      },
-      "he": {
-        "name": "רול עוף",
-        "description": "מילוי: עוף פריך, חסה, בצל ירוק. מעל: אבוקדו, בצל פריך, מיונז הויסין",
-        "category": "רולים מיוחדים (8 יחידות)"
       }
     }
   },
   {
     "id": "SR009",
     "name": "Masao",
-    "price": 21.0,
+    "price": 21,
     "description": "Μέσα: γαρίδα τεμπούρα, αβοκάντο, κρεμμύδι φρέσκο. Έξω: μοσχάρι ταρτάρ, μαγιονέζα τρούφας, τραγανό κρεμμύδι, σχοινόπρασο | Inside: shrimp tempura, avocado, spring onion. On top: beef tartare, truffle mayo, crispy onion, chives",
     "category": "Signature Rolls (8pcs)",
     "tags": [
@@ -947,18 +832,13 @@
         "name": "Masao",
         "description": "Inuti: räkor tempura, avokado, salladslök. Ovanpå: nöttartar, tryffel majonnäs, krispig lök, gräslök",
         "category": "Signature Rolls (8 bitar)"
-      },
-      "he": {
-        "name": "מסאו",
-        "description": "מילוי: שרימפס בטמפורה, אבוקדו, בצל ירוק. מעל: טרטר בקר, מיונז טרופל, בצל פריך, עירית",
-        "category": "רולים מיוחדים (8 יחידות)"
       }
     }
   },
   {
     "id": "SR010",
     "name": "Aegean Roll",
-    "price": 19.0,
+    "price": 19,
     "description": "Μέσα: αγγούρι, αβοκάντο, φέτα. Έξω: σοταρισμένο λαβράκι, μαγιονέζα λάιμ, ελαιόλαδο, άνηθος, σουσάμι | Inside: cucumber, avocado, feta cheese. On top: seared sea bass, lime mayo, olive oil, dill, sesame",
     "category": "Signature Rolls (8pcs)",
     "tags": [
@@ -987,11 +867,6 @@
         "name": "Aegean Roll",
         "description": "Inuti: gurka, avokado, fetaost. Ovanpå: stekt havsabborre, lime majonnäs, olivolja, dill, sesam",
         "category": "Signature Rolls (8 bitar)"
-      },
-      "he": {
-        "name": "רול אגאי",
-        "description": "מילוי: מלפפון, אבוקדו, גבינת פטה. מעל: דג ים צרוב, מיונז לימון, שמן זית, שמיר, שומשום",
-        "category": "רולים מיוחדים (8 יחידות)"
       }
     }
   },
@@ -1028,11 +903,6 @@
         "name": "Havsabborre Carpaccio",
         "description": "havsabborre, citrus, röd paprika, yuzu, chili, olivolja, citron, dill",
         "category": "Rå"
-      },
-      "he": {
-        "name": "קרפצ'יו דג ים",
-        "description": "דג ים, הדרים, פלפל אדום, יוזו, צ'ילי, שמן זית, לימון, שמיר",
-        "category": "נא"
       }
     }
   },
@@ -1068,18 +938,13 @@
         "name": "Lax Yuzu",
         "description": "lax, ikura, limeskal, salladslök, mango, yuzu, sesam",
         "category": "Rå"
-      },
-      "he": {
-        "name": "סלמון יוזו",
-        "description": "סלמון, איקורה, קליפת ליים, בצל ירוק, מנגו, יוזו, שומשום",
-        "category": "נא"
       }
     }
   },
   {
     "id": "RAW003",
     "name": "Tuna Turf",
-    "price": 20.0,
+    "price": 20,
     "description": "τόνος, λάδι τρούφας, τοματίνια, μαΐντανος, φρέσκο κρεμμυδάκι | tuna, truffle oil, cherry tomato, parsley, spring onion",
     "category": "Raw",
     "tags": [
@@ -1108,18 +973,13 @@
         "name": "Tonfisk Turf",
         "description": "tonfisk, tryffelolja, körsbärstomater, persilja, salladslök",
         "category": "Rå"
-      },
-      "he": {
-        "name": "טונה טרף",
-        "description": "טונה, שמן טרופל, עגבניות שרי, פטרוזיליה, בצל ירוק",
-        "category": "נא"
       }
     }
   },
   {
     "id": "RAW004",
     "name": "Variety of Sashimi 12pcs",
-    "price": 20.0,
+    "price": 20,
     "description": "σολομός, τόνος, λαβράκι | salmon, tuna, sea bass",
     "category": "Raw",
     "tags": [
@@ -1148,18 +1008,13 @@
         "name": "Sashimi Urval 12 bitar",
         "description": "lax, tonfisk, havsabborre",
         "category": "Rå"
-      },
-      "he": {
-        "name": "מבחר סשימי 12 יחידות",
-        "description": "סלמון, טונה, דג ים",
-        "category": "נא"
       }
     }
   },
   {
     "id": "CF001",
     "name": "Crispy Tekka Roll",
-    "price": 14.0,
+    "price": 14,
     "description": "Μέσα: τόνος, αγγούρι, τυρί κρέμα. Έξω: πικάντικη μαγιονέζα, τεριγιάκι, σχοινόπρασο | Inside: tuna, cucumber, cream cheese. On top: spicy mayo, teriyaki, chives",
     "category": "Crispy Fried Rolls (6pcs)",
     "tags": [
@@ -1188,18 +1043,13 @@
         "name": "Krispig Tekka Roll",
         "description": "Inuti: tonfisk, gurka, färskost. Ovanpå: stark majonnäs, teriyaki, gräslök",
         "category": "Krispiga Friterade Rullar (6 bitar)"
-      },
-      "he": {
-        "name": "רול טקה פריך",
-        "description": "מילוי: טונה, מלפפון, גבינת שמנת. מעל: מיונז חריף, טריאקי, עירית",
-        "category": "רולים פריכים מטוגנים (6 יחידות)"
       }
     }
   },
   {
     "id": "CF002",
     "name": "Crunchy Salmon Roll",
-    "price": 13.0,
+    "price": 13,
     "description": "Μέσα: σολομός, τυρί κρέμα Philadelphia, αβοκάντο. Έξω: μαγιονέζα hoisin, σχοινόπρασο | Inside: salmon, cream cheese, avocado. On top: hoisin mayo, chives",
     "category": "Crispy Fried Rolls (6pcs)",
     "tags": [
@@ -1228,18 +1078,13 @@
         "name": "Krispig Laxrulle",
         "description": "Inuti: lax, färskost, avokado. Ovanpå: hoisin majonnäs, gräslök",
         "category": "Krispiga Friterade Rullar (6 bitar)"
-      },
-      "he": {
-        "name": "רול סלמון פריך",
-        "description": "מילוי: סלמון, גבינת שמנת, אבוקדו. מעל: מיונז הויסין, עירית",
-        "category": "רולים פריכים מטוגנים (6 יחידות)"
       }
     }
   },
   {
     "id": "CF003",
     "name": "Crispy Veggie Roll",
-    "price": 10.0,
+    "price": 10,
     "description": "Μέσα: αγγούρι, τυρί κρέμα Philadelphia, αβοκάντο. Έξω: μαγιονέζα hoisin, σχοινόπρασο | Inside: cucumber, cream cheese, avocado. On top: hoisin mayo, chives",
     "category": "Crispy Fried Rolls (6pcs)",
     "tags": [
@@ -1268,11 +1113,6 @@
         "name": "Krispig Veggie Roll",
         "description": "Inuti: gurka, färskost, avokado. Ovanpå: hoisin majonnäs, gräslök",
         "category": "Krispiga Friterade Rullar (6 bitar)"
-      },
-      "he": {
-        "name": "רול ירקות פריך",
-        "description": "מילוי: מלפפון, גבינת שמנת, אבוקדו. מעל: מיונז הויסין, עירית",
-        "category": "רולים פריכים מטוגנים (6 יחידות)"
       }
     }
   },
@@ -1308,11 +1148,6 @@
         "name": "Kycklingdumplings",
         "description": "tryffel ponzu sås, salladslök",
         "category": "Smårätter"
-      },
-      "he": {
-        "name": "כיסוני עוף",
-        "description": "רוטב פונזו טרופל, בצל ירוק",
-        "category": "נשנושים"
       }
     }
   },
@@ -1349,11 +1184,6 @@
         "name": "Vårrullar",
         "description": "grönsaks vårrullar, söt chilisås",
         "category": "Smårätter"
-      },
-      "he": {
-        "name": "רולי אביב",
-        "description": "רולי אביב עם ירקות, רוטב צ'ילי מתוק",
-        "category": "נשנושים"
       }
     }
   },
@@ -1389,11 +1219,6 @@
         "name": "Räk Gyoza",
         "description": "chili sojasås, gräslök",
         "category": "Smårätter"
-      },
-      "he": {
-        "name": "גיוזה שרימפס",
-        "description": "רוטב סויה חריף, עירית",
-        "category": "נשנושים"
       }
     }
   },
@@ -1429,11 +1254,6 @@
         "name": "Krispiga Ost Wonton",
         "description": "räkor, krabba, färskost",
         "category": "Smårätter"
-      },
-      "he": {
-        "name": "וואנטון גבינה פריך",
-        "description": "שרימפס, סרטן, גבינת שמנת",
-        "category": "נשנושים"
       }
     }
   },
@@ -1469,18 +1289,13 @@
         "name": "Räk Bao",
         "description": "räkor tempura, gurka, avokadokräm, sallad, stark majonnäs, gräslök, sesam",
         "category": "Bao Bröd (2 bitar)"
-      },
-      "he": {
-        "name": "באו שרימפס",
-        "description": "שרימפס בטמפורה, מלפפון, קרם אבוקדו, חסה, מיונז חריף, עירית, שומשום",
-        "category": "לחמניות באו (2 יחידות)"
       }
     }
   },
   {
     "id": "BAO002",
     "name": "Chicken Bao",
-    "price": 12.0,
+    "price": 12,
     "description": "τραγανό κοτόπουλο, αγγούρι, κρέμα αβοκάντο, μαρούλι, πικάντικο σχοινόπρασο, τραγανό κρεμμύδι | crispy chicken, cucumber, lettuce, avocado, spicy mayo, chives, crispy onion",
     "category": "Bao Buns (2pcs)",
     "tags": [
@@ -1509,11 +1324,6 @@
         "name": "Kyckling Bao",
         "description": "krispig kyckling, gurka, avokadokräm, sallad, stark majonnäs, gräslök, krispig lök",
         "category": "Bao Bröd (2 bitar)"
-      },
-      "he": {
-        "name": "באו עוף",
-        "description": "עוף פריך, מלפפון, קרם אבוקדו, חסה, מיונז חריף, עירית, בצל פריך",
-        "category": "לחמניות באו (2 יחידות)"
       }
     }
   },
@@ -1549,18 +1359,13 @@
         "name": "Lax Bao",
         "description": "lax teriyaki, gurka, sallad, avokado, lime majonnäs, gräslök, krispig lök",
         "category": "Bao Bröd (2 bitar)"
-      },
-      "he": {
-        "name": "באו סלמון",
-        "description": "סלמון טריאקי, מלפפון, חסה, אבוקדו, מיונז ליים, עירית, בצל פריך",
-        "category": "לחמניות באו (2 יחידות)"
       }
     }
   },
   {
     "id": "BAO004",
     "name": "Mushroom Bao",
-    "price": 12.0,
+    "price": 12,
     "description": "μανιτάρια, αγγούρι, Hoisin mayo, κρεμμυδάκι φρέσκο, σουσάμι | mushroom, cucumber, Hoisin mayo, spring onion, sesame",
     "category": "Bao Buns (2pcs)",
     "tags": [
@@ -1589,18 +1394,13 @@
         "name": "Svamp Bao",
         "description": "svamp, gurka, hoisin majonnäs, salladslök, sesam",
         "category": "Bao Bröd (2 bitar)"
-      },
-      "he": {
-        "name": "באו פטריות",
-        "description": "פטריות, מלפפון, מיונז הויסין, בצל ירוק, שומשום",
-        "category": "לחמניות באו (2 יחידות)"
       }
     }
   },
   {
     "id": "BAO005",
     "name": "Duck Bao",
-    "price": 15.0,
+    "price": 15,
     "description": "τραγανή πάπια, αγγούρι, μαρούλι, καρότο, σάλτσα δαμάσκηνου, σχοινόπρασο, σουσάμι | crispy duck, cucumber, lettuce, carrot, plum sauce, chives, sesame",
     "category": "Bao Buns (2pcs)",
     "tags": [
@@ -1629,11 +1429,6 @@
         "name": "Anka Bao",
         "description": "krispig anka, gurka, sallad, morot, plommonsås, gräslök, sesam",
         "category": "Bao Bröd (2 bitar)"
-      },
-      "he": {
-        "name": "באו ברווז",
-        "description": "ברווז פריך, מלפפון, חסה, גזר, רוטב שזיפים, עירית, שומשום",
-        "category": "לחמניות באו (2 יחידות)"
       }
     }
   },
@@ -1669,18 +1464,13 @@
         "name": "Veggie Nudlar",
         "description": "kål, lök, morot, paprika, babymajskolvar, nudlar, sesamolja, teriyakisås",
         "category": "Nudlar"
-      },
-      "he": {
-        "name": "אטריות ירקות",
-        "description": "כרוב, בצל, גזר, פלפלים, תירס בייבי, אטריות, שמן שומשום, רוטב טריאקי",
-        "category": "אטריות"
       }
     }
   },
   {
     "id": "NO002",
     "name": "Chicken Noodles",
-    "price": 13.0,
+    "price": 13,
     "description": "λάχανο, κρεμμύδι, καρότο, πιπεριές, καλαμπόκι baby, νουντλς αυγού, λάδι σουσαμιού, σως τεριγιάκι | cabbage, onion, carrot, peppers, baby corn, mendake noodles, sesame oil, teriyaki sauce",
     "category": "Noodles",
     "tags": [
@@ -1709,18 +1499,13 @@
         "name": "Kyckling Nudlar",
         "description": "kål, lök, morot, paprika, babymajskolvar, äggnudlar, sesamolja, teriyakisås",
         "category": "Nudlar"
-      },
-      "he": {
-        "name": "אטריות עוף",
-        "description": "כרוב, בצל, גזר, פלפלים, תירס בייבי, אטריות ביצה, שמן שומשום, רוטב טריאקי",
-        "category": "אטריות"
       }
     }
   },
   {
     "id": "NO003",
     "name": "Shrimp Noodles",
-    "price": 15.0,
+    "price": 15,
     "description": "λάχανο, κρεμμύδι, καρότο, πιπεριές, καλαμπόκι baby, νουντλς mendake, λάδι σουσαμιού, σως τεριγιάκι | cabbage, onion, carrot, peppers, baby corn, mendake noodles, sesame oil, teriyaki sauce",
     "category": "Noodles",
     "tags": [
@@ -1749,18 +1534,13 @@
         "name": "Räk Nudlar",
         "description": "kål, lök, morot, paprika, babymajskolvar, nudlar, sesamolja, teriyakisås",
         "category": "Nudlar"
-      },
-      "he": {
-        "name": "אטריות שרימפס",
-        "description": "כרוב, בצל, גזר, פלפלים, תירס בייבי, אטריות, שמן שומשום, רוטב טריאקי",
-        "category": "אטריות"
       }
     }
   },
   {
     "id": "NO004",
     "name": "Mushroom Yaki Udon",
-    "price": 13.0,
+    "price": 13,
     "description": "μανιτάρια, νουντλς udon, κρεμμυδάκι φρέσκο, σκόρδο, τζίντζερ, σως unagi | mushrooms, udon noodles, spring onion, garlic, ginger, unagi sauce",
     "category": "Noodles",
     "tags": [
@@ -1789,18 +1569,13 @@
         "name": "Svamp Yaki Udon",
         "description": "svamp, udon nudlar, salladslök, vitlök, ingefära, unagi sås",
         "category": "Nudlar"
-      },
-      "he": {
-        "name": "אודון יאקי פטריות",
-        "description": "פטריות, אטריות אודון, בצל ירוק, שום, ג'ינג'ר, רוטב אונאגי",
-        "category": "אטריות"
       }
     }
   },
   {
     "id": "NO005",
     "name": "Salmon Yaki Udon",
-    "price": 16.0,
+    "price": 16,
     "description": "γλασαρισμένο φιλέτο σολομού, νουντλς udon, κρεμμυδάκι φρέσκο, καρότο, πιπεριά, σκόρδο, τζίντζερ, σως unagi | glazed salmon fillet, udon noodles, spring onion, carrot, pepper, garlic, ginger, unagi sauce",
     "category": "Noodles",
     "tags": [
@@ -1829,18 +1604,13 @@
         "name": "Lax Yaki Udon",
         "description": "glaserat laxfilé, udon nudlar, salladslök, morot, paprika, vitlök, ingefära, unagi sås",
         "category": "Nudlar"
-      },
-      "he": {
-        "name": "אודון יאקי סלמון",
-        "description": "פילה סלמון מגולס, אטריות אודון, בצל ירוק, גזר, פלפל, שום, ג'ינג'ר, רוטב אונאגי",
-        "category": "אטריות"
       }
     }
   },
   {
     "id": "NO006",
     "name": "Beef Yaki Udon",
-    "price": 16.0,
+    "price": 16,
     "description": "κιμάς μοσχαρίσιος, νουντλς udon, κρεμμυδάκι φρέσκο, σκόρδο, τζίντζερ, σως unagi | minced beef, udon noodles, spring onion, garlic, ginger, unagi sauce",
     "category": "Noodles",
     "tags": [
@@ -1869,11 +1639,6 @@
         "name": "Nötkött Yaki Udon",
         "description": "malet nötkött, udon nudlar, salladslök, vitlök, ingefära, unagi sås",
         "category": "Nudlar"
-      },
-      "he": {
-        "name": "אודון יאקי בקר",
-        "description": "בשר בקר טחון, אטריות אודון, בצל ירוק, שום, ג'ינג'ר, רוטב אונאגי",
-        "category": "אטריות"
       }
     }
   },
@@ -1909,18 +1674,13 @@
         "name": "Beef Melt",
         "description": "black angus nötköttsburgare, briochebröd, isbergssallad, jalapeñopeppar, cheddarost, hoisin majonnäs",
         "category": "Burger & Sando (serveras med pommes)"
-      },
-      "he": {
-        "name": "ביף מלט",
-        "description": "המבורגר בלאק אנגוס, לחמנית בריוש, חסת קרח, פלפל חלפיניו, גבינת צ'דר, מיונז הויסין",
-        "category": "המבורגר וסנדו (מוגש עם צ'יפס)"
       }
     }
   },
   {
     "id": "BU002",
     "name": "Beef Truffle",
-    "price": 16.0,
+    "price": 16,
     "description": "Μοσχαρίσιο μπιφτέκι black angus, ψωμάκι μπριός, φύλλα μεικτά, παρμεζάνα, σάλτσα μαγιονέζας με τρούφα | black angus beef burger, brioche bun, mixed leaves, parmesan cheese, truffle mayo sauce",
     "category": "Burger & Sando (served with fries)",
     "tags": [
@@ -1949,11 +1709,6 @@
         "name": "Nötkött Tryffel",
         "description": "black angus nötköttsburgare, briochebröd, blandade blad, parmesanost, tryffel majonnäs",
         "category": "Burger & Sando (serveras med pommes)"
-      },
-      "he": {
-        "name": "בורגר בקר טרופל",
-        "description": "המבורגר בלאק אנגוס, לחמנית בריוש, עלים מעורבים, פרמזן, מיונז טרופל",
-        "category": "המבורגר וסנדו (מוגש עם צ'יפס)"
       }
     }
   },
@@ -1989,18 +1744,13 @@
         "name": "Chicken Katsu Sando",
         "description": "krispigt kycklinglår, briochebröd, inlagd gurka, isbergssallad, hoisin majonnäs",
         "category": "Burger & Sando (serveras med pommes)"
-      },
-      "he": {
-        "name": "סנדו קטסו עוף",
-        "description": "שוק עוף פריך, לחמנית בריוש, מלפפון כבוש, חסת קרח, מיונז הויסין",
-        "category": "המבורגר וסנדו (מוגש עם צ'יפס)"
       }
     }
   },
   {
     "id": "BU004",
     "name": "Shrimp & Crab Sando Roll",
-    "price": 14.0,
+    "price": 14,
     "description": "γαρίδες, καβούρι, ψωμάκι μπριός, μαρούλι iceberg, κόκκινο κρεμμύδι τουρσί, τραγανό σκόρδο, σχοινόπρασο, πικάντικη μαγιονέζα | shrimps, crab, brioche bun, iceberg, pickled red onion, crispy garlic, chives, spicy mayo sauce",
     "category": "Burger & Sando (served with fries)",
     "tags": [
@@ -2029,18 +1779,13 @@
         "name": "Räk & Krabba Sando Roll",
         "description": "räkor, krabba, briochebröd, isbergssallad, inlagd rödlök, krispig vitlök, gräslök, stark majonnäs",
         "category": "Burger & Sando (serveras med pommes)"
-      },
-      "he": {
-        "name": "סנדו רול שרימפס וסרטן",
-        "description": "שרימפס, סרטן, לחמנית בריוש, חסת קרח, בצל סגול כבוש, שום פריך, עירית, מיונז חריף",
-        "category": "המבורגר וסנדו (מוגש עם צ'יפס)"
       }
     }
   },
   {
     "id": "PO001",
     "name": "Salmon Poke Bowl",
-    "price": 14.0,
+    "price": 14,
     "description": "ρύζι σούσι, μαριναρισμένος σολομός, αβοκάντο, αγγούρι, μάνγκο, τσίλι φασόλια ενταμάμε, φύκι wakame, tobico, σχοινόπρασο, λάιμ, σουσάμι, πικάντικη μαγιονέζα | sushi rice, marinated salmon, avocado, cucumber, mango, chilli edamame, wakame, tobico, chives, lime, sesame, spicy mayo",
     "category": "Poke Bowl",
     "tags": [
@@ -2070,11 +1815,6 @@
         "name": "Lax Poke Bowl",
         "description": "sushiris, marinerad lax, avokado, gurka, mango, edamame, wakame, tobiko, gräslök, lime, sesam, stark majonnäs",
         "category": "Poke Bowl"
-      },
-      "he": {
-        "name": "פוקה בול סלמון",
-        "description": "אורז סושי, סלמון מושרה, אבוקדו, מלפפון, מנגו, אדממה, ואקאמה, טוביקו, עירית, ליים, שומשום, מיונז חריף",
-        "category": "פוקה בול"
       }
     }
   },
@@ -2111,18 +1851,13 @@
         "name": "Räk-Krabba Poke Bowl",
         "description": "sushiris, pocherade räkor, krabba kanimi, avokado, gurka, mango, edamame, wakame, tobiko, gräslök, lime, sesam, stark majonnäs",
         "category": "Poke Bowl"
-      },
-      "he": {
-        "name": "פוקה בול שרימפס וסרטן",
-        "description": "אורז סושי, שרימפס מבושל, סרטן קנימי, אבוקדו, מלפפון, מנגו, אדממה, ואקאמה, טוביקו, עירית, ליים, שומשום, מיונז חריף",
-        "category": "פוקה בול"
       }
     }
   },
   {
     "id": "PO003",
     "name": "Chicken Poke Bowl",
-    "price": 14.0,
+    "price": 14,
     "description": "τραγανό ρύζι, τραγανό κοτόπουλο, αγγούρι, αβοκάντο, καλαμπόκι, κρεμμυδάκια, φύκι, μάνγκο, καρότο, μαγιονέζα, σουσάμι | sushi rice, crispy chicken, cucumber, avacado, sweet corn, scallions, seaweed, mango, carrot, mayonnaise, sesame",
     "category": "Poke Bowl",
     "tags": [
@@ -2152,11 +1887,6 @@
         "name": "Kyckling Poke Bowl",
         "description": "sushiris, krispig kyckling, gurka, avokado, majs, salladslök, tång, mango, morot, majonnäs, sesam",
         "category": "Poke Bowl"
-      },
-      "he": {
-        "name": "פוקה בול עוף",
-        "description": "אורז סושי, עוף פריך, מלפפון, אבוקדו, תירס, בצל ירוק, אצות, מנגו, גזר, מיונז, שומשום",
-        "category": "פוקה בול"
       }
     }
   },
@@ -2193,11 +1923,6 @@
         "name": "Edamame",
         "description": "ångad edamame, saltflingor",
         "category": "Sallader"
-      },
-      "he": {
-        "name": "אדממה",
-        "description": "אדממה מאודה, פתיתי מלח",
-        "category": "סלטים"
       }
     }
   },
@@ -2233,18 +1958,13 @@
         "name": "Kanimi Sallad",
         "description": "krabba kanimi, sallad, gurka, salladslök, chili, krispigt ris, krispig vitlök, sesamdressing",
         "category": "Sallader"
-      },
-      "he": {
-        "name": "סלט קנימי",
-        "description": "סרטן קנימי, חסה, מלפפון, בצל ירוק, צ'ילי, אורז פריך, שום פריך, רוטב שומשום",
-        "category": "סלטים"
       }
     }
   },
   {
     "id": "SA003",
     "name": "Emperor Salad",
-    "price": 16.0,
+    "price": 16,
     "description": "τραγανό κοτόπουλο, μαρούλι iceberg, μαρούλι, αβοκάντο, κάσιου, τραγανό μπέικον, ντρέσινγκ παρμεζάνας | crispy chicken, iceberg, lettuce, avocado, crispy bacon, cashew nuts, parmesan dressing",
     "category": "Salads",
     "tags": [
@@ -2273,11 +1993,6 @@
         "name": "Kejsar Sallad",
         "description": "krispig kyckling, isbergssallad, avokado, krispig bacon, cashewnötter, parmesandressing",
         "category": "Sallader"
-      },
-      "he": {
-        "name": "סלט הקיסר",
-        "description": "עוף פריך, חסת קרח, אבוקדו, בייקון פריך, קשיו, רוטב פרמזן",
-        "category": "סלטים"
       }
     }
   },
@@ -2314,11 +2029,6 @@
         "name": "Kaiso Sallad",
         "description": "wakametång, sesam",
         "category": "Sallader"
-      },
-      "he": {
-        "name": "סלט קאיסו",
-        "description": "אצות ואקאמה, שומשום",
-        "category": "סלטים"
       }
     }
   },
@@ -2355,18 +2065,13 @@
         "name": "Räk Nudelsallad",
         "description": "räkor, blandade blad, mendake nudlar, edamame, avokado, parmesan, paprika, stark limedressing",
         "category": "Sallader"
-      },
-      "he": {
-        "name": "סלט אטריות שרימפס",
-        "description": "שרימפס, עלים מעורבים, אטריות מנדאקה, אדממה, אבוקדו, פרמזן, פלפלים, רוטב ליים חריף",
-        "category": "סלטים"
       }
     }
   },
   {
     "id": "SA006",
     "name": "Tropical Shrimp Salad",
-    "price": 14.0,
+    "price": 14,
     "description": "γαρίδες, αγγούρι, μάνγκο, αβοκάντο, φύλλα μεικτά, μαγιονέζα passion fruit, σουσάμι | shrimps, cucumber, mango, avocado, mix leaves, passion fruit mayo, sesame",
     "category": "Salads",
     "tags": [
@@ -2396,11 +2101,6 @@
         "name": "Tropisk Räksallad",
         "description": "räkor, gurka, mango, avokado, blandade blad, passionsfrukts majonnäs, sesam",
         "category": "Sallader"
-      },
-      "he": {
-        "name": "סלט שרימפס טרופי",
-        "description": "שרימפס, מלפפון, מנגו, אבוקדו, עלים מעורבים, מיונז פסיפלורה, שומשום",
-        "category": "סלטים"
       }
     }
   },
@@ -2437,11 +2137,6 @@
         "name": "Chokladfondant",
         "description": "serveras med pistaschglass och grädde",
         "category": "Desserter"
-      },
-      "he": {
-        "name": "פונדנט שוקולד",
-        "description": "מוגש עם גלידת פיסטוק ושמנת",
-        "category": "קינוחים"
       }
     }
   },
@@ -2477,11 +2172,6 @@
         "name": "Bakad Cheesecake",
         "description": "serveras med rödfrukts glass och bär",
         "category": "Desserter"
-      },
-      "he": {
-        "name": "עוגת גבינה אפויה",
-        "description": "מוגש עם גלידת פירות אדומים ופירות יער",
-        "category": "קינוחים"
       }
     }
   },
@@ -2518,18 +2208,13 @@
         "name": "Tiramisu",
         "description": "serveras med vaniljglass och grädde",
         "category": "Desserter"
-      },
-      "he": {
-        "name": "טירמיסו",
-        "description": "מוגש עם גלידת וניל ושמנת",
-        "category": "קינוחים"
       }
     }
   },
   {
     "id": "CO001",
     "name": "Okinawa",
-    "price": 10.0,
+    "price": 10,
     "description": "Japanese Yuzu Aperitif, Shisho, Elderflowe, Carbonated Sake, Strawberry",
     "category": "Masao Cocktails",
     "tags": [
@@ -2559,18 +2244,13 @@
         "name": "Okinawa",
         "description": "Japansk yuzu aperitif, shiso, fläderblomma, kolsyrat sake, jordgubbe",
         "category": "Masao Cocktails"
-      },
-      "he": {
-        "name": "אוקינאווה",
-        "description": "אפריטיף יוזו יפני, שיסו, פרח סמבוק, סאקה מוגז, תות שדה",
-        "category": "קוקטיילים של מסאו"
       }
     }
   },
   {
     "id": "CO002",
     "name": "Chihaya",
-    "price": 13.0,
+    "price": 13,
     "description": "Don Julio Tequila Blanco, Cardamom-mustard, Cherries, Nuts, Plum bitters, Clouds",
     "category": "Masao Cocktails",
     "tags": [
@@ -2599,18 +2279,13 @@
         "name": "Chihaya",
         "description": "Don Julio Tequila Blanco, Kardemumma-senap, Körsbär, Nötter, Plommonbitters, Clouds",
         "category": "Masao Cocktails"
-      },
-      "he": {
-        "name": "צ'יהאיה",
-        "description": "טקילה בלנקו דון חוליו, קרדמום-חרדל, דובדבנים, אגוזים, ביטרס שזיפים, ענן",
-        "category": "קוקטיילים של מסאו"
       }
     }
   },
   {
     "id": "CO003",
     "name": "Shirakawa",
-    "price": 12.0,
+    "price": 12,
     "description": "Spiced Ketel One Vodka, Hibiscus, Rhum, Berries, Ginger foam",
     "category": "Masao Cocktails",
     "tags": [
@@ -2639,18 +2314,13 @@
         "name": "Shirakawa",
         "description": "Kryddad Ketel One Vodka, Hibiskus, Rom, Bär, Ingefärsskum",
         "category": "Masao Cocktails"
-      },
-      "he": {
-        "name": "שיראקאווה",
-        "description": "וודקה קטל ואן מתובלת, היביסקוס, רום, פירות יער, קצף ג'ינג'ר",
-        "category": "קוקטיילים של מסאו"
       }
     }
   },
   {
     "id": "CO004",
     "name": "Tsumago",
-    "price": 12.0,
+    "price": 12,
     "description": "Johnie Walker Black Label, Smoke, Pineapple, Jalapeno, Honey, Lemon Juice",
     "category": "Masao Cocktails",
     "tags": [
@@ -2679,18 +2349,13 @@
         "name": "Tsumago",
         "description": "Johnnie Walker Black Label, Rök, Ananas, Jalapeño, Honung, Citronsaft",
         "category": "Masao Cocktails"
-      },
-      "he": {
-        "name": "צומאגו",
-        "description": "ג'וני ווקר בלאק לייבל, עשן, אננס, חלפיניו, דבש, מיץ לימון",
-        "category": "קוקטיילים של מסאו"
       }
     }
   },
   {
     "id": "CO005",
     "name": "ギリシャ (Girisha)",
-    "price": 11.0,
+    "price": 11,
     "description": "Mastiha, Oolong tea, Ponzu citrus, Pickled peach, Aromatic bitters",
     "category": "Masao Cocktails",
     "tags": [
@@ -2720,18 +2385,13 @@
         "name": "ギリシャ (Girisha)",
         "description": "Mastika, Oolongte, Ponzucitrus, Inlagd persika, Aromatisk bitter",
         "category": "Masao Cocktails"
-      },
-      "he": {
-        "name": "גיריסא (יוון)",
-        "description": "מסטיחה, תה אולונג, פונזו הדרים, אפרסק כבוש, ביטרס ארומטי",
-        "category": "קוקטיילים של מסאו"
       }
     }
   },
   {
     "id": "CO006",
     "name": "Japanese Opioum",
-    "price": 12.0,
+    "price": 12,
     "description": "Vodka, Le Citron, Jasmine Syrup, Lime Juice, Green Apple Liqueur",
     "category": "Masao Cocktails",
     "tags": [
@@ -2760,18 +2420,13 @@
         "name": "Japanese Opioum",
         "description": "Vodka, citronlikör, jasminsirap, limejuice, grön äpplelikör",
         "category": "Masao Cocktails"
-      },
-      "he": {
-        "name": "אופיום יפני",
-        "description": "וודקה, ליקר לימון, סירופ יסמין, מיץ ליים, ליקר תפוח ירוק",
-        "category": "קוקטיילים של מסאו"
       }
     }
   },
   {
     "id": "CO007",
     "name": "Yugen",
-    "price": 14.0,
+    "price": 14,
     "description": "Tanqueray 10 Gin, Mandarin, Botanicals, Lemon Juice, Yuzu coconut foam",
     "category": "Masao Cocktails",
     "tags": [
@@ -2800,18 +2455,13 @@
         "name": "Yugen",
         "description": "Tanqueray No. 10 Gin, Mandarin, Botanicals, Citronsaft, Yuzu-kokosskum",
         "category": "Masao Cocktails"
-      },
-      "he": {
-        "name": "יוגן",
-        "description": "ג'ין טנקווריי 10, מנדרינה, בוטניקלס, מיץ לימון, קצף קוקוס יוזו",
-        "category": "קוקטיילים של מסאו"
       }
     }
   },
   {
     "id": "CO008",
     "name": "Kintsugi Sour",
-    "price": 11.0,
+    "price": 11,
     "description": "Johnie Walker Black Ruby, Vanilla, Banana, Lemon Peel, Lime, Clouds",
     "category": "Masao Cocktails",
     "tags": [
@@ -2840,18 +2490,13 @@
         "name": "Kintsugi Sour",
         "description": "Johnnie Walker Black Ruby, Vanilj, Banan, Citronskal, Lime, Clouds",
         "category": "Masao Cocktails"
-      },
-      "he": {
-        "name": "קינטסוגי סאור",
-        "description": "ג'וני ווקר בלאק רובי, וניל, בננה, קליפת לימון, ליים, ענן",
-        "category": "קוקטיילים של מסאו"
       }
     }
   },
   {
     "id": "CO009",
     "name": "Tsukimi Glow",
-    "price": 11.0,
+    "price": 11,
     "description": "Tanqueray Gin, Passion fruit, Rhubarb Liqueur, Pink Grapefruit Soda",
     "category": "Masao Cocktails",
     "tags": [
@@ -2880,18 +2525,13 @@
         "name": "Tsukimi Glow",
         "description": "Tanqueray Gin, Passionsfrukt, Rabarberslikör, Rosa grapefruktläsk",
         "category": "Masao Cocktails"
-      },
-      "he": {
-        "name": "צוקימי גלואו",
-        "description": "ג'ין טנקווריי, פסיפלורה, ליקר ריבס, סודה אשכולית ורודה",
-        "category": "קוקטיילים של מסאו"
       }
     }
   },
   {
     "id": "CO010",
     "name": "Amaterasu Light",
-    "price": 11.0,
+    "price": 11,
     "description": "Captain Morgan Rum, Zacapa Rum, Melon, Lemon Juice, Mint Leaves",
     "category": "Masao Cocktails",
     "tags": [
@@ -2920,18 +2560,13 @@
         "name": "Amaterasu Light",
         "description": "Captain Morgan Rum, Zacapa Rum, Melon, Citronsaft, Myntablad",
         "category": "Masao Cocktails"
-      },
-      "he": {
-        "name": "אמטרסו לייט",
-        "description": "רום קפטן מורגן, רום זאקאפה, מלון, מיץ לימון, עלי נענע",
-        "category": "קוקטיילים של מסאו"
       }
     }
   },
   {
     "id": "CC001",
     "name": "Margarita",
-    "price": 12.0,
+    "price": 12,
     "description": "Classic Margarita cocktail",
     "category": "Classic Cocktails",
     "tags": [
@@ -2960,18 +2595,13 @@
         "name": "Margarita",
         "description": "Tequila, triple sec, limejuice, saltrand",
         "category": "Klassiska Cocktails"
-      },
-      "he": {
-        "name": "מרגריטה",
-        "description": "טקילה, טריפל סק, מיץ ליים, שפת מלח",
-        "category": "קוקטיילים קלאסיים"
       }
     }
   },
   {
     "id": "CC002",
     "name": "Daiquiri",
-    "price": 11.0,
+    "price": 11,
     "description": "Classic Daiquiri cocktail",
     "category": "Classic Cocktails",
     "tags": [
@@ -3000,18 +2630,13 @@
         "name": "Daiquiri",
         "description": "Rom, limejuice, socker",
         "category": "Klassiska Cocktails"
-      },
-      "he": {
-        "name": "דייקירי",
-        "description": "רום, מיץ ליים, סוכר",
-        "category": "קוקטיילים קלאסיים"
       }
     }
   },
   {
     "id": "CC003",
     "name": "Porn Star Martini",
-    "price": 11.0,
+    "price": 11,
     "description": "Classic Porn Star Martini cocktail",
     "category": "Classic Cocktails",
     "tags": [
@@ -3040,18 +2665,13 @@
         "name": "Porn Star Martini",
         "description": "Vaniljvodka, passionsfruktslikör, passionsfrukt, prosecco",
         "category": "Klassiska Cocktails"
-      },
-      "he": {
-        "name": "פורן סטאר מרטיני",
-        "description": "וודקה וניל, ליקר פסיפלורה, פסיפלורה, פרוסקו",
-        "category": "קוקטיילים קלאסיים"
       }
     }
   },
   {
     "id": "CC004",
     "name": "Gin Basil Smash",
-    "price": 10.0,
+    "price": 10,
     "description": "Classic Gin Basil Smash cocktail",
     "category": "Classic Cocktails",
     "tags": [
@@ -3080,18 +2700,13 @@
         "name": "Gin Basilika Smash",
         "description": "Gin, färsk basilika, citronsaft, sockerlag",
         "category": "Klassiska Cocktails"
-      },
-      "he": {
-        "name": "ג'ין בזיל סמאש",
-        "description": "ג'ין, בזיל טרי, מיץ לימון, סירופ סוכר",
-        "category": "קוקטיילים קלאסיים"
       }
     }
   },
   {
     "id": "CC005",
     "name": "Paloma",
-    "price": 12.0,
+    "price": 12,
     "description": "Classic Paloma cocktail",
     "category": "Classic Cocktails",
     "tags": [
@@ -3120,18 +2735,13 @@
         "name": "Paloma",
         "description": "Tequila, grapefruktsläsk, limejuice, salt",
         "category": "Klassiska Cocktails"
-      },
-      "he": {
-        "name": "פלומה",
-        "description": "טקילה, סודה אשכולית, מיץ ליים, מלח",
-        "category": "קוקטיילים קלאסיים"
       }
     }
   },
   {
     "id": "CC006",
     "name": "Mai Tai",
-    "price": 12.0,
+    "price": 12,
     "description": "Classic Mai Tai cocktail",
     "category": "Classic Cocktails",
     "tags": [
@@ -3160,18 +2770,13 @@
         "name": "Mai Tai",
         "description": "Rom, orange curaçao, limejuice, orgeatsirap",
         "category": "Klassiska Cocktails"
-      },
-      "he": {
-        "name": "מאי טאי",
-        "description": "רום, קוראסאו תפוז, מיץ ליים, סירופ אורז",
-        "category": "קוקטיילים קלאסיים"
       }
     }
   },
   {
     "id": "CC007",
     "name": "Zombie",
-    "price": 12.0,
+    "price": 12,
     "description": "Classic Zombie cocktail",
     "category": "Classic Cocktails",
     "tags": [
@@ -3200,18 +2805,13 @@
         "name": "Zombie",
         "description": "Tre typer av rom, fruktjuicer, grenadinsirap",
         "category": "Klassiska Cocktails"
-      },
-      "he": {
-        "name": "זומבי",
-        "description": "שלושה סוגי רום, מיצי פירות, גרנדין",
-        "category": "קוקטיילים קלאסיים"
       }
     }
   },
   {
     "id": "CC008",
     "name": "Espresso Martini",
-    "price": 11.0,
+    "price": 11,
     "description": "Classic Espresso Martini cocktail",
     "category": "Classic Cocktails",
     "tags": [
@@ -3240,18 +2840,13 @@
         "name": "Espresso Martini",
         "description": "Vodka, kaffelikör, espresso, sockerlag",
         "category": "Klassiska Cocktails"
-      },
-      "he": {
-        "name": "אספרסו מרטיני",
-        "description": "וודקה, ליקר קפה, אספרסו, סירופ סוכר",
-        "category": "קוקטיילים קלאסיים"
       }
     }
   },
   {
     "id": "CC009",
     "name": "Long Drinks",
-    "price": 9.0,
+    "price": 9,
     "description": "Classic Long Drinks",
     "category": "Classic Cocktails",
     "tags": [
@@ -3279,18 +2874,13 @@
         "name": "Long Drinks",
         "description": "Klassiskt urval av long drinks",
         "category": "Klassiska Cocktails"
-      },
-      "he": {
-        "name": "לונג דרינקס",
-        "description": "מבחר לונג דרינקס קלאסי",
-        "category": "קוקטיילים קלאסיים"
       }
     }
   },
   {
     "id": "MO001",
     "name": "Takaragawa",
-    "price": 9.0,
+    "price": 9,
     "description": "Tanqueray 0%, cherries, pickled peach",
     "category": "Mocktails",
     "tags": [
@@ -3319,18 +2909,13 @@
         "name": "Takaragawa",
         "description": "Tanqueray 0%, körsbär, inlagd persika",
         "category": "Alkoholfria Cocktails"
-      },
-      "he": {
-        "name": "טאקאראגאווה",
-        "description": "טנקווריי 0%, דובדבנים, אפרסק כבוש",
-        "category": "משקאות ללא אלכוהול"
       }
     }
   },
   {
     "id": "MO002",
     "name": "Bonsai Breeze",
-    "price": 10.0,
+    "price": 10,
     "description": "Tanqueray 0%, Passion fruit, Tangerine, Black tea, Lemon juice",
     "category": "Mocktails",
     "tags": [
@@ -3360,11 +2945,6 @@
         "name": "Bonsai Breeze",
         "description": "Tanqueray 0%, passionsfrukt, mandarin, svart te, citronsaft",
         "category": "Alkoholfria Cocktails"
-      },
-      "he": {
-        "name": "בונסאי ברייז",
-        "description": "טנקווריי 0%, פסיפלורה, מנדרינה, תה שחור, מיץ לימון",
-        "category": "משקאות ללא אלכוהול"
       }
     }
   },
@@ -3398,18 +2978,13 @@
         "name": "Stilla Vatten 1L",
         "description": "Stilla vatten 1 liter",
         "category": "Läskedrycker"
-      },
-      "he": {
-        "name": "מים עדינים 1 ליטר",
-        "description": "מים עדינים 1 ליטר",
-        "category": "משקאות קלים"
       }
     }
   },
   {
     "id": "DR002",
     "name": "S.Pellegrino 750ml",
-    "price": 6.0,
+    "price": 6,
     "description": "Sparkling water 750ml",
     "category": "Soft Drinks",
     "tags": [
@@ -3436,18 +3011,13 @@
         "name": "S.Pellegrino 750ml",
         "description": "Kolsyrat mineralvatten 750ml",
         "category": "Läskedrycker"
-      },
-      "he": {
-        "name": "ס.פלגרינו 750 מ\"ל",
-        "description": "מים מינרלים מוגזים 750 מ\"ל",
-        "category": "משקאות קלים"
       }
     }
   },
   {
     "id": "DR003",
     "name": "Three Cents Pink Grapefruit Soda",
-    "price": 4.0,
+    "price": 4,
     "description": "Pink grapefruit soda 200ml",
     "category": "Soft Drinks",
     "tags": [
@@ -3476,18 +3046,13 @@
         "name": "Three Cents Rosa Grapefruktläsk",
         "description": "Rosa grapefruktläsk 200ml",
         "category": "Läskedrycker"
-      },
-      "he": {
-        "name": "סודה אשכולית ורודה Three Cents",
-        "description": "סודה אשכולית ורודה 200 מ\"ל",
-        "category": "משקאות קלים"
       }
     }
   },
   {
     "id": "DR004",
     "name": "Espresso",
-    "price": 3.0,
+    "price": 3,
     "description": "Espresso coffee",
     "category": "Soft Drinks",
     "tags": [
@@ -3515,18 +3080,13 @@
         "name": "Espresso",
         "description": "Espressokaffe",
         "category": "Läskedrycker"
-      },
-      "he": {
-        "name": "אספרסו",
-        "description": "קפה אספרסו",
-        "category": "משקאות קלים"
       }
     }
   },
   {
     "id": "DR005",
     "name": "Tea",
-    "price": 3.0,
+    "price": 3,
     "description": "Tea",
     "category": "Soft Drinks",
     "tags": [
@@ -3554,18 +3114,13 @@
         "name": "Te",
         "description": "Te",
         "category": "Läskedrycker"
-      },
-      "he": {
-        "name": "תה",
-        "description": "תה",
-        "category": "משקאות קלים"
       }
     }
   },
   {
     "id": "CI001",
     "name": "Milokleftis Greek Apple Cider",
-    "price": 6.0,
+    "price": 6,
     "description": "Greek apple cider, 330ml, alc 4.5%",
     "category": "Ciders",
     "tags": [
@@ -3594,18 +3149,13 @@
         "name": "Milokleftis Grekisk Äppelcider",
         "description": "Grekisk äppelcider, 330ml, 4,5% alc.",
         "category": "Cider"
-      },
-      "he": {
-        "name": "מילוקלפטיס סיידר תפוחים יווני",
-        "description": "סיידר תפוחים יווני, 330 מ\"ל, 4.5% אלכוהול",
-        "category": "סיידר"
       }
     }
   },
   {
     "id": "CI002",
     "name": "Strongbow Red Berries",
-    "price": 6.0,
+    "price": 6,
     "description": "Cider with red berries, 330ml, alc 4.5%",
     "category": "Ciders",
     "tags": [
@@ -3634,18 +3184,13 @@
         "name": "Strongbow Röda Bär Cider",
         "description": "Cider med röda bär, 330ml, 4,5% alc.",
         "category": "Cider"
-      },
-      "he": {
-        "name": "סטרונגבאו סיידר פירות יער אדומים",
-        "description": "סיידר עם פירות יער אדומים, 330 מ\"ל, 4.5% אלכוהול",
-        "category": "סיידר"
       }
     }
   },
   {
     "id": "BE001",
     "name": "Heineken Draft",
-    "price": 6.0,
+    "price": 6,
     "description": "Lager, 400ml, alc 5%",
     "category": "Beers",
     "tags": [
@@ -3673,18 +3218,13 @@
         "name": "Heineken Fatöl",
         "description": "Lager, 400ml, 5% alc.",
         "category": "Öl"
-      },
-      "he": {
-        "name": "היינקן בטפה",
-        "description": "לאגר, 400 מ\"ל, 5% אלכוהול",
-        "category": "בירות"
       }
     }
   },
   {
     "id": "BE002",
     "name": "Alfa Lager",
-    "price": 5.0,
+    "price": 5,
     "description": "Lager, 330ml, alc 5%",
     "category": "Beers",
     "tags": [
@@ -3713,18 +3253,13 @@
         "name": "Alfa Lager",
         "description": "Grekisk lager, 330ml, 5% alc.",
         "category": "Öl"
-      },
-      "he": {
-        "name": "אלפא לאגר",
-        "description": "לאגר יווני, 330 מ\"ל, 5% אלכוהול",
-        "category": "בירות"
       }
     }
   },
   {
     "id": "BE003",
     "name": "Amstel Radler",
-    "price": 5.0,
+    "price": 5,
     "description": "Lemon Radler, 330ml, alc 4.2%",
     "category": "Beers",
     "tags": [
@@ -3753,18 +3288,13 @@
         "name": "Amstel Radler",
         "description": "Citron radler, 330ml, 4,2% alc.",
         "category": "Öl"
-      },
-      "he": {
-        "name": "אמסטל ראדלר",
-        "description": "ראדלר לימון, 330 מ\"ל, 4.2% אלכוהול",
-        "category": "בירות"
       }
     }
   },
   {
     "id": "BE004",
     "name": "Mamos Pilsner",
-    "price": 5.0,
+    "price": 5,
     "description": "Pilsner, 330ml, alc 5%",
     "category": "Beers",
     "tags": [
@@ -3792,18 +3322,13 @@
         "name": "Mamos Pilsner",
         "description": "Pilsner, 330ml, 5% alc.",
         "category": "Öl"
-      },
-      "he": {
-        "name": "מאמוס פילסנר",
-        "description": "פילסנר, 330 מ\"ל, 5% אלכוהול",
-        "category": "בירות"
       }
     }
   },
   {
     "id": "BE005",
     "name": "Erdinger Weiss",
-    "price": 6.0,
+    "price": 6,
     "description": "Weiss beer, 330ml, alc 5.3%",
     "category": "Beers",
     "tags": [
@@ -3832,18 +3357,13 @@
         "name": "Erdinger Weiss",
         "description": "Veteöl, 330ml, 5,3% alc.",
         "category": "Öl"
-      },
-      "he": {
-        "name": "ארדינגר ווייס",
-        "description": "בירת חיטה, 330 מ\"ל, 5.3% אלכוהול",
-        "category": "בירות"
       }
     }
   },
   {
     "id": "BE006",
     "name": "Sol Exotic Lager",
-    "price": 6.0,
+    "price": 6,
     "description": "Exotic Lager, 330ml, alc 4.2%",
     "category": "Beers",
     "tags": [
@@ -3871,18 +3391,13 @@
         "name": "Sol Exotic Lager",
         "description": "Exotisk lager, 330ml, 4,2% alc.",
         "category": "Öl"
-      },
-      "he": {
-        "name": "סול לאגר אקזוטי",
-        "description": "לאגר אקזוטי, 330 מ\"ל, 4.2% אלכוהול",
-        "category": "בירות"
       }
     }
   },
   {
     "id": "BE007",
     "name": "Asahi Dry Japanese Beer",
-    "price": 9.0,
+    "price": 9,
     "description": "Dry Japanese beer, 330ml",
     "category": "Beers",
     "tags": [
@@ -3911,18 +3426,13 @@
         "name": "Asahi Dry Japanskt Öl",
         "description": "Torrt japanskt öl, 330ml",
         "category": "Öl"
-      },
-      "he": {
-        "name": "אסאהי דריי בירה יפנית",
-        "description": "בירה יפנית יבשה, 330 מ\"ל",
-        "category": "בירות"
       }
     }
   },
   {
     "id": "WH001",
     "name": "Johnnie Walker Red Label",
-    "price": 10.0,
+    "price": 10,
     "description": "Blended Scotch Whisky",
     "category": "Whiskey",
     "tags": [
@@ -3950,18 +3460,13 @@
         "name": "Johnnie Walker Red Label",
         "description": "Blandad Scotch Whisky",
         "category": "Whisky"
-      },
-      "he": {
-        "name": "ג'וני ווקר רד לייבל",
-        "description": "ויסקי סקוטי ממוזג",
-        "category": "ויסקי"
       }
     }
   },
   {
     "id": "WH002",
     "name": "Johnnie Walker Black Label",
-    "price": 11.0,
+    "price": 11,
     "description": "Blended Scotch Whisky 12 years",
     "category": "Whiskey",
     "tags": [
@@ -3990,18 +3495,13 @@
         "name": "Johnnie Walker Black Label",
         "description": "Blandad Scotch Whisky, 12 år",
         "category": "Whisky"
-      },
-      "he": {
-        "name": "ג'וני ווקר בלאק לייבל",
-        "description": "ויסקי סקוטי ממוזג, 12 שנים",
-        "category": "ויסקי"
       }
     }
   },
   {
     "id": "WH003",
     "name": "Dewar's",
-    "price": 10.0,
+    "price": 10,
     "description": "Blended Scotch Whisky",
     "category": "Whiskey",
     "tags": [
@@ -4029,18 +3529,13 @@
         "name": "Dewar's",
         "description": "Blandad Scotch Whisky",
         "category": "Whisky"
-      },
-      "he": {
-        "name": "דיוורס",
-        "description": "ויסקי סקוטי ממוזג",
-        "category": "ויסקי"
       }
     }
   },
   {
     "id": "WH004",
     "name": "Metaxa 5 Stars",
-    "price": 10.0,
+    "price": 10,
     "description": "Greek spirit",
     "category": "Whiskey",
     "tags": [
@@ -4069,18 +3564,13 @@
         "name": "Metaxa 5 Stjärnor",
         "description": "Grekisk lagrad sprit",
         "category": "Whisky"
-      },
-      "he": {
-        "name": "מטקסה 5 כוכבים",
-        "description": "משקה חריף יווני מיושן",
-        "category": "ויסקי"
       }
     }
   },
   {
     "id": "WW001",
     "name": "Oinos Grigoriadi",
-    "price": 32.0,
+    "price": 32,
     "description": "Sauvignon Blanc, Assyrtiko — glass: 7.00",
     "category": "White Wines",
     "tags": [
@@ -4110,18 +3600,13 @@
         "name": "Oinos Grigoriadi",
         "description": "Sauvignon Blanc, Assyrtiko — glas: 7€",
         "category": "Vita Viner"
-      },
-      "he": {
-        "name": "אוינוס גריגוריאדי",
-        "description": "סוביניון בלאן, אסירטיקו — כוס: 7€",
-        "category": "יינות לבנים"
       }
     }
   },
   {
     "id": "WW002",
     "name": "Monolithos | Bairaktaris Winery",
-    "price": 30.0,
+    "price": 30,
     "description": "Malagouzia, Assyrtiko, Muscat — glass: 7.00",
     "category": "White Wines",
     "tags": [
@@ -4150,18 +3635,13 @@
         "name": "Monolithos | Bairaktaris Winery",
         "description": "Malagouzia, Assyrtiko, Muscat — glas: 7€",
         "category": "Vita Viner"
-      },
-      "he": {
-        "name": "מונוליתוס | בייראקטאריס וויינרי",
-        "description": "מלגוזיה, אסירטיקו, מוסקט — כוס: 7€",
-        "category": "יינות לבנים"
       }
     }
   },
   {
     "id": "WW003",
     "name": "Propodes | Domaine Zafeirakis",
-    "price": 40.0,
+    "price": 40,
     "description": "Chardonnay",
     "category": "White Wines",
     "tags": [
@@ -4190,18 +3670,13 @@
         "name": "Propodes | Domaine Zafeirakis",
         "description": "Chardonnay",
         "category": "Vita Viner"
-      },
-      "he": {
-        "name": "פרופודס | דומיין זאפיראקיס",
-        "description": "שרדונה",
-        "category": "יינות לבנים"
       }
     }
   },
   {
     "id": "WW004",
     "name": "Megathiri | Tatakis Wines",
-    "price": 34.0,
+    "price": 34,
     "description": "Athiri",
     "category": "White Wines",
     "tags": [
@@ -4230,18 +3705,13 @@
         "name": "Megathiri | Tatakis Wines",
         "description": "Athiri",
         "category": "Vita Viner"
-      },
-      "he": {
-        "name": "מגאתירי | טאטאקיס ויינס",
-        "description": "אתירי",
-        "category": "יינות לבנים"
       }
     }
   },
   {
     "id": "WW005",
     "name": "Theros Wine Collectiva",
-    "price": 45.0,
+    "price": 45,
     "description": "Thrapsathiri",
     "category": "White Wines",
     "tags": [
@@ -4270,18 +3740,13 @@
         "name": "Theros Wine Collectiva",
         "description": "Thrapsathiri",
         "category": "Vita Viner"
-      },
-      "he": {
-        "name": "תרוס ויין קולקטיבה",
-        "description": "תראפסתירי",
-        "category": "יינות לבנים"
       }
     }
   },
   {
     "id": "WW006",
     "name": "Ktima Gerovasiliou",
-    "price": 35.0,
+    "price": 35,
     "description": "Malagouzia, Assyrtiko",
     "category": "White Wines",
     "tags": [
@@ -4310,18 +3775,13 @@
         "name": "Ktima Gerovasiliou",
         "description": "Malagouzia, Assyrtiko",
         "category": "Vita Viner"
-      },
-      "he": {
-        "name": "קטימה גרובאסיליו",
-        "description": "מלגוזיה, אסירטיקו",
-        "category": "יינות לבנים"
       }
     }
   },
   {
     "id": "WW007",
     "name": "Akrathos Newlands Winery",
-    "price": 45.0,
+    "price": 45,
     "description": "Assyrtiko",
     "category": "White Wines",
     "tags": [
@@ -4350,18 +3810,13 @@
         "name": "Akrathos Newlands Winery",
         "description": "Assyrtiko",
         "category": "Vita Viner"
-      },
-      "he": {
-        "name": "אקראתוס ניולנדס וויינרי",
-        "description": "אסירטיקו",
-        "category": "יינות לבנים"
       }
     }
   },
   {
     "id": "WW008",
     "name": "Domaine Costa Lazaridi",
-    "price": 40.0,
+    "price": 40,
     "description": "Semillon",
     "category": "White Wines",
     "tags": [
@@ -4389,18 +3844,13 @@
         "name": "Domaine Costa Lazaridi",
         "description": "Semillon",
         "category": "Vita Viner"
-      },
-      "he": {
-        "name": "דומיין קוסטה לזאריד",
-        "description": "סמיון",
-        "category": "יינות לבנים"
       }
     }
   },
   {
     "id": "WW009",
     "name": "Le Bouquet | Domaine Laporte",
-    "price": 36.0,
+    "price": 36,
     "description": "Sauvignon Blanc",
     "category": "White Wines",
     "tags": [
@@ -4429,18 +3879,13 @@
         "name": "Le Bouquet | Domaine Laporte",
         "description": "Sauvignon Blanc",
         "category": "Vita Viner"
-      },
-      "he": {
-        "name": "לה בוקה | דומיין לאפורט",
-        "description": "סוביניון בלאן",
-        "category": "יינות לבנים"
       }
     }
   },
   {
     "id": "WW010",
     "name": "Weingut Thorle",
-    "price": 37.0,
+    "price": 37,
     "description": "Riesling off dry",
     "category": "White Wines",
     "tags": [
@@ -4469,18 +3914,13 @@
         "name": "Weingut Thorle",
         "description": "Riesling halvtorrt",
         "category": "Vita Viner"
-      },
-      "he": {
-        "name": "ווינגוט תורלה",
-        "description": "ריסלינג חצי יבש",
-        "category": "יינות לבנים"
       }
     }
   },
   {
     "id": "WW011",
     "name": "Bourgogne / Domaine David Moret",
-    "price": 60.0,
+    "price": 60,
     "description": "Chardonnay",
     "category": "White Wines",
     "tags": [
@@ -4509,18 +3949,13 @@
         "name": "Bourgogne / Domaine David Moret",
         "description": "Chardonnay",
         "category": "Vita Viner"
-      },
-      "he": {
-        "name": "בורגון / דומיין דיוויד מורט",
-        "description": "שרדונה",
-        "category": "יינות לבנים"
       }
     }
   },
   {
     "id": "RO001",
     "name": "4-6H | Gaia Wines",
-    "price": 30.0,
+    "price": 30,
     "description": "Agiorgitiko — glass: 7.00",
     "category": "Rose Wines",
     "tags": [
@@ -4549,18 +3984,13 @@
         "name": "4-6H | Gaia Wines",
         "description": "Agiorgitiko rosé — glas: 7€",
         "category": "Rosévin"
-      },
-      "he": {
-        "name": "4-6H | גאיה ויינס",
-        "description": "אגיורגיטיקו רוזה — כוס: 7€",
-        "category": "יינות רוזה"
       }
     }
   },
   {
     "id": "RO002",
     "name": "Joker Semi Dry | Liappis Boutique Winery",
-    "price": 30.0,
+    "price": 30,
     "description": "Muscat, Syrah — glass: 7.00",
     "category": "Rose Wines",
     "tags": [
@@ -4589,18 +4019,13 @@
         "name": "Joker Halvtorrt | Liappis Boutique Winery",
         "description": "Muscat, Syrah rosé — glas: 7€",
         "category": "Rosévin"
-      },
-      "he": {
-        "name": "ג'וקר חצי יבש | ליאפיס בוטיק וויינרי",
-        "description": "מוסקט, סירה רוזה — כוס: 7€",
-        "category": "יינות רוזה"
       }
     }
   },
   {
     "id": "RO003",
     "name": "Maissa | Tatakis Wines",
-    "price": 34.0,
+    "price": 34,
     "description": "Syrah, Merlot",
     "category": "Rose Wines",
     "tags": [
@@ -4629,18 +4054,13 @@
         "name": "Maissa | Tatakis Wines",
         "description": "Syrah, Merlot rosé",
         "category": "Rosévin"
-      },
-      "he": {
-        "name": "מאיסה | טאטאקיס ויינס",
-        "description": "סירה, מרלו רוזה",
-        "category": "יינות רוזה"
       }
     }
   },
   {
     "id": "RO004",
     "name": "Techni Alipias | Wine Art Estate",
-    "price": 35.0,
+    "price": 35,
     "description": "Syrah",
     "category": "Rose Wines",
     "tags": [
@@ -4669,18 +4089,13 @@
         "name": "Techni Alipias | Wine Art Estate",
         "description": "Syrah rosé",
         "category": "Rosévin"
-      },
-      "he": {
-        "name": "טכני אליפיאס | ווין ארט אסטייט",
-        "description": "סירה רוזה",
-        "category": "יינות רוזה"
       }
     }
   },
   {
     "id": "RO005",
     "name": "Domaine Costa Lazaridi Rose",
-    "price": 36.0,
+    "price": 36,
     "description": "Merlot, Agiorgitiko, Syrah",
     "category": "Rose Wines",
     "tags": [
@@ -4709,18 +4124,13 @@
         "name": "Domaine Costa Lazaridi Rosé",
         "description": "Merlot, Agiorgitiko, Syrah rosé",
         "category": "Rosévin"
-      },
-      "he": {
-        "name": "דומיין קוסטה לזאריד רוזה",
-        "description": "מרלו, אגיורגיטיקו, סירה רוזה",
-        "category": "יינות רוזה"
       }
     }
   },
   {
     "id": "RO006",
     "name": "Alpha Estate",
-    "price": 42.0,
+    "price": 42,
     "description": "Xinomavro",
     "category": "Rose Wines",
     "tags": [
@@ -4749,18 +4159,13 @@
         "name": "Alpha Estate",
         "description": "Xinomavro rosé",
         "category": "Rosévin"
-      },
-      "he": {
-        "name": "אלפא אסטייט",
-        "description": "קסינומאברו רוזה",
-        "category": "יינות רוזה"
       }
     }
   },
   {
     "id": "RO007",
     "name": "Miraval | Chateau Miraval",
-    "price": 60.0,
+    "price": 60,
     "description": "Grenache Rouge, Cinsault, Syrah",
     "category": "Rose Wines",
     "tags": [
@@ -4789,18 +4194,13 @@
         "name": "Miraval | Chateau Miraval",
         "description": "Grenache Rouge, Cinsault, Syrah rosé",
         "category": "Rosévin"
-      },
-      "he": {
-        "name": "מיראבל | שאטו מיראבל",
-        "description": "גרנש, סינסו, סירה רוזה",
-        "category": "יינות רוזה"
       }
     }
   },
   {
     "id": "RO008",
     "name": "M de Minuty | Chateau Minuty",
-    "price": 70.0,
+    "price": 70,
     "description": "Cinsault, Grenache, Mourverde, Rolle",
     "category": "Rose Wines",
     "tags": [
@@ -4830,18 +4230,13 @@
         "name": "M de Minuty | Chateau Minuty",
         "description": "Cinsault, Grenache, Mourvèdre, Rolle rosé",
         "category": "Rosévin"
-      },
-      "he": {
-        "name": "מ' דה מינוטי | שאטו מינוטי",
-        "description": "סינסו, גרנש, מורוודר, רולה רוזה",
-        "category": "יינות רוזה"
       }
     }
   },
   {
     "id": "RE001",
     "name": "Kompsos | Karavitakis Winery",
-    "price": 30.0,
+    "price": 30,
     "description": "Liatiko — glass: 7.00",
     "category": "Red Wines",
     "tags": [
@@ -4870,18 +4265,13 @@
         "name": "Kompsos | Karavitakis Winery",
         "description": "Liatiko rödvin — glas: 7€",
         "category": "Röda Viner"
-      },
-      "he": {
-        "name": "קומפסוס | קאראביטאקיס וויינרי",
-        "description": "ליאטיקו אדום — כוס: 7€",
-        "category": "יינות אדומים"
       }
     }
   },
   {
     "id": "RE002",
     "name": "Kokkini Porta | Tatakis Wines Rhodes",
-    "price": 40.0,
+    "price": 40,
     "description": "Mandilaria, Merlot",
     "category": "Red Wines",
     "tags": [
@@ -4910,18 +4300,13 @@
         "name": "Kokkini Porta | Tatakis Wines Rhodes",
         "description": "Mandilaria, Merlot rödvin",
         "category": "Röda Viner"
-      },
-      "he": {
-        "name": "קוקיני פורטה | טאטאקיס ויינס רודוס",
-        "description": "מנדילריה, מרלו אדום",
-        "category": "יינות אדומים"
       }
     }
   },
   {
     "id": "RE003",
     "name": "Feggites | Oenogenesis Winery",
-    "price": 39.0,
+    "price": 39,
     "description": "Cabernet Sauvignon, Cabernet Franc, Merlot",
     "category": "Red Wines",
     "tags": [
@@ -4950,18 +4335,13 @@
         "name": "Feggites | Oenogenesis Winery",
         "description": "Cabernet Sauvignon, Cabernet Franc, Merlot",
         "category": "Röda Viner"
-      },
-      "he": {
-        "name": "פגיטס | אוינוגנסיס וויינרי",
-        "description": "קברנה סוביניון, קברנה פראן, מרלו",
-        "category": "יינות אדומים"
       }
     }
   },
   {
     "id": "SP001",
     "name": "Martini Prosecco D.O.C",
-    "price": 35.0,
+    "price": 35,
     "description": "Prosecco — glass: 8.00",
     "category": "Champagne & Sparkling",
     "tags": [
@@ -4990,18 +4370,13 @@
         "name": "Martini Prosecco D.O.C",
         "description": "Prosecco — glas: 8€",
         "category": "Champagne & Mousserande"
-      },
-      "he": {
-        "name": "מרטיני פרוסקו D.O.C",
-        "description": "פרוסקו — כוס: 8€",
-        "category": "שמפניה ויינות מבעבעים"
       }
     }
   },
   {
     "id": "SP002",
     "name": "Martini Asti Semi Sweet",
-    "price": 35.0,
+    "price": 35,
     "description": "Semi sweet sparkling — glass: 8.00",
     "category": "Champagne & Sparkling",
     "tags": [
@@ -5030,18 +4405,13 @@
         "name": "Martini Asti Halvsött",
         "description": "Halvt sött mousserande vin — glas: 8€",
         "category": "Champagne & Mousserande"
-      },
-      "he": {
-        "name": "מרטיני אסטי חצי מתוק",
-        "description": "יין מבעבע חצי מתוק — כוס: 8€",
-        "category": "שמפניה ויינות מבעבעים"
       }
     }
   },
   {
     "id": "SP003",
     "name": "Moet & Chandon Ice Imperial",
-    "price": 180.0,
+    "price": 180,
     "description": "Champagne served over ice",
     "category": "Champagne & Sparkling",
     "tags": [
@@ -5070,18 +4440,13 @@
         "name": "Moët & Chandon Ice Imperial",
         "description": "Champagne serverad på is",
         "category": "Champagne & Mousserande"
-      },
-      "he": {
-        "name": "מואה ושנדון איס אימפריאל",
-        "description": "שמפניה מוגשת על קרח",
-        "category": "שמפניה ויינות מבעבעים"
       }
     }
   },
   {
     "id": "SP004",
     "name": "Moet & Chandon Rose Imperial Brut",
-    "price": 160.0,
+    "price": 160,
     "description": "Rose Champagne Brut",
     "category": "Champagne & Sparkling",
     "tags": [
@@ -5110,18 +4475,13 @@
         "name": "Moët & Chandon Rosé Imperial Brut",
         "description": "Rosé Champagne Brut",
         "category": "Champagne & Mousserande"
-      },
-      "he": {
-        "name": "מואה ושנדון רוזה אימפריאל ברוט",
-        "description": "שמפניה רוזה ברוט",
-        "category": "שמפניה ויינות מבעבעים"
       }
     }
   },
   {
     "id": "SP005",
     "name": "Louis Roederer Brut Collection",
-    "price": 170.0,
+    "price": 170,
     "description": "Champagne Brut Collection",
     "category": "Champagne & Sparkling",
     "tags": [
@@ -5150,18 +4510,13 @@
         "name": "Louis Roederer Brut Collection",
         "description": "Champagne Brut Collection",
         "category": "Champagne & Mousserande"
-      },
-      "he": {
-        "name": "לואי רואדרר ברוט קולקציה",
-        "description": "שמפניה ברוט קולקציה",
-        "category": "שמפניה ויינות מבעבעים"
       }
     }
   },
   {
     "id": "SH001",
     "name": "Shisha",
-    "price": 20.0,
+    "price": 20,
     "description": "Διαθέσιμες γεύσεις: Blue ice, Forest pulp (strawberry, berry), Alter ego (berry, mango, mint), Knock out (passion fruit, mango), Watermellon, Peach, Lemon mint, Two apples (green, red)",
     "category": "Shisha",
     "tags": [
@@ -5190,11 +4545,6 @@
         "name": "Shisha",
         "description": "Tillgängliga smaker: Blue ice, Forest pulp (jordgubbe, bär), Alter ego (bär, mango, mynta), Knock out (passionsfrukt, mango), Vattenmelon, Persika, Citronmynta, Två äpplen (grönt, rött)",
         "category": "Shisha"
-      },
-      "he": {
-        "name": "שישה",
-        "description": "טעמים זמינים: קרח כחול, עיסת יער (תות, פירות יער), אלטר אגו (פירות יער, מנגו, נענע), נוק אאוט (פסיפלורה, מנגו), אבטיח, אפרסק, לימון נענע, שני תפוחים (ירוק, אדום)",
-        "category": "שישה"
       }
     }
   }

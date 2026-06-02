@@ -1,10 +1,26 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { buildReply, findMatches } from "@/lib/recommend";
 import { useLanguage } from "@/i18n/LanguageContext";
+import {
+  getOrCreateDeviceId,
+  getTableNumberFromUrl,
+  sendChatMessage,
+  type ChatApiMessage,
+} from "@/lib/chat-api";
+import type { Lang } from "@/i18n/config";
 
-type Message = { id: number; role: "user" | "bot"; text: string };
+type Message = { id: string; role: "user" | "bot"; text: string };
+
+const RESTAURANT_SLUG = "masao";
+
+const ERROR_COPY: Record<Lang, string> = {
+  el: "Ο σερβιτόρος δεν είναι διαθέσιμος αυτή τη στιγμή. Δοκιμάστε ξανά σε λίγο.",
+  en: "The waiter is unavailable right now. Please try again in a moment.",
+  de: "Der Kellner ist gerade nicht verfügbar. Bitte versuchen Sie es gleich erneut.",
+  it: "Il cameriere non è disponibile al momento. Riprovi tra poco.",
+  sv: "Kyparen är inte tillgänglig just nu. Försök igen om en stund.",
+};
 
 export function Chat() {
   const { lang, t } = useLanguage();
@@ -12,10 +28,15 @@ export function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
+  const [deviceId, setDeviceId] = useState(() =>
+    typeof window === "undefined" ? "" : getOrCreateDeviceId(),
+  );
+  const [tableNumber] = useState(() =>
+    typeof window === "undefined" ? 1 : getTableNumberFromUrl(),
+  );
 
   const nextId = useRef(1);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Auto-scroll to the latest message / typing indicator.
   useEffect(() => {
@@ -25,30 +46,34 @@ export function Chat() {
     });
   }, [messages, typing, open]);
 
-  // Clean up a pending reply timer on unmount.
-  useEffect(() => () => clearTimeout(timer.current ?? undefined), []);
-
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const text = input.trim();
     if (!text || typing) return;
 
-    const userMsg: Message = { id: nextId.current++, role: "user", text };
+    const activeDeviceId = deviceId || getOrCreateDeviceId();
+    if (!deviceId) setDeviceId(activeDeviceId);
+
+    const userMsg: Message = { id: `local-${nextId.current++}`, role: "user", text };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setTyping(true);
 
-    // Simulate network latency, then reply from the (local) "AI".
-    timer.current = setTimeout(() => {
-      const matches = findMatches(text);
-      const botMsg: Message = {
-        id: nextId.current++,
-        role: "bot",
-        text: buildReply(matches, lang),
-      };
+    try {
+      const response = await sendChatMessage({
+        restaurantSlug: RESTAURANT_SLUG,
+        tableNumber,
+        deviceId: activeDeviceId,
+        userMessage: text,
+        languageCode: lang,
+      });
+      setMessages(response.messages.map(mapApiMessage));
+    } catch {
+      const botMsg: Message = { id: `local-${nextId.current++}`, role: "bot", text: ERROR_COPY[lang] };
       setMessages((prev) => [...prev, botMsg]);
+    } finally {
       setTyping(false);
-    }, 1200);
+    }
   }
 
   return (
@@ -85,7 +110,7 @@ export function Chat() {
                 aria-label={t.chatClose}
                 className="flex h-8 w-8 items-center justify-center rounded-full text-muted transition-colors hover:bg-surface hover:text-foreground"
               >
-                ✕
+                <CloseIcon />
               </button>
             </header>
 
@@ -128,6 +153,14 @@ export function Chat() {
       )}
     </>
   );
+}
+
+function mapApiMessage(message: ChatApiMessage): Message {
+  return {
+    id: `server-${message.id}`,
+    role: message.role === "user" ? "user" : "bot",
+    text: message.content,
+  };
 }
 
 function Bubble({ role, text }: { role: "user" | "bot"; text: string }) {
@@ -185,6 +218,19 @@ function SendIcon() {
         stroke="currentColor"
         strokeWidth="1.6"
         strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M6 6l12 12M18 6L6 18"
+        stroke="currentColor"
+        strokeWidth="1.8"
         strokeLinecap="round"
       />
     </svg>
