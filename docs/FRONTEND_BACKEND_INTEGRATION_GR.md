@@ -1,6 +1,6 @@
 # Masao MVP - Τεκμηρίωση Σύνδεσης Frontend με Backend
 
-**Ημερομηνία:** 2026-06-03
+**Ημερομηνία:** 2026-06-06
 **Κατάσταση:** Development
 **Στόχος:** Να εξηγήσει τι έχει γίνει ώστε το Next.js frontend να μιλάει με το FastAPI/Supabase backend για το AI restaurant chatbot.
 
@@ -10,7 +10,57 @@
 
 Το chat του frontend δεν απαντάει πλέον τοπικά από το `menu-mock.json`. Πλέον στέλνει HTTP request στο FastAPI endpoint `POST /api/chat`, μαζί με τα στοιχεία που χρειάζεται το backend για να ανοίξει/συνεχίσει σωστή συνομιλία ανά τραπέζι και συσκευή.
 
-Το menu display της σελίδας παραμένει προσωρινά static από `frontend/src/data/menu-mock.json`. Αυτό είναι συνειδητή επιλογή για το MVP: πρώτα δένουμε το chat με backend, μετά περνάμε όλο το menu page σε DB-driven endpoint.
+Το menu display της σελίδας παραμένει προσωρινά static από `frontend/src/data/menu-mock.json`, αλλά το backend endpoint για DB-driven menu είναι πλέον έτοιμο: `GET /api/menu`. Ο συνεργάτης στο frontend μπορεί να το συνδέσει χωρίς να χρειαστεί νέο backend contract.
+
+Υπάρχει επίσης protected backend admin API για αλλαγές στο menu με `X-API-Key`:
+
+```text
+POST  /api/admin/menu/categories
+PATCH /api/admin/menu/categories/{category_id}
+PUT   /api/admin/menu/categories/{category_id}/translations/{language_code}
+POST  /api/admin/menu/items
+PATCH /api/admin/menu/items/{item_id}
+PUT   /api/admin/menu/items/{item_id}/translations/{language_code}
+```
+
+Το `POST /api/chat` έχει πλέον rate limiting ανά `restaurant_slug`, `table_number` και anonymous `device_id`. Αν ο πελάτης στείλει πολλά μηνύματα πολύ γρήγορα, το backend γυρίζει:
+
+```text
+429 Too Many Requests
+Retry-After: 60
+X-RateLimit-Limit: 20
+X-RateLimit-Remaining: 0
+X-RateLimit-Reset: 60
+```
+
+Το frontend μπορεί να δείξει ένα ήπιο μήνυμα τύπου "Περίμενε λίγο πριν στείλεις ξανά".
+
+Για production, το rate limiting δεν πρέπει να μείνει σε local memory. Το backend υποστηρίζει Redis-backed limiter:
+
+```text
+RATE_LIMIT_BACKEND=redis
+REDIS_URL=rediss://...
+RATE_LIMIT_FAIL_CLOSED=true
+```
+
+Έτσι όλοι οι FastAPI workers μοιράζονται το ίδιο limit state. Το `memory` backend μένει μόνο για local development.
+
+Προστέθηκε και Cloudflare edge rate limiting config:
+
+```text
+infra/cloudflare/
+```
+
+Default rule:
+
+```text
+POST /api/chat
+60 requests / 60 seconds
+key: cf.colo.id + ip.src
+response: 429 application/json
+```
+
+Αυτό κόβει abuse πριν φτάσει στο FastAPI. Αν το frontend λάβει `429`, δεν χρειάζεται να ξέρει αν ήρθε από Cloudflare ή από FastAPI. Δείχνει το ίδιο μήνυμα αναμονής.
 
 ---
 
@@ -227,7 +277,7 @@ http://localhost:3000/?table=12
 
 ## 8. Τι δεν έχει γίνει ακόμα
 
-Δεν έχει γίνει ακόμα DB-driven menu page.
+Δεν έχει γίνει ακόμα frontend wiring για DB-driven menu page.
 
 Το frontend menu εξακολουθεί να διαβάζει:
 
@@ -235,13 +285,31 @@ http://localhost:3000/?table=12
 frontend/src/data/menu-mock.json
 ```
 
-Για production θα πρέπει να προστεθεί backend endpoint:
+Το backend endpoint έχει πλέον προστεθεί:
 
 ```text
 GET /api/menu?language_code=el
 ```
 
-και μετά το `MenuApp` να φορτώνει menu groups από Supabase αντί από mock JSON.
+Επιστρέφει grouped response ανά category:
+
+```text
+restaurant_slug
+language_code
+total_categories
+total_items
+categories[] -> items[]
+```
+
+Verified backend result:
+
+```text
+GET /api/menu?language_code=en -> 200
+total_categories: 24
+total_items: 130
+```
+
+Το μόνο που μένει εδώ είναι το `MenuApp` να φορτώνει menu groups από αυτό το endpoint αντί από mock JSON.
 
 ---
 
@@ -256,6 +324,11 @@ frontend npm run lint
 frontend npm run build
 GET http://localhost:8000/health -> 200 ok masao
 POST http://localhost:8000/api/chat -> recommendation: Shrimp Tempura
+POST /api/chat route-level rate limit test -> 429 on second request with test limiter
+Redis rate limiter unit tests -> allow/block/fail-closed/fail-open passed
+GET /api/menu?language_code=en -> 200, categories: 24, items: 130
+PATCH /api/admin/menu/items/1 without X-API-Key -> 403
+Cloudflare Terraform config added under infra/cloudflare/
 ```
 
 Το frontend lint πέρασε μετά τη διόρθωση των React 19 setState-in-effect θεμάτων.
@@ -274,7 +347,7 @@ npm install
 
 ## 10. Επόμενη σωστή κίνηση
 
-Η επόμενη σωστή κίνηση δεν είναι πια το seed. Αυτό έχει ολοκληρωθεί. Το επόμενο βήμα είναι να συνδεθεί και το menu page με Supabase αντί για το mock JSON:
+Η επόμενη σωστή κίνηση δεν είναι πια backend για public menu. Το backend endpoint υπάρχει. Το επόμενο βήμα είναι frontend wiring:
 
 ```text
 Next.js MenuApp -> FastAPI GET /api/menu -> Supabase menu_items/translations -> rendered menu groups

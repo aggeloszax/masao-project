@@ -28,3 +28,13 @@ chat:
   history_limit: 20
   max_user_message_chars: 1000
   default_table_number: 1
+
+rate_limit:
+  backend: "memory"
+  chat_requests: 20
+  window_seconds: 60
+  max_buckets: 5000
+  redis_url:
+  redis_key_prefix: "masao"
+  redis_socket_timeout_seconds: 1.0
+  fail_closed: true

@@ -1,0 +1,6 @@
+cloudflare_zone_id = "REPLACE_WITH_ZONE_ID"
+api_hostname       = "api.example.com"
+
+chat_edge_requests_per_period          = 60
+chat_edge_period_seconds               = 60
+chat_edge_mitigation_timeout_seconds   = 60

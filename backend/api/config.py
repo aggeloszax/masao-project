@@ -50,6 +50,15 @@ class Settings(BaseSettings):
     chat_max_user_message_chars: int = Field(default=_yaml_config.get("chat", {}).get("max_user_message_chars", 1000))
     chat_default_table_number: int = Field(default=_yaml_config.get("chat", {}).get("default_table_number", 1))
 
+    chat_rate_limit_requests: int = Field(default=_yaml_config.get("rate_limit", {}).get("chat_requests", 20), gt=0)
+    chat_rate_limit_window_seconds: int = Field(default=_yaml_config.get("rate_limit", {}).get("window_seconds", 60), gt=0)
+    chat_rate_limit_max_buckets: int = Field(default=_yaml_config.get("rate_limit", {}).get("max_buckets", 5000), gt=0)
+    chat_rate_limit_backend: str = Field(default=os.getenv("RATE_LIMIT_BACKEND", _yaml_config.get("rate_limit", {}).get("backend", "memory")))
+    redis_url: str | None = Field(default=os.getenv("REDIS_URL", _yaml_config.get("rate_limit", {}).get("redis_url")))
+    redis_key_prefix: str = Field(default=os.getenv("REDIS_KEY_PREFIX", _yaml_config.get("rate_limit", {}).get("redis_key_prefix", "masao")))
+    redis_socket_timeout_seconds: float = Field(default=float(os.getenv("REDIS_SOCKET_TIMEOUT_SECONDS", _yaml_config.get("rate_limit", {}).get("redis_socket_timeout_seconds", 1.0))), gt=0)
+    rate_limit_fail_closed: bool = Field(default=os.getenv("RATE_LIMIT_FAIL_CLOSED", str(_yaml_config.get("rate_limit", {}).get("fail_closed", True))).lower() == "true")
+
     internal_api_key: str = Field(default=os.getenv("INTERNAL_API_KEY", "change-this-for-internal-admin-endpoints"))
 
 
