@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Masao Frontend
 
-## Getting Started
+Next.js menu app for Masao's multilingual digital menu and waiter chat.
 
-First, run the development server:
+## Setup
+
+```bash
+npm install
+npm run dev
+```
+
+The app runs at `http://localhost:3000`.
+
+## Scripts
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run lint
+npm run test
+npm run build
+npm run start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## App Structure
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `src/app/page.tsx` renders the menu experience.
+- `src/components/` contains the menu UI, language selector, and chat panel.
+- `src/lib/menu-api.ts` loads the public menu from `GET /api/menu`.
+- `src/data/menu-mock.json` is the local fallback menu used when the backend is unavailable.
+- `src/data/menu.ts` groups menu items and resolves localized display fields.
+- `src/i18n/config.ts` defines supported languages, UI copy, group labels, tag labels, and chat replies.
+- `src/lib/recommend.ts` contains the local recommendation matcher used by tests and fallback logic.
+- `src/lib/chat-api.ts` sends chat requests to the backend waiter API.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Menu Data
 
-## Learn More
+Greek is the base language for menu records. English, German, Italian, and Swedish translations live under each item's `translations` object. The MVP language contract is `el`, `en`, `de`, `it`, and `sv`.
 
-To learn more about Next.js, take a look at the following resources:
+Each menu item should keep:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- a unique `id`
+- a positive numeric `price`
+- a base `name`, `description`, and `category`
+- translated `name`, `description`, and `category` for `en`, `de`, `it`, and `sv`
+- dietary/flavour tags that reflect the actual ingredients
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Chat Integration
 
-## Deploy on Vercel
+The chat panel posts to the backend through `src/lib/chat-api.ts`. It includes the restaurant slug, table number, device id, user message, and active language code. If the API is unavailable, the UI shows a localized error message.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The menu page reads `NEXT_PUBLIC_API_BASE_URL` and calls `GET /api/menu?language_code=<lang>`. If the request fails during local development, the page renders the saved mock menu and shows a small fallback notice.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Verification
+
+Run these before handoff:
+
+```bash
+npm run lint
+npm run test
+npm run build
+```

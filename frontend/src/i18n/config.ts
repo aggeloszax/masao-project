@@ -12,8 +12,7 @@ export const LANGUAGES: { code: Lang; label: string; flag: string; rtl?: boolean
 ];
 
 export function isRtl(lang: Lang): boolean {
-  void lang;
-  return false;
+  return LANGUAGES.some((language) => language.code === lang && language.rtl);
 }
 
 /** Static UI strings. */
@@ -27,6 +26,8 @@ type UIStrings = {
   chatSend: string;
   chatClose: string;
   chatTyping: string;
+  menuLoading: string;
+  menuFallback: string;
   footer: (count: number) => string;
 };
 
@@ -42,6 +43,8 @@ export const UI: Record<Lang, UIStrings> = {
     chatSend: "Αποστολή",
     chatClose: "Κλείσιμο",
     chatTyping: "Ο σερβιτόρος πληκτρολογεί…",
+    menuLoading: "Φόρτωση μενού…",
+    menuFallback: "Προσωρινή εμφάνιση αποθηκευμένου μενού.",
     footer: (n) => `${n} πιάτα & ποτά · Masao`,
   },
   en: {
@@ -55,6 +58,8 @@ export const UI: Record<Lang, UIStrings> = {
     chatSend: "Send",
     chatClose: "Close",
     chatTyping: "The waiter is typing…",
+    menuLoading: "Loading menu…",
+    menuFallback: "Showing the saved menu for now.",
     footer: (n) => `${n} dishes & drinks · Masao`,
   },
   de: {
@@ -68,6 +73,8 @@ export const UI: Record<Lang, UIStrings> = {
     chatSend: "Senden",
     chatClose: "Schließen",
     chatTyping: "Der Kellner schreibt…",
+    menuLoading: "Menü wird geladen…",
+    menuFallback: "Vorübergehend wird das gespeicherte Menü angezeigt.",
     footer: (n) => `${n} Gerichte & Getränke · Masao`,
   },
   it: {
@@ -81,6 +88,8 @@ export const UI: Record<Lang, UIStrings> = {
     chatSend: "Invia",
     chatClose: "Chiudi",
     chatTyping: "Il cameriere sta scrivendo…",
+    menuLoading: "Caricamento del menu…",
+    menuFallback: "Per ora viene mostrato il menu salvato.",
     footer: (n) => `${n} piatti e bevande · Masao`,
   },
   sv: {
@@ -94,6 +103,8 @@ export const UI: Record<Lang, UIStrings> = {
     chatSend: "Skicka",
     chatClose: "Stäng",
     chatTyping: "Kyparen skriver…",
+    menuLoading: "Laddar menyn…",
+    menuFallback: "Visar den sparade menyn tills vidare.",
     footer: (n) => `${n} rätter & drycker · Masao`,
   },
 };
@@ -119,7 +130,7 @@ export const GROUP_LABELS: Record<string, Record<Lang, string>> = {
  * the JSON (so the backend AI can filter on them); we translate only at render
  * time. Tags without an entry fall back to the original Greek token.
  */
-export const TAG_TRANSLATIONS: Record<string, Record<Lang, string>> = {
+export const TAG_TRANSLATIONS: Record<string, Partial<Record<Lang, string>>> = {
   γαρίδα: { el: "Γαρίδα", en: "Shrimp", de: "Garnele", it: "Gambero", sv: "Räka" },
   κοτόπουλο: { el: "Κοτόπουλο", en: "Chicken", de: "Hähnchen", it: "Pollo", sv: "Kyckling" },
   σολομός: { el: "Σολομός", en: "Salmon", de: "Lachs", it: "Salmone", sv: "Lax" },

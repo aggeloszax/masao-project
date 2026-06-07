@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import {
+  ChatApiError,
   getOrCreateDeviceId,
   getTableNumberFromUrl,
   sendChatMessage,
@@ -20,6 +21,14 @@ const ERROR_COPY: Record<Lang, string> = {
   de: "Der Kellner ist gerade nicht verfügbar. Bitte versuchen Sie es gleich erneut.",
   it: "Il cameriere non è disponibile al momento. Riprovi tra poco.",
   sv: "Kyparen är inte tillgänglig just nu. Försök igen om en stund.",
+};
+
+const RATE_LIMIT_COPY: Record<Lang, string> = {
+  el: "Περιμένετε λίγο πριν στείλετε ξανά.",
+  en: "Please wait a moment before sending another message.",
+  de: "Bitte warten Sie kurz, bevor Sie eine weitere Nachricht senden.",
+  it: "Attenda un momento prima di inviare un altro messaggio.",
+  sv: "Vänta en stund innan du skickar ett nytt meddelande.",
 };
 
 export function Chat() {
@@ -68,8 +77,12 @@ export function Chat() {
         languageCode: lang,
       });
       setMessages(response.messages.map(mapApiMessage));
-    } catch {
-      const botMsg: Message = { id: `local-${nextId.current++}`, role: "bot", text: ERROR_COPY[lang] };
+    } catch (error) {
+      const text =
+        error instanceof ChatApiError && error.status === 429
+          ? RATE_LIMIT_COPY[lang]
+          : ERROR_COPY[lang];
+      const botMsg: Message = { id: `local-${nextId.current++}`, role: "bot", text };
       setMessages((prev) => [...prev, botMsg]);
     } finally {
       setTyping(false);

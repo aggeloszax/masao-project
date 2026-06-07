@@ -6,10 +6,10 @@ import { REPLY, type Lang } from "@/i18n/config";
  *
  * Note on data shape: the mock has no `name_el` field — `name` is English only,
  * and the Greek content lives in `tags` and the Greek half of `description`.
- * So we scan name + category + description + tags. Greek input rarely appears
- * verbatim in the data, so we (1) normalize away accents/final-sigma, (2) stem
- * inflectional endings (γαρίδα/γαρίδες → γαριδ), and (3) expand a few intent
- * words via a synonym map (καυτερό → πικάντικο).
+ * So we scan name + category + description + tags. User input may be Greek,
+ * English, so we (1) normalize away accents/final-sigma, (2) keep Unicode
+ * letters during tokenization, (3) stem common Greek endings, and (4) expand
+ * intent words via a synonym map (καυτερό → spicy).
  */
 
 /** lowercase, strip Greek/Latin accents, unify final sigma. */
@@ -73,7 +73,7 @@ const SYNONYMS: Record<string, string[]> = {
 
 function searchTerms(input: string): string[] {
   const tokens = normalize(input)
-    .split(/[^a-z0-9α-ω]+/i)
+    .split(/[^\p{L}\p{N}]+/u)
     .filter((t) => t.length >= 3 && !STOPWORDS.has(t));
 
   const terms = new Set<string>();

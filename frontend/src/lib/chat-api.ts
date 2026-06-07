@@ -37,6 +37,17 @@ export type ChatApiResponse = {
   recommended_items: ChatApiMenuItem[];
 };
 
+export class ChatApiError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+    readonly retryAfter?: number,
+  ) {
+    super(message);
+    this.name = "ChatApiError";
+  }
+}
+
 export type SendChatMessageInput = {
   restaurantSlug: string;
   tableNumber: number;
@@ -96,8 +107,18 @@ export async function sendChatMessage(input: SendChatMessageInput): Promise<Chat
     } catch {
       // Keep the status-based message when the server does not return JSON.
     }
-    throw new Error(detail);
+    throw new ChatApiError(
+      detail,
+      response.status,
+      parseRetryAfter(response.headers.get("Retry-After")),
+    );
   }
 
   return response.json() as Promise<ChatApiResponse>;
+}
+
+function parseRetryAfter(value: string | null): number | undefined {
+  if (!value) return undefined;
+  const seconds = Number(value);
+  return Number.isFinite(seconds) ? seconds : undefined;
 }

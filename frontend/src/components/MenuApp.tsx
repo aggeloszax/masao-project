@@ -1,19 +1,59 @@
 "use client";
 
-import { getLocalized, menu, menuGroups } from "@/data/menu";
+import { useEffect, useMemo, useState } from "react";
+import { getLocalized, menuGroups as staticMenuGroups, type MenuGroup } from "@/data/menu";
 import { GROUP_LABELS } from "@/i18n/config";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { MenuNav } from "@/components/MenuNav";
 import { MenuCard } from "@/components/MenuCard";
 import { Chat } from "@/components/Chat";
 import { LanguageSelector } from "@/components/LanguageSelector";
+import { fetchMenuGroups } from "@/lib/menu-api";
+
+type MenuResult = {
+  lang: string;
+  groups: MenuGroup[] | null;
+  status: "ready" | "fallback";
+};
 
 export function MenuApp() {
   const { lang, rtl, t } = useLanguage();
+  const [menuResult, setMenuResult] = useState<MenuResult | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetchMenuGroups(lang)
+      .then((groups) => {
+        if (cancelled) return;
+        setMenuResult({ lang, groups, status: "ready" });
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setMenuResult({ lang, groups: null, status: "fallback" });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [lang]);
+
+  const menuStatus = menuResult?.lang === lang ? menuResult.status : "loading";
+  const menuGroups =
+    menuResult?.lang === lang && menuResult.groups ? menuResult.groups : staticMenuGroups;
+  const itemCount = useMemo(
+    () =>
+      menuGroups.reduce(
+        (count, group) =>
+          count + group.sections.reduce((total, section) => total + section.items.length, 0),
+        0,
+      ),
+    [menuGroups],
+  );
 
   const tabs = menuGroups.map((group) => ({
     id: group.id,
-    label: GROUP_LABELS[group.id][lang],
+    label: group.label || GROUP_LABELS[group.id]?.[lang] || group.id,
   }));
 
   return (
@@ -36,6 +76,14 @@ export function MenuApp() {
         <div className="mx-auto mt-6 h-px w-16 bg-accent" />
       </header>
 
+      {menuStatus === "loading" && (
+        <p className="px-6 pb-3 text-center text-xs text-muted">{t.menuLoading}</p>
+      )}
+
+      {menuStatus === "fallback" && (
+        <p className="px-6 pb-3 text-center text-xs text-muted">{t.menuFallback}</p>
+      )}
+
       <MenuNav tabs={tabs} />
 
       <main className="px-6 pb-20">
@@ -44,7 +92,7 @@ export function MenuApp() {
             {/* Group header */}
             <div className="flex items-center gap-3">
               <h2 className="font-serif text-2xl uppercase tracking-[0.2em] text-accent">
-                {GROUP_LABELS[group.id][lang]}
+                {group.label || GROUP_LABELS[group.id]?.[lang] || group.id}
               </h2>
               <div className="h-px flex-1 bg-hairline" />
             </div>
@@ -70,7 +118,7 @@ export function MenuApp() {
       </main>
 
       <footer className="border-t border-hairline px-6 py-8 text-center">
-        <p className="text-xs tracking-wide text-muted">{t.footer(menu.length)}</p>
+        <p className="text-xs tracking-wide text-muted">{t.footer(itemCount)}</p>
       </footer>
 
       <Chat />

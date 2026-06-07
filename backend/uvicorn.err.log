@@ -1,0 +1,864 @@
+INFO:     Started server process [9156]
+INFO:     Waiting for application startup.
+2026-06-03 01:26:26,699 | INFO | api.main | Masao Restaurant Chatbot API starting up
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+2026-06-03 01:27:00,373 | ERROR | database | Database session failed and was rolled back
+Traceback (most recent call last):
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\database.py", line 42, in get_db_session
+    yield session
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\fastapi\routing.py", line 301, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\fastapi\routing.py", line 212, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\api\routers\chat.py", line 31, in chat
+    return await service.handle_chat(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\api\services\chat_service.py", line 218, in handle_chat
+    session_id = await self._get_or_create_session(request.device_id, request.table_number)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\api\services\chat_service.py", line 248, in _get_or_create_session
+    result = await self.session.execute(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<10 lines>...
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\ext\asyncio\session.py", line 461, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\util\_concurrency_py3k.py", line 201, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\orm\session.py", line 2362, in execute
+    return self._execute_internal(
+           ~~~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+    ...<4 lines>...
+        _add_event=_add_event,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\orm\session.py", line 2237, in _execute_internal
+    conn = self._connection_for_bind(bind)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\orm\session.py", line 2106, in _connection_for_bind
+    return trans._connection_for_bind(engine, execution_options)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<string>", line 2, in _connection_for_bind
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\orm\state_changes.py", line 139, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\orm\session.py", line 1189, in _connection_for_bind
+    conn = bind.connect()
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\engine\base.py", line 3278, in connect
+    return self._connection_cls(self)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\engine\base.py", line 146, in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\engine\base.py", line 3302, in raw_connection
+    return self.pool.connect()
+           ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 449, in connect
+    return _ConnectionFairy._checkout(self)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 1263, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 712, in checkout
+    rec = pool._do_get()
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\impl.py", line 179, in _do_get
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\util\langhelpers.py", line 146, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\impl.py", line 177, in _do_get
+    return self._create_connection()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 390, in _create_connection
+    return _ConnectionRecord(self)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 674, in __init__
+    self.__connect()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 900, in __connect
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\util\langhelpers.py", line 146, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 896, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\engine\create.py", line 643, in connect
+    return dialect.connect(*cargs, **cparams)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\engine\default.py", line 621, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\dialects\postgresql\asyncpg.py", line 953, in connect
+    await_only(creator_fn(*arg, **kw)),
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\util\_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\util\_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\asyncpg\connection.py", line 2443, in connect
+    return await connect_utils._connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<22 lines>...
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\asyncpg\connect_utils.py", line 1218, in _connect
+    conn = await _connect_addr(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\asyncpg\connect_utils.py", line 1054, in _connect_addr
+    return await __connect_addr(params, True, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\asyncpg\connect_utils.py", line 1102, in __connect_addr
+    await connected
+asyncpg.exceptions.InvalidPasswordError: password authentication failed for user "postgres"
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\uvicorn\protocols\http\h11_impl.py", line 396, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\uvicorn\middleware\proxy_headers.py", line 70, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\fastapi\applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\applications.py", line 113, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\middleware\errors.py", line 187, in __call__
+    raise exc
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\middleware\errors.py", line 165, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\middleware\cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\middleware\exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\_exception_handler.py", line 62, in wrapped_app
+    raise exc
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\_exception_handler.py", line 51, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\routing.py", line 715, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\routing.py", line 735, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\routing.py", line 288, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\routing.py", line 76, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\_exception_handler.py", line 62, in wrapped_app
+    raise exc
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\_exception_handler.py", line 51, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\routing.py", line 73, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\fastapi\routing.py", line 301, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\fastapi\routing.py", line 212, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\api\routers\chat.py", line 31, in chat
+    return await service.handle_chat(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\api\services\chat_service.py", line 218, in handle_chat
+    session_id = await self._get_or_create_session(request.device_id, request.table_number)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\api\services\chat_service.py", line 248, in _get_or_create_session
+    result = await self.session.execute(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<10 lines>...
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\ext\asyncio\session.py", line 461, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\util\_concurrency_py3k.py", line 201, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\orm\session.py", line 2362, in execute
+    return self._execute_internal(
+           ~~~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+    ...<4 lines>...
+        _add_event=_add_event,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\orm\session.py", line 2237, in _execute_internal
+    conn = self._connection_for_bind(bind)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\orm\session.py", line 2106, in _connection_for_bind
+    return trans._connection_for_bind(engine, execution_options)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<string>", line 2, in _connection_for_bind
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\orm\state_changes.py", line 139, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\orm\session.py", line 1189, in _connection_for_bind
+    conn = bind.connect()
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\engine\base.py", line 3278, in connect
+    return self._connection_cls(self)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\engine\base.py", line 146, in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\engine\base.py", line 3302, in raw_connection
+    return self.pool.connect()
+           ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 449, in connect
+    return _ConnectionFairy._checkout(self)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 1263, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 712, in checkout
+    rec = pool._do_get()
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\impl.py", line 179, in _do_get
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\util\langhelpers.py", line 146, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\impl.py", line 177, in _do_get
+    return self._create_connection()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 390, in _create_connection
+    return _ConnectionRecord(self)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 674, in __init__
+    self.__connect()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 900, in __connect
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\util\langhelpers.py", line 146, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 896, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\engine\create.py", line 643, in connect
+    return dialect.connect(*cargs, **cparams)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\engine\default.py", line 621, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\dialects\postgresql\asyncpg.py", line 953, in connect
+    await_only(creator_fn(*arg, **kw)),
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\util\_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\util\_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\asyncpg\connection.py", line 2443, in connect
+    return await connect_utils._connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<22 lines>...
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\asyncpg\connect_utils.py", line 1218, in _connect
+    conn = await _connect_addr(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\asyncpg\connect_utils.py", line 1054, in _connect_addr
+    return await __connect_addr(params, True, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\asyncpg\connect_utils.py", line 1102, in __connect_addr
+    await connected
+asyncpg.exceptions.InvalidPasswordError: password authentication failed for user "postgres"
+2026-06-03 01:28:37,873 | ERROR | database | Database session failed and was rolled back
+Traceback (most recent call last):
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\database.py", line 42, in get_db_session
+    yield session
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\fastapi\routing.py", line 301, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\fastapi\routing.py", line 212, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\api\routers\chat.py", line 31, in chat
+    return await service.handle_chat(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\api\services\chat_service.py", line 218, in handle_chat
+    session_id = await self._get_or_create_session(request.device_id, request.table_number)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\api\services\chat_service.py", line 248, in _get_or_create_session
+    result = await self.session.execute(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<10 lines>...
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\ext\asyncio\session.py", line 461, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\util\_concurrency_py3k.py", line 201, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\orm\session.py", line 2362, in execute
+    return self._execute_internal(
+           ~~~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+    ...<4 lines>...
+        _add_event=_add_event,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\orm\session.py", line 2237, in _execute_internal
+    conn = self._connection_for_bind(bind)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\orm\session.py", line 2106, in _connection_for_bind
+    return trans._connection_for_bind(engine, execution_options)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<string>", line 2, in _connection_for_bind
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\orm\state_changes.py", line 139, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\orm\session.py", line 1189, in _connection_for_bind
+    conn = bind.connect()
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\engine\base.py", line 3278, in connect
+    return self._connection_cls(self)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\engine\base.py", line 146, in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\engine\base.py", line 3302, in raw_connection
+    return self.pool.connect()
+           ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 449, in connect
+    return _ConnectionFairy._checkout(self)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 1263, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 712, in checkout
+    rec = pool._do_get()
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\impl.py", line 179, in _do_get
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\util\langhelpers.py", line 146, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\impl.py", line 177, in _do_get
+    return self._create_connection()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 390, in _create_connection
+    return _ConnectionRecord(self)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 674, in __init__
+    self.__connect()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 900, in __connect
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\util\langhelpers.py", line 146, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 896, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\engine\create.py", line 643, in connect
+    return dialect.connect(*cargs, **cparams)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\engine\default.py", line 621, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\dialects\postgresql\asyncpg.py", line 953, in connect
+    await_only(creator_fn(*arg, **kw)),
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\util\_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\util\_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\asyncpg\connection.py", line 2443, in connect
+    return await connect_utils._connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<22 lines>...
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\asyncpg\connect_utils.py", line 1218, in _connect
+    conn = await _connect_addr(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\asyncpg\connect_utils.py", line 1054, in _connect_addr
+    return await __connect_addr(params, True, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\asyncpg\connect_utils.py", line 1102, in __connect_addr
+    await connected
+asyncpg.exceptions.InvalidPasswordError: password authentication failed for user "postgres"
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\uvicorn\protocols\http\h11_impl.py", line 396, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\uvicorn\middleware\proxy_headers.py", line 70, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\fastapi\applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\applications.py", line 113, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\middleware\errors.py", line 187, in __call__
+    raise exc
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\middleware\errors.py", line 165, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\middleware\cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\middleware\cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\middleware\exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\_exception_handler.py", line 62, in wrapped_app
+    raise exc
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\_exception_handler.py", line 51, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\routing.py", line 715, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\routing.py", line 735, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\routing.py", line 288, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\routing.py", line 76, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\_exception_handler.py", line 62, in wrapped_app
+    raise exc
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\_exception_handler.py", line 51, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\routing.py", line 73, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\fastapi\routing.py", line 301, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\fastapi\routing.py", line 212, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\api\routers\chat.py", line 31, in chat
+    return await service.handle_chat(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\api\services\chat_service.py", line 218, in handle_chat
+    session_id = await self._get_or_create_session(request.device_id, request.table_number)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\api\services\chat_service.py", line 248, in _get_or_create_session
+    result = await self.session.execute(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<10 lines>...
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\ext\asyncio\session.py", line 461, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\util\_concurrency_py3k.py", line 201, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\orm\session.py", line 2362, in execute
+    return self._execute_internal(
+           ~~~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+    ...<4 lines>...
+        _add_event=_add_event,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\orm\session.py", line 2237, in _execute_internal
+    conn = self._connection_for_bind(bind)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\orm\session.py", line 2106, in _connection_for_bind
+    return trans._connection_for_bind(engine, execution_options)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<string>", line 2, in _connection_for_bind
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\orm\state_changes.py", line 139, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\orm\session.py", line 1189, in _connection_for_bind
+    conn = bind.connect()
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\engine\base.py", line 3278, in connect
+    return self._connection_cls(self)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\engine\base.py", line 146, in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\engine\base.py", line 3302, in raw_connection
+    return self.pool.connect()
+           ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 449, in connect
+    return _ConnectionFairy._checkout(self)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 1263, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 712, in checkout
+    rec = pool._do_get()
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\impl.py", line 179, in _do_get
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\util\langhelpers.py", line 146, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\impl.py", line 177, in _do_get
+    return self._create_connection()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 390, in _create_connection
+    return _ConnectionRecord(self)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 674, in __init__
+    self.__connect()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 900, in __connect
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\util\langhelpers.py", line 146, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 896, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\engine\create.py", line 643, in connect
+    return dialect.connect(*cargs, **cparams)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\engine\default.py", line 621, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\dialects\postgresql\asyncpg.py", line 953, in connect
+    await_only(creator_fn(*arg, **kw)),
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\util\_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\util\_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\asyncpg\connection.py", line 2443, in connect
+    return await connect_utils._connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<22 lines>...
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\asyncpg\connect_utils.py", line 1218, in _connect
+    conn = await _connect_addr(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\asyncpg\connect_utils.py", line 1054, in _connect_addr
+    return await __connect_addr(params, True, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\asyncpg\connect_utils.py", line 1102, in __connect_addr
+    await connected
+asyncpg.exceptions.InvalidPasswordError: password authentication failed for user "postgres"
+2026-06-03 01:28:48,098 | ERROR | database | Database session failed and was rolled back
+Traceback (most recent call last):
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\database.py", line 42, in get_db_session
+    yield session
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\fastapi\routing.py", line 301, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\fastapi\routing.py", line 212, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\api\routers\chat.py", line 31, in chat
+    return await service.handle_chat(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\api\services\chat_service.py", line 218, in handle_chat
+    session_id = await self._get_or_create_session(request.device_id, request.table_number)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\api\services\chat_service.py", line 248, in _get_or_create_session
+    result = await self.session.execute(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<10 lines>...
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\ext\asyncio\session.py", line 461, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\util\_concurrency_py3k.py", line 201, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\orm\session.py", line 2362, in execute
+    return self._execute_internal(
+           ~~~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+    ...<4 lines>...
+        _add_event=_add_event,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\orm\session.py", line 2237, in _execute_internal
+    conn = self._connection_for_bind(bind)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\orm\session.py", line 2106, in _connection_for_bind
+    return trans._connection_for_bind(engine, execution_options)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<string>", line 2, in _connection_for_bind
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\orm\state_changes.py", line 139, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\orm\session.py", line 1189, in _connection_for_bind
+    conn = bind.connect()
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\engine\base.py", line 3278, in connect
+    return self._connection_cls(self)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\engine\base.py", line 146, in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\engine\base.py", line 3302, in raw_connection
+    return self.pool.connect()
+           ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 449, in connect
+    return _ConnectionFairy._checkout(self)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 1263, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 712, in checkout
+    rec = pool._do_get()
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\impl.py", line 179, in _do_get
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\util\langhelpers.py", line 146, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\impl.py", line 177, in _do_get
+    return self._create_connection()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 390, in _create_connection
+    return _ConnectionRecord(self)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 674, in __init__
+    self.__connect()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 900, in __connect
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\util\langhelpers.py", line 146, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 896, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\engine\create.py", line 643, in connect
+    return dialect.connect(*cargs, **cparams)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\engine\default.py", line 621, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\dialects\postgresql\asyncpg.py", line 953, in connect
+    await_only(creator_fn(*arg, **kw)),
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\util\_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\util\_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\asyncpg\connection.py", line 2443, in connect
+    return await connect_utils._connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<22 lines>...
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\asyncpg\connect_utils.py", line 1218, in _connect
+    conn = await _connect_addr(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\asyncpg\connect_utils.py", line 1054, in _connect_addr
+    return await __connect_addr(params, True, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\asyncpg\connect_utils.py", line 1102, in __connect_addr
+    await connected
+asyncpg.exceptions.InvalidPasswordError: password authentication failed for user "postgres"
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\uvicorn\protocols\http\h11_impl.py", line 396, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\uvicorn\middleware\proxy_headers.py", line 70, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\fastapi\applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\applications.py", line 113, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\middleware\errors.py", line 187, in __call__
+    raise exc
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\middleware\errors.py", line 165, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\middleware\cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\middleware\cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\middleware\exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\_exception_handler.py", line 62, in wrapped_app
+    raise exc
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\_exception_handler.py", line 51, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\routing.py", line 715, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\routing.py", line 735, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\routing.py", line 288, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\routing.py", line 76, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\_exception_handler.py", line 62, in wrapped_app
+    raise exc
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\_exception_handler.py", line 51, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\starlette\routing.py", line 73, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\fastapi\routing.py", line 301, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\fastapi\routing.py", line 212, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\api\routers\chat.py", line 31, in chat
+    return await service.handle_chat(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\api\services\chat_service.py", line 218, in handle_chat
+    session_id = await self._get_or_create_session(request.device_id, request.table_number)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\api\services\chat_service.py", line 248, in _get_or_create_session
+    result = await self.session.execute(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<10 lines>...
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\ext\asyncio\session.py", line 461, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\util\_concurrency_py3k.py", line 201, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\orm\session.py", line 2362, in execute
+    return self._execute_internal(
+           ~~~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+    ...<4 lines>...
+        _add_event=_add_event,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\orm\session.py", line 2237, in _execute_internal
+    conn = self._connection_for_bind(bind)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\orm\session.py", line 2106, in _connection_for_bind
+    return trans._connection_for_bind(engine, execution_options)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<string>", line 2, in _connection_for_bind
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\orm\state_changes.py", line 139, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\orm\session.py", line 1189, in _connection_for_bind
+    conn = bind.connect()
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\engine\base.py", line 3278, in connect
+    return self._connection_cls(self)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\engine\base.py", line 146, in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\engine\base.py", line 3302, in raw_connection
+    return self.pool.connect()
+           ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 449, in connect
+    return _ConnectionFairy._checkout(self)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 1263, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 712, in checkout
+    rec = pool._do_get()
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\impl.py", line 179, in _do_get
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\util\langhelpers.py", line 146, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\impl.py", line 177, in _do_get
+    return self._create_connection()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 390, in _create_connection
+    return _ConnectionRecord(self)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 674, in __init__
+    self.__connect()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 900, in __connect
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\util\langhelpers.py", line 146, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\pool\base.py", line 896, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\engine\create.py", line 643, in connect
+    return dialect.connect(*cargs, **cparams)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\engine\default.py", line 621, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\dialects\postgresql\asyncpg.py", line 953, in connect
+    await_only(creator_fn(*arg, **kw)),
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\util\_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\sqlalchemy\util\_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\asyncpg\connection.py", line 2443, in connect
+    return await connect_utils._connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<22 lines>...
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\asyncpg\connect_utils.py", line 1218, in _connect
+    conn = await _connect_addr(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\asyncpg\connect_utils.py", line 1054, in _connect_addr
+    return await __connect_addr(params, True, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggel\Downloads\projects\masao-project\masao-project\backend\.pythonlibs\asyncpg\connect_utils.py", line 1102, in __connect_addr
+    await connected
+asyncpg.exceptions.InvalidPasswordError: password authentication failed for user "postgres"
