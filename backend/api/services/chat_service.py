@@ -3,8 +3,6 @@ from __future__ import annotations
 import logging
 import re
 import unicodedata
-from dataclasses import dataclass
-from decimal import Decimal
 from uuid import UUID
 
 from sqlalchemy import RowMapping, text
@@ -13,21 +11,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.config import settings
 from api.schemas.chat import ChatMessageResponse, ChatRequest, ChatResponse, MenuItemResponse
+from api.services.menu_service import MenuCandidate, MenuService
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass(frozen=True)
-class MenuCandidate:
-    id: int
-    external_id: str | None
-    category: str
-    name: str
-    description: str
-    price: float
-    tags: list[str]
-    is_available: bool
-    language_code: str
 
 
 STOPWORDS = {
@@ -292,34 +278,7 @@ class ChatService:
         return [self._message_response(row) for row in result.mappings().all()]
 
     async def _fetch_menu_items(self, language_code: str) -> list[MenuCandidate]:
-        result = await self.session.execute(
-            text(
-                """
-                select
-                    mi.id,
-                    mi.external_id,
-                    coalesce(mct.name, mc.name) as category,
-                    coalesce(mit.name, mi.name) as name,
-                    coalesce(mit.description, mi.description) as description,
-                    mi.price,
-                    mi.tags,
-                    mi.is_available,
-                    :language_code as language_code
-                from menu_items mi
-                join menu_categories mc on mc.id = mi.category_id
-                left join menu_item_translations mit
-                    on mit.menu_item_id = mi.id
-                   and mit.language_code = :language_code
-                left join menu_category_translations mct
-                    on mct.category_id = mc.id
-                   and mct.language_code = :language_code
-                where mi.is_available = true
-                order by mc.display_order asc, mi.display_order asc, mi.id asc
-                """
-            ),
-            {"language_code": language_code},
-        )
-        return [self._menu_candidate(row) for row in result.mappings().all()]
+        return await MenuService(self.session).fetch_candidates(language_code=language_code)
 
     @staticmethod
     def _message_response(row: RowMapping) -> ChatMessageResponse:
@@ -329,21 +288,6 @@ class ChatService:
             role=row["role"],
             content=row["content"],
             created_at=row["created_at"],
-        )
-
-    @staticmethod
-    def _menu_candidate(row: RowMapping) -> MenuCandidate:
-        price = row["price"]
-        return MenuCandidate(
-            id=row["id"],
-            external_id=row["external_id"],
-            category=row["category"],
-            name=row["name"],
-            description=row["description"],
-            price=float(price if not isinstance(price, Decimal) else price),
-            tags=list(row["tags"] or []),
-            is_available=row["is_available"],
-            language_code=row["language_code"],
         )
 
     @staticmethod

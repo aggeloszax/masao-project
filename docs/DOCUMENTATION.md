@@ -1,7 +1,7 @@
 ## Masao Restaurant Chatbot Backend — Technical Documentation
 
 **Version:** 1.0.0
-**Last updated:** 2026-06-03
+**Last updated:** 2026-06-06
 **Author:** PlanAhead Engineering
 **Status:** Development
 
@@ -61,6 +61,11 @@ pip install -r requirements.txt
 DATABASE_URL=          # PostgreSQL/Supabase async SQLAlchemy URL
 INTERNAL_API_KEY=      # API key reserved for future internal/admin endpoints
 ENVIRONMENT=           # development, staging, or production
+RATE_LIMIT_BACKEND=    # redis for production, memory for local development
+REDIS_URL=             # Managed Redis URL for distributed rate limiting
+REDIS_KEY_PREFIX=      # Redis key namespace, e.g. masao
+RATE_LIMIT_FAIL_CLOSED= # true blocks chat if Redis is unavailable
+REDIS_SOCKET_TIMEOUT_SECONDS= # Redis connect/read timeout
 ```
 
 For Supabase, use the pooled PostgreSQL connection string converted to SQLAlchemy async format:
@@ -309,6 +314,7 @@ This explicitly allows Next.js development origins such as `http://localhost:300
 **Business logic it triggers:** Delegates session/history/menu/recommendation work to `ChatService`.
 
 **Errors it can return:**
+- `429` if the anonymous chat client exceeds the configured rate limit.
 - `422` if `restaurant_slug` is unsupported.
 - `500` if database operations fail.
 
@@ -323,6 +329,7 @@ This explicitly allows Next.js development origins such as `http://localhost:300
 **Why it works this way:** The MVP does not require an LLM dependency to prove the backend/frontend contract. It uses menu tags and descriptions first, which keeps responses predictable and auditable.
 
 **Edge cases handled:**
+- Rate limit exceeded -> returns `429` before writing a chat message.
 - Unknown restaurant slug -> raises `ValueError`.
 - Empty/low-signal user message -> fallback assistant reply.
 - Unavailable menu item -> excluded from recommendations.
@@ -359,6 +366,135 @@ Exact Python code:
 ```python
 return sum(1 for term in terms if term and term in haystack)
 ```
+
+#### `backend/api/services/rate_limiter.py`
+
+**Purpose:** Rate limiting for public chat traffic.
+
+**Main function: `check(key)`**
+
+**What it does:** Tracks request timestamps per anonymous key and returns an allow/deny decision with `X-RateLimit-*` and `Retry-After` values.
+
+**Why it works this way:** The production backend should use Redis so all FastAPI workers share one rate-limit state. Limiting by `restaurant_slug`, `table_number`, and anonymous `device_id` blocks rapid repeats before any database write.
+
+**Edge cases handled:**
+- Same device repeats too quickly -> `429 Too Many Requests`.
+- Different device ids -> separate buckets.
+- Old timestamps -> removed after the configured window.
+- Redis keys are SHA-256 hashed so raw anonymous ids are not stored in key names.
+- Redis failures -> fail closed by default with `503`, configurable for fail-open behavior.
+
+**Key logic explained:**
+
+```python
+raw_result = await self.redis.eval(
+    REDIS_SLIDING_WINDOW_SCRIPT,
+    1,
+    self._redis_key(key),
+    now_ms,
+    window_ms,
+    self.limit,
+    member,
+    ttl_ms,
+)
+```
+
+The Redis backend uses one atomic Lua script with a sorted set sliding window. Local development can still use the in-process `memory` backend, but production should set `RATE_LIMIT_BACKEND=redis`.
+
+#### `backend/api/routers/menu.py`
+
+**Purpose:** HTTP boundary for public menu reads.
+
+**Endpoint:** `GET /api/menu`
+
+**What it expects:** Optional query parameters: `restaurant_slug`, `language_code`, and `include_unavailable`.
+
+**What it returns:** Restaurant slug, language code, category count, item count, and menu categories with nested items.
+
+**Business logic it triggers:** Delegates Supabase menu reads and grouping to `MenuService`.
+
+**Errors it can return:**
+- `422` if `restaurant_slug` is unsupported or `language_code` is outside `el`, `en`, `de`, `it`, `sv`.
+- `500` if database operations fail.
+
+#### `backend/api/services/menu_service.py`
+
+**Purpose:** Read-only menu data service for the public menu endpoint and chat recommendations.
+
+**Main function: `get_public_menu(restaurant_slug, language_code, include_unavailable)`**
+
+**What it does:** Fetches localized menu rows from Supabase/PostgreSQL, falls back to canonical names/descriptions when a translation is missing, filters unavailable items by default, and groups rows into frontend-friendly category sections.
+
+**Why it works this way:** The frontend `MenuApp` needs categories with nested items, while the database stores normalized category, item, and translation tables. Grouping in the backend keeps the frontend simple and avoids direct frontend database access.
+
+**Edge cases handled:**
+- Unknown restaurant slug -> raises `ValueError`.
+- Missing translation row -> falls back to canonical menu/category fields.
+- Unavailable items -> excluded by default; returned only with `include_unavailable=true`.
+- Category and item ordering -> preserved from database `display_order`.
+
+**Key logic explained:**
+
+```python
+for item in items:
+    if not include_unavailable and not item.is_available:
+        continue
+
+    category = categories.get(item.category_id)
+    if category is None:
+        category = MenuCategoryPublicResponse(...)
+        categories[item.category_id] = category
+
+    category.items.append(MenuItemPublicResponse(...))
+```
+
+This turns flat SQL rows into the grouped structure expected by a menu UI.
+
+#### `backend/api/routers/admin_menu.py`
+
+**Purpose:** Authenticated HTTP boundary for menu management.
+
+**Endpoints:** `POST/PATCH /api/admin/menu/categories`, `POST/PATCH /api/admin/menu/items`, and translation upserts.
+
+**What it expects:** `X-API-Key` plus JSON payloads for category, item, or translation changes.
+
+**What it returns:** Canonical category/item rows or translation rows after persistence.
+
+**Business logic it triggers:** Delegates validated menu writes to `AdminMenuService`.
+
+**Errors it can return:**
+- `403` if `X-API-Key` is missing or invalid.
+- `404` if a patched category or item does not exist.
+- `409` if the update conflicts with unique/FK constraints.
+- `500` if database operations fail.
+
+#### `backend/api/services/admin_menu_service.py`
+
+**Purpose:** Authenticated menu write service for internal/admin tools.
+
+**Main functions:** `create_category`, `update_category`, `create_item`, `update_item`, `upsert_category_translation`, `upsert_item_translation`.
+
+**What it does:** Writes validated admin changes to normalized Supabase/PostgreSQL menu tables and returns the persisted row.
+
+**Why it works this way:** Daily menu changes should not require editing SQL seed files. Admin writes are kept behind the backend API and `X-API-Key`, while the public frontend continues to use read-only endpoints.
+
+**Edge cases handled:**
+- Empty PATCH body -> rejected before SQL.
+- `is_available=false` -> accepted as a real update, not treated as missing.
+- Unsupported update field -> rejected by a whitelist.
+- Duplicate category slug or external id -> returned as `409 Conflict`.
+
+**Key logic explained:**
+
+```python
+assignments, params = build_update_statement(
+    "item",
+    fields,
+    {"category_id", "external_id", "name", "description", "price", "tags", "is_available", "display_order"},
+)
+```
+
+The SQL `SET` clause is built only from validated Pydantic fields and an explicit whitelist. Values are still bound as SQL parameters.
 
 #### `backend/main.py`
 
@@ -441,6 +577,8 @@ return sum(1 for term in terms if term and term in haystack)
 **Errors:**
 
 ```text
+429 Too Many Requests - anonymous device exceeded chat request budget
+503 Service Unavailable - Redis rate-limit backend unavailable and fail-closed is enabled
 422 Unprocessable Entity - invalid body or unsupported restaurant_slug
 500 Internal Server Error - database unavailable or write failed
 ```
@@ -448,6 +586,259 @@ return sum(1 for term in terms if term and term in haystack)
 **Next.js binding:**
 
 The frontend chat sends this request from `frontend/src/lib/chat-api.ts`. It creates a stable anonymous `device_id` in LocalStorage, reads the table number from `?table=12`, and sends the active `LanguageContext` language as `language_code`.
+
+**Rate-limit response headers:**
+
+```text
+X-RateLimit-Limit: 20
+X-RateLimit-Remaining: 19
+X-RateLimit-Reset: 60
+Retry-After: 60       # only when response is 429
+```
+
+#### GET /api/menu
+
+**Purpose:** Return the public restaurant menu grouped by category for frontend rendering.
+
+**Query parameters:**
+
+```text
+restaurant_slug=masao       # optional, defaults to masao
+language_code=en            # optional, defaults to el; allowed: el, en, de, it, sv
+include_unavailable=false   # optional, defaults to false
+```
+
+**Example request:**
+
+```text
+GET /api/menu?language_code=en
+```
+
+**Response shape:**
+
+```json
+{
+  "restaurant_slug": "masao",
+  "language_code": "en",
+  "total_categories": 24,
+  "total_items": 130,
+  "categories": [
+    {
+      "id": 1,
+      "slug": "uramaki-hossomaki-6pcs",
+      "name": "Uramaki / Hossomaki (6pcs)",
+      "display_order": 10,
+      "items": [
+        {
+          "id": 1,
+          "external_id": "UR001",
+          "category_id": 1,
+          "category_slug": "uramaki-hossomaki-6pcs",
+          "category_name": "Uramaki / Hossomaki (6pcs)",
+          "name": "Cucumber Maki",
+          "description": "cucumber",
+          "price": 8.0,
+          "tags": ["light", "fresh"],
+          "is_available": true,
+          "display_order": 1,
+          "language_code": "en"
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Errors:**
+
+```text
+422 Unprocessable Entity - unsupported restaurant_slug or language_code
+500 Internal Server Error - database unavailable or read failed
+```
+
+**Frontend handoff:**
+
+The backend endpoint is ready. The frontend `MenuApp` has not been changed in this backend-only task; it can now be wired to this endpoint by the frontend owner.
+
+#### POST /api/admin/menu/categories
+
+**Purpose:** Create a menu category.
+
+**Auth:** Requires `X-API-Key`.
+
+**Request body:**
+
+```json
+{
+  "name": "Lunch Specials",
+  "slug": "lunch-specials",
+  "display_order": 250
+}
+```
+
+**Response:**
+
+```json
+{
+  "id": 25,
+  "name": "Lunch Specials",
+  "slug": "lunch-specials",
+  "display_order": 250
+}
+```
+
+#### PATCH /api/admin/menu/categories/{category_id}
+
+**Purpose:** Update category name, slug, or display order.
+
+**Auth:** Requires `X-API-Key`.
+
+**Request body:**
+
+```json
+{
+  "display_order": 260
+}
+```
+
+**Response:**
+
+```json
+{
+  "id": 25,
+  "name": "Lunch Specials",
+  "slug": "lunch-specials",
+  "display_order": 260
+}
+```
+
+#### PUT /api/admin/menu/categories/{category_id}/translations/{language_code}
+
+**Purpose:** Create or update a category translation.
+
+**Auth:** Requires `X-API-Key`.
+
+**Request body:**
+
+```json
+{
+  "name": "Specials Ημέρας"
+}
+```
+
+**Response:**
+
+```json
+{
+  "category_id": 25,
+  "language_code": "el",
+  "name": "Specials Ημέρας"
+}
+```
+
+#### POST /api/admin/menu/items
+
+**Purpose:** Create a menu item.
+
+**Auth:** Requires `X-API-Key`.
+
+**Request body:**
+
+```json
+{
+  "category_id": 25,
+  "external_id": "LS001",
+  "name": "Lunch Salmon Bowl",
+  "description": "Salmon, rice, avocado, cucumber",
+  "price": 14.5,
+  "tags": ["salmon", "fresh", "lunch"],
+  "is_available": true,
+  "display_order": 1
+}
+```
+
+**Response:**
+
+```json
+{
+  "id": 131,
+  "external_id": "LS001",
+  "category_id": 25,
+  "name": "Lunch Salmon Bowl",
+  "description": "Salmon, rice, avocado, cucumber",
+  "price": 14.5,
+  "tags": ["salmon", "fresh", "lunch"],
+  "is_available": true,
+  "display_order": 1
+}
+```
+
+#### PATCH /api/admin/menu/items/{item_id}
+
+**Purpose:** Update item fields such as price, availability, tags, category, or display order.
+
+**Auth:** Requires `X-API-Key`.
+
+**Request body:**
+
+```json
+{
+  "price": 15.0,
+  "is_available": false
+}
+```
+
+**Response:**
+
+```json
+{
+  "id": 131,
+  "external_id": "LS001",
+  "category_id": 25,
+  "name": "Lunch Salmon Bowl",
+  "description": "Salmon, rice, avocado, cucumber",
+  "price": 15.0,
+  "tags": ["salmon", "fresh", "lunch"],
+  "is_available": false,
+  "display_order": 1
+}
+```
+
+#### PUT /api/admin/menu/items/{item_id}/translations/{language_code}
+
+**Purpose:** Create or update an item translation.
+
+**Auth:** Requires `X-API-Key`.
+
+**Request body:**
+
+```json
+{
+  "name": "Lunch Salmon Bowl",
+  "description": "Σολομός, ρύζι, αβοκάντο, αγγούρι"
+}
+```
+
+**Response:**
+
+```json
+{
+  "menu_item_id": 131,
+  "language_code": "el",
+  "name": "Lunch Salmon Bowl",
+  "description": "Σολομός, ρύζι, αβοκάντο, αγγούρι"
+}
+```
+
+**Admin endpoint errors:**
+
+```text
+403 Forbidden - missing or invalid X-API-Key
+404 Not Found - category or item id does not exist
+409 Conflict - unique/FK constraint conflict
+422 Unprocessable Entity - invalid payload or empty PATCH body
+500 Internal Server Error - database unavailable or write failed
+```
 
 #### GET /health
 
@@ -474,7 +865,7 @@ The frontend chat sends this request from `frontend/src/lib/chat-api.ts`. It cre
 | 003_remove_hebrew_translations.sql | backend/sql/ | SQL | Cleanup migration that removes old Hebrew rows and constraints |
 | generate_menu_seed_sql.py | backend/scripts/ | Python | Deterministic SQL seed generator |
 | pipeline/runtime logs | backend/logs/ | Text | Future operational logs; gitignored |
-| API responses | HTTP JSON | JSON | Chat messages and recommendations for Next.js |
+| API responses | HTTP JSON | JSON | Public menu, chat messages and recommendations for Next.js |
 | DOCUMENTATION.md | docs/ | Markdown | Technical documentation |
 
 ---
@@ -497,6 +888,14 @@ The frontend chat sends this request from `frontend/src/lib/chat-api.ts`. It cre
 | chat.history_limit | 20 | Maximum recent messages returned per response |
 | chat.max_user_message_chars | 1000 | Pydantic max length for user messages |
 | chat.default_table_number | 1 | Reserved default for future QR helpers |
+| rate_limit.backend | memory | Use `redis` in production, `memory` only for local development |
+| rate_limit.chat_requests | 20 | Allowed `/api/chat` requests per anonymous restaurant/table/device key |
+| rate_limit.window_seconds | 60 | Sliding window in seconds for chat rate limiting |
+| rate_limit.max_buckets | 5000 | Maximum in-memory limiter buckets before pruning |
+| rate_limit.redis_url | empty | Managed Redis URL, usually supplied by `REDIS_URL` |
+| rate_limit.redis_key_prefix | masao | Redis key namespace for this app |
+| rate_limit.redis_socket_timeout_seconds | 1.0 | Redis connect/read timeout in seconds |
+| rate_limit.fail_closed | true | Return 503 if Redis is unavailable instead of allowing unlimited chat |
 
 ---
 
@@ -507,6 +906,8 @@ The frontend chat sends this request from `frontend/src/lib/chat-api.ts`. It cre
 | ValidationError | schemas/chat.py | Missing/blank field, short device id, invalid table number | FastAPI returns 422 |
 | ValueError | services/chat_service.py | Unsupported `restaurant_slug` | Router returns 422 with detail |
 | SQLAlchemyError | services/chat_service.py | DB unavailable, failed insert/select | Router returns 500 and logs exception |
+| HTTPException 429 | routers/chat.py | Chat rate limit exceeded | Request is rejected before any DB write; `Retry-After` is returned |
+| HTTPException 503 | routers/chat.py | Redis rate-limit backend unavailable with fail-closed enabled | Request is rejected before chat DB writes |
 | Exception during DB dependency | database.py | Any unhandled request DB failure | Transaction rollback, exception logged, error re-raised |
 | FileNotFoundError | main.py | CLI input folder missing | CLI exits loudly with descriptive error |
 
@@ -534,14 +935,17 @@ pytest tests/ --cov=api --cov-report=term-missing
 |------|---------------|
 | tests/test_chat_service.py | Latin/Greek tokenization, recommendation ranking, unavailable items, fallback reply |
 | tests/test_chat_schema.py | Next.js payload validation, language_code support and invalid request cases |
+| tests/test_menu_service.py | Public menu grouping, unavailable item filtering and include_unavailable behavior |
+| tests/test_admin_menu_schema.py | Admin menu payload validation and patch semantics |
+| tests/test_admin_menu_service.py | Whitelisted dynamic update statement generation |
+| tests/test_rate_limiter.py | Memory limiter, Redis limiter, fail-open/fail-closed behavior, key scoping and headers |
+| tests/test_chat_rate_limit_route.py | `/api/chat` route returns 429 after configured budget is exceeded |
 
-Current verification on 2026-06-03:
+Current verification on 2026-06-06:
 
 ```text
 python -m compileall backend passed
-python -m pytest tests -v passed: 10 tests
-frontend npm run lint passed
-frontend npm run build passed
+python -m pytest tests -v passed: 31 tests
 Supabase project nycfqostjdjaynstaloo contains:
   menu_categories=24
   menu_items=130
@@ -551,6 +955,10 @@ Supabase project nycfqostjdjaynstaloo contains:
 backend/.env DATABASE_URL uses postgresql+asyncpg:// and connected successfully
 GET /health returned 200 ok masao
 POST /api/chat returned Shrimp Tempura for a spicy shrimp request
+POST /api/chat route-level rate limit test returned 429 on second request with test limiter
+Redis rate limiter tests passed with fake Redis eval responses and fail-closed/fail-open behavior
+GET /api/menu?language_code=en returned 200, total_categories=24, total_items=130
+PATCH /api/admin/menu/items/1 without X-API-Key returned 403
 Temporary codex-test-device-001 chat data was cleaned from Supabase
 ```
 
@@ -590,6 +998,38 @@ Set `DATABASE_URL`, `INTERNAL_API_KEY`, and `ENVIRONMENT` in the platform dashbo
 gunicorn api.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
 ```
 
+**Cloudflare edge rate limiting:**
+
+The production API should also be protected before traffic reaches FastAPI. The repository includes Terraform config for a Cloudflare WAF rate limiting rule:
+
+```text
+infra/cloudflare/
+```
+
+Default edge rule:
+
+```text
+POST /api/chat
+60 requests / 60 seconds
+key: cf.colo.id + ip.src
+response: 429 application/json
+```
+
+Apply flow:
+
+```bash
+cd infra/cloudflare
+cp terraform.tfvars.example terraform.tfvars
+# Set cloudflare_zone_id and api_hostname.
+terraform init
+terraform plan
+terraform apply
+```
+
+Use a Cloudflare API token with `Zone WAF Write`. Do not commit `terraform.tfvars` or Terraform state.
+
+Important: Cloudflare supports one zone entry point ruleset per `http_ratelimit` phase. If the zone already has rate limiting rules, import the existing ruleset into Terraform and merge this rule before applying.
+
 **Scheduled runs:**
 
 No scheduled job is required for the MVP chat endpoint. Future analytics rollups can use GitHub Actions or Supabase scheduled functions.
@@ -601,13 +1041,17 @@ No scheduled job is required for the MVP chat endpoint. Future analytics rollups
 **Current limitations:**
 - The assistant reply is deterministic and tag-based; it is not yet connected to an LLM.
 - The schema is intentionally single-restaurant; adding more restaurants will require a `restaurants` table and FKs.
-- The Supabase schema and full menu seed are applied; future menu changes must regenerate and reapply `backend/sql/002_seed_full_menu_from_frontend.sql` or use a future admin CRUD flow.
-- The frontend chat is now backend-bound, but the menu page still reads `frontend/src/data/menu-mock.json`.
-- No admin endpoint exists yet for menu updates.
-- No rate limiting is implemented yet for public chat traffic.
+- The Supabase schema and full menu seed are applied; future menu changes can use the protected `/api/admin/menu/*` endpoints instead of regenerating the seed.
+- Backend `GET /api/menu` is ready, but the frontend menu page still reads `frontend/src/data/menu-mock.json` until the frontend owner wires it.
+- Admin menu endpoints exist, but there is no browser admin UI yet.
+- `/api/chat` supports Redis-backed distributed rate limiting, but production deployment must provide managed Redis and set `RATE_LIMIT_BACKEND=redis`.
+- Cloudflare edge rate limiting IaC exists under `infra/cloudflare/`, but it has not been applied to a live Cloudflare zone from this workspace because no zone id/API token is configured here.
 
 **Planned improvements:**
+- Wire frontend `MenuApp` to `GET /api/menu`.
+- Build a small internal admin UI on top of the protected `/api/admin/menu/*` endpoints.
 - Add LLM integration with menu context and strict JSON output.
+- Apply `infra/cloudflare/` Terraform against the production Cloudflare zone and tune thresholds from Cloudflare analytics.
 - Add Supabase Row Level Security policies if direct frontend reads are introduced.
 - Add admin-authenticated CRUD endpoints for menu categories and items.
 - Add analytics tables for popular requests, unmatched queries and conversion to recommendations.

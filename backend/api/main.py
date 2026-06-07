@@ -7,7 +7,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.config import settings
-from api.routers import chat
+from api.dependencies import close_chat_rate_limiter
+from api.routers import admin_menu, chat, menu
 from database import close_database
 
 logging.basicConfig(
@@ -21,6 +22,7 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     logger.info("%s starting up", settings.app_name)
     yield
+    await close_chat_rate_limiter()
     await close_database()
     logger.info("%s shutting down", settings.app_name)
 
@@ -43,6 +45,8 @@ app.add_middleware(
 )
 
 app.include_router(chat.router, prefix="/api", tags=["Chat"])
+app.include_router(menu.router, prefix="/api", tags=["Menu"])
+app.include_router(admin_menu.router, prefix="/api/admin", tags=["Admin Menu"])
 
 
 @app.get("/health")
