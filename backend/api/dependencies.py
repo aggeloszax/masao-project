@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import hashlib
+import secrets
+
 from fastapi import Depends, HTTPException, Security
 from fastapi.security import APIKeyHeader
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,6 +15,21 @@ from api.services.rate_limiter import InMemoryRateLimiter, RateLimiter, RedisRat
 from database import get_db_session
 
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=True)
+
+
+def device_log_hash(device_id: str) -> str:
+    """Return a short stable hash for anonymous device ids in logs.
+
+    Args:
+        device_id: Raw anonymous frontend device id.
+
+    Returns:
+        str: First 12 hex characters of the SHA-256 digest.
+
+    Raises:
+        None.
+    """
+    return hashlib.sha256(device_id.encode("utf-8")).hexdigest()[:12]
 
 
 def create_chat_rate_limiter() -> RateLimiter:
@@ -63,7 +81,7 @@ async def verify_internal_api_key(api_key: str = Security(api_key_header)) -> st
     Raises:
         HTTPException: If the supplied key does not match configuration.
     """
-    if api_key != settings.internal_api_key:
+    if not secrets.compare_digest(api_key, settings.internal_api_key):
         raise HTTPException(status_code=403, detail="Invalid API key")
     return api_key
 
@@ -143,3 +161,20 @@ async def close_chat_rate_limiter() -> None:
     close = getattr(chat_rate_limiter, "aclose", None)
     if close is not None:
         await close()
+
+
+async def check_chat_rate_limiter_ready() -> None:
+    """Check that the configured rate limiter is ready.
+
+    Args:
+        None.
+
+    Returns:
+        None.
+
+    Raises:
+        Exception: If the limiter backend is unavailable.
+    """
+    healthcheck = getattr(chat_rate_limiter, "healthcheck", None)
+    if healthcheck is not None:
+        await healthcheck()

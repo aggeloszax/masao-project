@@ -89,6 +89,20 @@ class InMemoryRateLimiter:
                 reset_seconds=reset_seconds,
             )
 
+    async def healthcheck(self) -> None:
+        """Validate that the in-memory limiter is available.
+
+        Args:
+            None.
+
+        Returns:
+            None.
+
+        Raises:
+            None.
+        """
+        return None
+
     def _remove_expired(self, bucket: deque[float], now: float) -> None:
         cutoff = now - self.window_seconds
         while bucket and bucket[0] <= cutoff:
@@ -242,6 +256,23 @@ class RedisRateLimiter:
         close = getattr(self.redis, "aclose", None)
         if close is not None:
             await close()
+
+    async def healthcheck(self) -> None:
+        """Validate that Redis is reachable.
+
+        Args:
+            None.
+
+        Returns:
+            None.
+
+        Raises:
+            RateLimitBackendError: If Redis cannot be reached.
+        """
+        try:
+            await self.redis.ping()
+        except Exception as exc:
+            raise RateLimitBackendError("Rate limit backend unavailable") from exc
 
     def _redis_key(self, key: str) -> str:
         hashed_key = hashlib.sha256(key.encode("utf-8")).hexdigest()
