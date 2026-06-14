@@ -1,7 +1,7 @@
 ## Masao Restaurant Chatbot Backend — Technical Documentation
 
 **Version:** 1.0.0
-**Last updated:** 2026-06-06
+**Last updated:** 2026-06-12
 **Author:** PlanAhead Engineering
 **Status:** Development
 
@@ -28,7 +28,7 @@ api/services/chat_service.py
      ├── get/create active chat_sessions row
      ├── insert user chat_messages row
      ├── fetch available menu_items + menu_categories
-     ├── choose menu recommendations
+     ├── classify menu intent + choose deterministic answer
      └── insert assistant chat_messages row
      │
      ▼
@@ -61,6 +61,8 @@ pip install -r requirements.txt
 DATABASE_URL=          # PostgreSQL/Supabase async SQLAlchemy URL
 INTERNAL_API_KEY=      # API key reserved for future internal/admin endpoints
 ENVIRONMENT=           # development, staging, or production
+CORS_ALLOWED_ORIGINS=  # Comma-separated Render/frontend origins allowed by CORS
+CORS_ALLOWED_METHODS=  # Comma-separated methods, usually GET,POST,OPTIONS
 RATE_LIMIT_BACKEND=    # redis for production, memory for local development
 REDIS_URL=             # Managed Redis URL for distributed rate limiting
 REDIS_KEY_PREFIX=      # Redis key namespace, e.g. masao
@@ -254,13 +256,15 @@ The session commits only after the endpoint finishes successfully. If a DB write
 
 **Main object: `settings`**
 
-**What it does:** Reads `backend/config/settings.yaml`, loads `.env`, and exposes typed settings for database pool, CORS, restaurant slug and chat limits.
+**What it does:** Reads `backend/config/settings.yaml`, loads `.env`, parses Render-friendly comma-separated CORS env vars, and exposes typed settings for database pool, CORS, restaurant slug and chat limits.
 
-**Why it works this way:** CORS origins, pool size and restaurant slug stay configurable without code changes.
+**Why it works this way:** CORS origins, pool size and restaurant slug stay configurable without code changes. In production it fails fast if a Render deployment is missing Redis, has a default admin API key, uses wildcard/localhost-only CORS, or tries to use the in-memory rate limiter.
 
 **Edge cases handled:**
 - Missing YAML file -> empty config fallback.
 - Missing `.env` -> local defaults still allow import and tests.
+- `ENVIRONMENT=production` with unsafe defaults -> app startup fails before serving traffic.
+- `CORS_ALLOWED_ORIGINS=https://a,https://b` -> parsed into a list for FastAPI CORS middleware.
 
 #### `backend/api/main.py`
 
@@ -268,9 +272,9 @@ The session commits only after the endpoint finishes successfully. If a DB write
 
 **Main object: `app`**
 
-**What it does:** Creates FastAPI, registers CORS middleware, includes `/api/chat`, and exposes `/health`.
+**What it does:** Creates FastAPI, registers CORS middleware, includes `/api/chat`, adds request-id logging, exposes `/health`, and exposes `/ready` for dependency readiness.
 
-**Why it works this way:** The Next.js frontend runs on localhost ports during development and Vercel in production; allowed origins live in config.
+**Why it works this way:** The Next.js frontend runs on localhost ports during development and Render/Vercel-style origins in production; allowed origins live in config. `/health` stays lightweight for liveness, while `/ready` checks Supabase/PostgreSQL and Redis before Render routes traffic to the service.
 
 **Key logic explained:**
 
@@ -285,6 +289,15 @@ app.add_middleware(
 ```
 
 This explicitly allows Next.js development origins such as `http://localhost:3000` while avoiding `allow_origins=["*"]`.
+
+```python
+@app.get("/ready")
+async def ready():
+    checks = {"database": "ok", "rate_limiter": "ok"}
+    ...
+```
+
+The readiness endpoint returns `200` only when the database and configured rate limiter are available. It returns `503` with generic dependency status when either check fails.
 
 #### `backend/api/schemas/chat.py`
 
@@ -324,14 +337,17 @@ This explicitly allows Next.js development origins such as `http://localhost:300
 
 **Main function: `handle_chat(request)`**
 
-**What it does:** Creates or reuses an active chat session, stores the user message, fetches localized menu items for the requested `language_code`, generates a deterministic recommendation, stores the assistant message, and returns structured JSON.
+**What it does:** Creates or reuses an active chat session, stores the user message, fetches localized menu items for the requested `language_code`, classifies the user intent, generates a deterministic answer, stores the assistant message, and returns structured JSON.
 
-**Why it works this way:** The MVP does not require an LLM dependency to prove the backend/frontend contract. It uses menu tags and descriptions first, which keeps responses predictable and auditable.
+**Why it works this way:** The MVP does not require an LLM dependency to prove the backend/frontend contract. It uses menu tags, descriptions, category intent and item-name matching first, which keeps responses predictable and auditable.
 
 **Edge cases handled:**
 - Rate limit exceeded -> returns `429` before writing a chat message.
 - Unknown restaurant slug -> raises `ValueError`.
 - Empty/low-signal user message -> fallback assistant reply.
+- Drink/cocktail/wine questions -> scoped to drink categories instead of food.
+- Item detail questions such as `τι έχει το long drinks` -> answer from the stored item description.
+- Generic item descriptions -> the assistant states that detailed ingredients are unavailable instead of inventing them.
 - Unavailable menu item -> excluded from recommendations.
 - Long history -> latest `chat_history_limit` messages are returned in chronological order.
 - Missing translation row -> falls back to canonical `menu_items` / `menu_categories` fields.
@@ -351,20 +367,29 @@ ranked = sorted(
 )
 ```
 
-This ranks available menu items by text/tag overlap, then by lower price and stable name ordering. It is intentionally deterministic so test failures are meaningful.
+This ranks available menu items by text/tag overlap inside the detected menu group, then by lower price and stable name ordering. It is intentionally deterministic so test failures are meaningful.
 
 **Business formulas used:**
 
-No financial formulas are used in this backend. Recommendation scoring is:
+No financial formulas are used in this backend. Recommendation logic is:
 
 ```text
-Menu Match Score = count(search_terms that appear in item name + description + category + tags)
+1. Normalize Greek/Latin text, remove accents and normalize final sigma.
+2. Detect intent:
+   - item_detail for "τι έχει/τι περιέχει το X"
+   - category_overview for "σε ποτά τι έχει"
+   - recommendation for "θέλω/πρότεινε X"
+3. Detect menu group: cocktails, drinks, wines or shisha when the query mentions those categories.
+4. Score only available items inside the detected group.
+5. Menu Match Score = count(search_terms that appear in item name + description + category + tags).
 ```
 
 Exact Python code:
 
 ```python
-return sum(1 for term in terms if term and term in haystack)
+answer = answer_menu_query(request.user_message, menu_items)
+recommendations = answer.recommendations
+assistant_content = answer.reply
 ```
 
 #### `backend/api/services/rate_limiter.py`
@@ -854,6 +879,42 @@ The backend endpoint is ready. The frontend `MenuApp` has not been changed in th
 }
 ```
 
+#### GET /ready
+
+**Purpose:** Render readiness check for dependencies before routing production traffic.
+
+**Healthy response:**
+
+```json
+{
+  "status": "ready",
+  "service": "Masao Restaurant Chatbot API",
+  "checks": {
+    "database": "ok",
+    "rate_limiter": "ok"
+  }
+}
+```
+
+**Unavailable response:**
+
+```json
+{
+  "status": "not_ready",
+  "service": "Masao Restaurant Chatbot API",
+  "checks": {
+    "database": "unavailable",
+    "rate_limiter": "ok"
+  }
+}
+```
+
+**Errors:**
+
+```text
+503 Service Unavailable - database or Redis-backed rate limiter is unavailable
+```
+
 ---
 
 ### 8. Output Files
@@ -885,6 +946,8 @@ The backend endpoint is ready. The frontend `MenuApp` has not been changed in th
 | database.pool_timeout_seconds | 30 | Seconds to wait for a pooled connection |
 | cors.allowed_origins | localhost and Vercel Masao URL | Frontend origins allowed by browser CORS |
 | cors.allowed_methods | GET, POST, OPTIONS | HTTP methods accepted by CORS |
+| CORS_ALLOWED_ORIGINS | unset | Comma-separated env override for Render/frontend origins |
+| CORS_ALLOWED_METHODS | unset | Comma-separated env override for allowed browser methods |
 | chat.history_limit | 20 | Maximum recent messages returned per response |
 | chat.max_user_message_chars | 1000 | Pydantic max length for user messages |
 | chat.default_table_number | 1 | Reserved default for future QR helpers |
@@ -896,6 +959,8 @@ The backend endpoint is ready. The frontend `MenuApp` has not been changed in th
 | rate_limit.redis_key_prefix | masao | Redis key namespace for this app |
 | rate_limit.redis_socket_timeout_seconds | 1.0 | Redis connect/read timeout in seconds |
 | rate_limit.fail_closed | true | Return 503 if Redis is unavailable instead of allowing unlimited chat |
+| INTERNAL_API_KEY | required in production | Secret for `/api/admin/menu/*`; default placeholder is rejected in production |
+| ENVIRONMENT | development | `production` enables startup guardrails for CORS, Redis and secrets |
 
 ---
 
@@ -938,28 +1003,28 @@ pytest tests/ --cov=api --cov-report=term-missing
 | tests/test_menu_service.py | Public menu grouping, unavailable item filtering and include_unavailable behavior |
 | tests/test_admin_menu_schema.py | Admin menu payload validation and patch semantics |
 | tests/test_admin_menu_service.py | Whitelisted dynamic update statement generation |
+| tests/test_config.py | Production startup guardrails and Render CORS env parsing |
+| tests/test_health_routes.py | `/health` liveness and `/ready` dependency status |
+| tests/test_security.py | Admin API key behavior and redacted device logging |
 | tests/test_rate_limiter.py | Memory limiter, Redis limiter, fail-open/fail-closed behavior, key scoping and headers |
 | tests/test_chat_rate_limit_route.py | `/api/chat` route returns 429 after configured budget is exceeded |
 
-Current verification on 2026-06-06:
+Regression cases added for the drink/chat bug:
 
 ```text
-python -m compileall backend passed
-python -m pytest tests -v passed: 31 tests
-Supabase project nycfqostjdjaynstaloo contains:
-  menu_categories=24
-  menu_items=130
-  menu_category_translations=120
-  menu_item_translations=650
-  hebrew_item_translations=0
-backend/.env DATABASE_URL uses postgresql+asyncpg:// and connected successfully
-GET /health returned 200 ok masao
-POST /api/chat returned Shrimp Tempura for a spicy shrimp request
-POST /api/chat route-level rate limit test returned 429 on second request with test limiter
-Redis rate limiter tests passed with fake Redis eval responses and fail-closed/fail-open behavior
-GET /api/menu?language_code=en returned 200, total_categories=24, total_items=130
-PATCH /api/admin/menu/items/1 without X-API-Key returned 403
-Temporary codex-test-device-001 chat data was cleaned from Supabase
+θέλω ένα φρουτώδες cocktail -> cocktail items only, no soft drink/sushi fallback
+σε ποτά τι έχει -> category overview for cocktails/drinks/wines, no food recommendation
+τι έχει το long drinks -> Long Drinks detail, no Tea recommendation
+τι περιέχει το cucumber maki -> Cucumber Maki detail, no Shrimp Tempura recommendation
+```
+
+Current verification on 2026-06-12:
+
+```text
+python -m compileall . exited 0
+  note: existing .pytest_cache could not be listed because of local permissions
+python -m pytest -p no:cacheprovider tests -v passed: 46 tests
+python main.py --input sql --dry-run passed with batch summary success:1 failed:0 skipped:0
 ```
 
 ---
@@ -986,6 +1051,23 @@ backend/sql/003_remove_hebrew_translations.sql
 **Staging (Render):**
 
 Connect GitHub repo -> Render auto-deploys on push to `staging` branch.
+
+Render production environment variables:
+
+```text
+ENVIRONMENT=production
+DATABASE_URL=postgresql+asyncpg://USER:PASSWORD@HOST:PORT/DATABASE
+INTERNAL_API_KEY=<long random secret>
+CORS_ALLOWED_ORIGINS=https://masao.onrender.com,https://masao.vercel.app
+CORS_ALLOWED_METHODS=GET,POST,OPTIONS
+RATE_LIMIT_BACKEND=redis
+REDIS_URL=rediss://USER:PASSWORD@HOST:PORT/0
+REDIS_KEY_PREFIX=masao
+RATE_LIMIT_FAIL_CLOSED=true
+REDIS_SOCKET_TIMEOUT_SECONDS=1.0
+```
+
+Render health checks should use `/health` for liveness and `/ready` when the platform needs dependency readiness.
 
 **Production (DigitalOcean App Platform):**
 
@@ -1040,6 +1122,8 @@ No scheduled job is required for the MVP chat endpoint. Future analytics rollups
 
 **Current limitations:**
 - The assistant reply is deterministic and tag-based; it is not yet connected to an LLM.
+- Drink/category intent is deterministic and rule-based; it handles known menu groups but does not understand arbitrary natural-language menu taxonomy.
+- Generic menu rows such as `Long Drinks = Classic Long Drinks` are answered factually as generic because the backend must not invent missing ingredients.
 - The schema is intentionally single-restaurant; adding more restaurants will require a `restaurants` table and FKs.
 - The Supabase schema and full menu seed are applied; future menu changes can use the protected `/api/admin/menu/*` endpoints instead of regenerating the seed.
 - Backend `GET /api/menu` is ready, but the frontend menu page still reads `frontend/src/data/menu-mock.json` until the frontend owner wires it.
