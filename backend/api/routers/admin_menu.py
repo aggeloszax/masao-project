@@ -73,6 +73,8 @@ async def upsert_category_translation(
     """Create or update a category translation for admin users."""
     try:
         return await service.upsert_category_translation(category_id, language_code, request)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
     except IntegrityError as exc:
         raise HTTPException(status_code=409, detail="Category translation conflicts with existing data") from exc
     except SQLAlchemyError as exc:
@@ -125,6 +127,8 @@ async def upsert_item_translation(
     """Create or update a menu item translation for admin users."""
     try:
         return await service.upsert_item_translation(item_id, language_code, request)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
     except IntegrityError as exc:
         raise HTTPException(status_code=409, detail="Item translation conflicts with existing data") from exc
     except SQLAlchemyError as exc:

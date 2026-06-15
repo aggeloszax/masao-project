@@ -3,6 +3,9 @@ from __future__ import annotations
 import logging
 import re
 import unicodedata
+import hashlib
+from dataclasses import dataclass
+from typing import Literal
 from uuid import UUID
 
 from sqlalchemy import RowMapping, text
@@ -16,6 +19,10 @@ from api.services.menu_service import MenuCandidate, MenuService
 logger = logging.getLogger(__name__)
 
 
+def _device_log_hash(device_id: str) -> str:
+    return hashlib.sha256(device_id.encode("utf-8")).hexdigest()[:12]
+
+
 STOPWORDS = {
     "i",
     "want",
@@ -25,6 +32,17 @@ STOPWORDS = {
     "please",
     "the",
     "and",
+    "a",
+    "an",
+    "one",
+    "το",
+    "τη",
+    "την",
+    "τον",
+    "τα",
+    "σε",
+    "ενα",
+    "ένα",
     "θελω",
     "κατι",
     "εχετε",
@@ -37,6 +55,9 @@ STOPWORDS = {
 SYNONYMS: dict[str, set[str]] = {
     "spicy": {"spicy", "hot", "chilli", "chili", "πικαντικο", "καυτερο"},
     "καυτερο": {"spicy", "πικαντικο", "καυτερο"},
+    "φρουτωδες": {"φρουτωδες", "fruity", "fruit", "tropical", "τροπικο"},
+    "φρουτωδεσ": {"φρουτωδες", "fruity", "fruit", "tropical", "τροπικο"},
+    "fruity": {"φρουτωδες", "fruity", "fruit", "tropical", "τροπικο"},
     "vegan": {"vegan", "vegan-friendly", "vegetarian", "χορτοφαγικο"},
     "vegetarian": {"vegetarian", "vegan-friendly", "χορτοφαγικο"},
     "shrimp": {"shrimp", "γαριδα", "γαριδες"},
@@ -44,9 +65,102 @@ SYNONYMS: dict[str, set[str]] = {
     "salmon": {"salmon", "σολομος"},
     "chicken": {"chicken", "κοτοπουλο"},
     "dessert": {"dessert", "sweet", "chocolate", "γλυκο", "επιδορπιο"},
-    "cocktail": {"cocktail", "drink", "κοκτειλ", "ποτο"},
+    "cocktail": {"cocktail", "cocktails", "κοκτειλ", "κοκτειλς"},
+    "cocktails": {"cocktail", "cocktails", "κοκτειλ", "κοκτειλς"},
+    "κοκτειλ": {"cocktail", "cocktails", "κοκτειλ", "κοκτειλς"},
+    "drink": {"drink", "drinks", "ποτο", "ποτα"},
+    "drinks": {"drink", "drinks", "ποτο", "ποτα"},
+    "ποτο": {"drink", "drinks", "ποτο", "ποτα"},
+    "ποτα": {"drink", "drinks", "ποτο", "ποτα"},
+    "κρασι": {"wine", "wines", "κρασι", "κρασια"},
+    "κρασια": {"wine", "wines", "κρασι", "κρασια"},
+    "wine": {"wine", "wines", "κρασι", "κρασια"},
+    "wines": {"wine", "wines", "κρασι", "κρασια"},
+    "μπυρα": {"beer", "beers", "μπυρα", "μπυρες"},
+    "μπυρες": {"beer", "beers", "μπυρα", "μπυρες"},
+    "beer": {"beer", "beers", "μπυρα", "μπυρες"},
+    "beers": {"beer", "beers", "μπυρα", "μπυρες"},
+    "αναψυκτικο": {"soft drink", "soft drinks", "soda", "αναψυκτικο", "αναψυκτικα"},
+    "αναψυκτικα": {"soft drink", "soft drinks", "soda", "αναψυκτικο", "αναψυκτικα"},
+    "καφες": {"coffee", "espresso", "καφες"},
+    "coffee": {"coffee", "espresso", "καφες"},
+    "τσαι": {"tea", "τσαι"},
+    "tea": {"tea", "τσαι"},
+    "shisha": {"shisha", "ναργιλες"},
+    "ναργιλες": {"shisha", "ναργιλες"},
+}
+
+QueryIntent = Literal["recommendation", "item_detail", "category_overview"]
+
+MENU_GROUP_CATEGORIES: dict[str, set[str]] = {
+    "cocktails": {"masao cocktails", "classic cocktails", "mocktails"},
+    "drinks": {"soft drinks", "ciders", "beers", "whiskey"},
+    "wines": {"white wines", "rose wines", "red wines", "champagne sparkling"},
+    "shisha": {"shisha"},
+}
+
+GROUP_LABELS = {
+    "cocktails": "Cocktails",
+    "drinks": "Soft Drinks / Beers / Whiskey",
+    "wines": "Wines",
+    "shisha": "Shisha",
+}
+
+GROUP_KEYWORDS: dict[str, set[str]] = {
+    "cocktails": {"cocktail", "cocktails", "κοκτειλ", "κοκτειλς"},
+    "drinks": {
+        "drink",
+        "drinks",
+        "ποτο",
+        "ποτα",
+        "soft drink",
+        "soft drinks",
+        "αναψυκτικο",
+        "αναψυκτικα",
+        "beer",
+        "beers",
+        "μπυρα",
+        "μπυρες",
+        "coffee",
+        "espresso",
+        "καφες",
+        "tea",
+        "τσαι",
+    },
+    "wines": {"wine", "wines", "κρασι", "κρασια"},
     "shisha": {"shisha", "ναργιλες"},
 }
+
+BROAD_DRINK_TERMS = {"drink", "drinks", "ποτο", "ποτα"}
+
+DETAIL_PATTERNS = (
+    "τι εχει",
+    "τι περιεχει",
+    "τι ειναι",
+    "what is",
+    "what does",
+    "what's in",
+    "ingredients",
+    "contains",
+)
+
+OVERVIEW_PATTERNS = (
+    "τι εχει",
+    "τι εχετε",
+    "τι υπαρχει",
+    "τι επιλογες",
+    "what do you have",
+    "show me",
+)
+
+RECOMMENDATION_TERMS = {"προτεινεις", "προτεινε", "recommend", "suggest", "θελω", "want"}
+
+
+@dataclass(frozen=True)
+class ChatAnswer:
+    intent: QueryIntent
+    reply: str
+    recommendations: list[MenuCandidate]
 
 
 def normalize_text(value: str) -> str:
@@ -101,6 +215,110 @@ def expand_terms(tokens: list[str]) -> set[str]:
     return {normalize_text(term) for term in terms}
 
 
+def item_group(item: MenuCandidate) -> str | None:
+    """Return the high-level menu group for a menu item.
+
+    Args:
+        item: Menu item candidate.
+
+    Returns:
+        str | None: Group id such as cocktails, drinks, wines or shisha.
+
+    Raises:
+        None.
+    """
+    normalized_category = normalize_text(item.category).replace("&", " ")
+    normalized_category = re.sub(r"[^0-9a-zα-ω]+", " ", normalized_category).strip()
+    for group, categories in MENU_GROUP_CATEGORIES.items():
+        if normalized_category in categories:
+            return group
+    return None
+
+
+def requested_groups(user_message: str) -> set[str]:
+    """Detect high-level menu groups requested by the guest.
+
+    Args:
+        user_message: Raw guest message.
+
+    Returns:
+        set[str]: Requested group ids.
+
+    Raises:
+        None.
+    """
+    normalized_message = normalize_text(user_message)
+    tokens = tokenize(user_message)
+    terms = expand_terms(tokens)
+
+    if terms & BROAD_DRINK_TERMS:
+        return {"cocktails", "drinks", "wines"}
+
+    groups: set[str] = set()
+    for group, keywords in GROUP_KEYWORDS.items():
+        for keyword in keywords:
+            normalized_keyword = normalize_text(keyword)
+            if " " in normalized_keyword:
+                if normalized_keyword in normalized_message:
+                    groups.add(group)
+            elif normalized_keyword in terms or normalized_keyword in tokens:
+                groups.add(group)
+    return groups
+
+
+def group_keyword_terms(groups: set[str]) -> set[str]:
+    """Return normalized keywords that only identify requested groups.
+
+    Args:
+        groups: High-level menu group ids.
+
+    Returns:
+        set[str]: Normalized group/category keywords.
+
+    Raises:
+        None.
+    """
+    terms: set[str] = set()
+    for group in groups:
+        for keyword in GROUP_KEYWORDS.get(group, set()):
+            terms.add(normalize_text(keyword))
+    return terms
+
+
+def is_overview_question(user_message: str) -> bool:
+    """Detect whether the guest asks what exists in a category.
+
+    Args:
+        user_message: Raw guest message.
+
+    Returns:
+        bool: True when the message asks for category availability.
+
+    Raises:
+        None.
+    """
+    normalized_message = normalize_text(user_message)
+    if any(term in normalized_message for term in RECOMMENDATION_TERMS):
+        return False
+    return any(pattern in normalized_message for pattern in OVERVIEW_PATTERNS)
+
+
+def is_item_detail_question(user_message: str) -> bool:
+    """Detect whether the guest asks about a specific menu item.
+
+    Args:
+        user_message: Raw guest message.
+
+    Returns:
+        bool: True when the message asks about item ingredients/details.
+
+    Raises:
+        None.
+    """
+    normalized_message = normalize_text(user_message)
+    return any(pattern in normalized_message for pattern in DETAIL_PATTERNS)
+
+
 def score_menu_item(item: MenuCandidate, terms: set[str]) -> int:
     """Score a menu item by term overlap.
 
@@ -136,17 +354,145 @@ def choose_recommendations(user_message: str, menu_items: list[MenuCandidate], l
     if not terms:
         return []
 
+    groups = requested_groups(user_message)
+    scoped_items = [
+        item
+        for item in menu_items
+        if item.is_available and (not groups or item_group(item) in groups)
+    ]
+    preference_terms = terms - group_keyword_terms(groups)
+
     # Επιλογή πιάτων με βάση overlap σε όνομα, περιγραφή, κατηγορία και AI tags.
     scored = [
         (item, score_menu_item(item, terms))
-        for item in menu_items
-        if item.is_available
+        for item in scoped_items
+        if not preference_terms or score_menu_item(item, preference_terms) > 0
     ]
     ranked = sorted(
         ((item, score) for item, score in scored if score > 0),
-        key=lambda pair: (-pair[1], pair[0].price, pair[0].name),
+        key=lambda pair: (-pair[1], item_group(pair[0]) or "", pair[0].price, pair[0].name),
     )
     return [item for item, _score in ranked[:limit]]
+
+
+def find_item_detail_match(user_message: str, menu_items: list[MenuCandidate]) -> MenuCandidate | None:
+    """Find a specific item mentioned in a detail question.
+
+    Args:
+        user_message: Raw guest message.
+        menu_items: Available menu candidates.
+
+    Returns:
+        MenuCandidate | None: Best exact item-name match.
+
+    Raises:
+        None.
+    """
+    normalized_message = normalize_text(user_message)
+    matches = [
+        item
+        for item in menu_items
+        if item.is_available and normalize_text(item.name) in normalized_message
+    ]
+    if not matches:
+        return None
+    return sorted(matches, key=lambda item: (-len(item.name), item.name))[0]
+
+
+def build_item_detail_reply(item: MenuCandidate) -> str:
+    """Build a factual item detail reply without inventing missing ingredients.
+
+    Args:
+        item: Matched menu item.
+
+    Returns:
+        str: Assistant reply.
+
+    Raises:
+        None.
+    """
+    normalized_name = normalize_text(item.name)
+    normalized_description = normalize_text(item.description)
+    generic_descriptions = {
+        normalized_name,
+        f"classic {normalized_name}",
+        f"{normalized_name} selection",
+        f"classic {normalized_name} selection",
+    }
+    if normalized_description in generic_descriptions:
+        return (
+            f"Για το {item.name} ({item.price:.2f}€), το μενού γράφει: {item.description}. "
+            "δεν έχω αναλυτικά συστατικά για αυτό το item, οπότε δεν θα τα επινοήσω."
+        )
+    return f"Το {item.name} ({item.price:.2f}€) περιέχει: {item.description}."
+
+
+def build_category_overview_reply(groups: set[str], menu_items: list[MenuCandidate]) -> str:
+    """Build a category overview for drinks/cocktails/wines style questions.
+
+    Args:
+        groups: Requested high-level group ids.
+        menu_items: Available menu candidates.
+
+    Returns:
+        str: Assistant reply with category names and sample items.
+
+    Raises:
+        None.
+    """
+    lines = []
+    for group in ("cocktails", "drinks", "wines", "shisha"):
+        if group not in groups:
+            continue
+        grouped_items = [item for item in menu_items if item.is_available and item_group(item) == group]
+        if not grouped_items:
+            continue
+        categories = sorted({item.category for item in grouped_items})
+        sample_names = ", ".join(item.name for item in grouped_items[:3])
+        lines.append(f"{GROUP_LABELS[group]}: {', '.join(categories)}. Ενδεικτικά: {sample_names}.")
+
+    if not lines:
+        return "Δεν βρήκα διαθέσιμες επιλογές σε αυτή την κατηγορία."
+    return "Στα ποτά υπάρχουν οι εξής επιλογές: " + " ".join(lines)
+
+
+def answer_menu_query(user_message: str, menu_items: list[MenuCandidate], limit: int = 3) -> ChatAnswer:
+    """Answer a menu query using deterministic intent handling.
+
+    Args:
+        user_message: Raw guest message.
+        menu_items: Available menu candidates.
+        limit: Maximum recommendation count.
+
+    Returns:
+        ChatAnswer: Intent, assistant reply and recommended items.
+
+    Raises:
+        None.
+    """
+    if is_item_detail_question(user_message):
+        item = find_item_detail_match(user_message, menu_items)
+        if item is not None:
+            return ChatAnswer(
+                intent="item_detail",
+                reply=build_item_detail_reply(item),
+                recommendations=[item],
+            )
+
+    groups = requested_groups(user_message)
+    if groups and is_overview_question(user_message):
+        return ChatAnswer(
+            intent="category_overview",
+            reply=build_category_overview_reply(groups, menu_items),
+            recommendations=[],
+        )
+
+    recommendations = choose_recommendations(user_message, menu_items, limit=limit)
+    return ChatAnswer(
+        intent="recommendation",
+        reply=build_assistant_reply(user_message, recommendations),
+        recommendations=recommendations,
+    )
 
 
 def build_assistant_reply(user_message: str, recommendations: list[MenuCandidate]) -> str:
@@ -204,19 +550,24 @@ class ChatService:
             session_id = await self._get_or_create_session(request.device_id, request.table_number)
             await self._insert_message(session_id, "user", request.user_message)
             menu_items = await self._fetch_menu_items(request.language_code)
-            recommendations = choose_recommendations(request.user_message, menu_items)
-            assistant_content = build_assistant_reply(request.user_message, recommendations)
+            answer = answer_menu_query(request.user_message, menu_items)
+            recommendations = answer.recommendations
+            assistant_content = answer.reply
             assistant_message = await self._insert_message(session_id, "assistant", assistant_content)
             messages = await self._fetch_messages(session_id)
         except SQLAlchemyError:
-            logger.exception("Chat persistence failed for device_id=%s table=%s", request.device_id, request.table_number)
+            logger.exception(
+                "Chat persistence failed for device_hash=%s table=%s",
+                _device_log_hash(request.device_id),
+                request.table_number,
+            )
             raise
 
         logger.info(
-            "Chat handled for restaurant=%s table=%s device_id=%s recommendations=%s",
+            "Chat handled for restaurant=%s table=%s device_hash=%s recommendations=%s",
             request.restaurant_slug,
             request.table_number,
-            request.device_id,
+            _device_log_hash(request.device_id),
             len(recommendations),
         )
         return ChatResponse(

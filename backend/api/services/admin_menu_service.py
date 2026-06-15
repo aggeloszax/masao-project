@@ -130,6 +130,7 @@ class AdminMenuService:
         Raises:
             SQLAlchemyError: Propagated by SQLAlchemy if persistence fails.
         """
+        await self._ensure_category_exists(category_id)
         result = await self.session.execute(
             text(
                 """
@@ -244,6 +245,7 @@ class AdminMenuService:
         Raises:
             SQLAlchemyError: Propagated by SQLAlchemy if persistence fails.
         """
+        await self._ensure_item_exists(item_id)
         result = await self.session.execute(
             text(
                 """
@@ -260,6 +262,22 @@ class AdminMenuService:
             {"item_id": item_id, "language_code": language_code, **request.model_dump()},
         )
         return self._item_translation_response(result.mappings().one())
+
+    async def _ensure_category_exists(self, category_id: int) -> None:
+        result = await self.session.execute(
+            text("select 1 from menu_categories where id = :category_id"),
+            {"category_id": category_id},
+        )
+        if result.scalar_one_or_none() is None:
+            raise LookupError(f"Menu category not found: {category_id}")
+
+    async def _ensure_item_exists(self, item_id: int) -> None:
+        result = await self.session.execute(
+            text("select 1 from menu_items where id = :item_id"),
+            {"item_id": item_id},
+        )
+        if result.scalar_one_or_none() is None:
+            raise LookupError(f"Menu item not found: {item_id}")
 
     @staticmethod
     def _category_response(row: RowMapping) -> MenuCategoryAdminResponse:

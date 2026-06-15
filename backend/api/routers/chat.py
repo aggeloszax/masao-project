@@ -5,7 +5,7 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.exc import SQLAlchemyError
 
-from api.dependencies import get_chat_rate_limiter, get_chat_service
+from api.dependencies import device_log_hash, get_chat_rate_limiter, get_chat_service
 from api.schemas.chat import ChatRequest, ChatResponse
 from api.services.chat_service import ChatService
 from api.services.rate_limiter import RateLimitBackendError, RateLimitDecision, RateLimiter, chat_rate_limit_key
@@ -45,13 +45,53 @@ async def chat(
 
         return await service.handle_chat(request)
     except RateLimitBackendError as exc:
-        logger.exception("Rate limit backend unavailable for table=%s device_id=%s", request.table_number, request.device_id)
+        log_rate_limit_backend_error(table_number=request.table_number, device_id=request.device_id)
         raise HTTPException(status_code=503, detail="Rate limit service unavailable") from exc
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     except SQLAlchemyError as exc:
-        logger.exception("Chat endpoint failed for table=%s device_id=%s", request.table_number, request.device_id)
+        log_chat_backend_error(table_number=request.table_number, device_id=request.device_id)
         raise HTTPException(status_code=500, detail="Chat service unavailable") from exc
+
+
+def log_rate_limit_backend_error(table_number: int, device_id: str) -> None:
+    """Log rate limiter failures without raw anonymous device ids.
+
+    Args:
+        table_number: Restaurant table number.
+        device_id: Raw anonymous frontend device id.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+    logger.exception(
+        "Rate limit backend unavailable for table=%s device_hash=%s",
+        table_number,
+        device_log_hash(device_id),
+    )
+
+
+def log_chat_backend_error(table_number: int, device_id: str) -> None:
+    """Log chat failures without raw anonymous device ids.
+
+    Args:
+        table_number: Restaurant table number.
+        device_id: Raw anonymous frontend device id.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+    logger.exception(
+        "Chat endpoint failed for table=%s device_hash=%s",
+        table_number,
+        device_log_hash(device_id),
+    )
 
 
 def rate_limit_headers(decision: RateLimitDecision) -> dict[str, str]:

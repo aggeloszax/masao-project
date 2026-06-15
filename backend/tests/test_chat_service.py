@@ -1,5 +1,6 @@
 from api.services.chat_service import (
     MenuCandidate,
+    answer_menu_query,
     build_assistant_reply,
     choose_recommendations,
     expand_terms,
@@ -73,3 +74,132 @@ def test_expand_terms_adds_synonyms_for_spicy() -> None:
 
     assert "hot" in terms
     assert "chilli" in terms
+
+
+def test_choose_recommendations_scopes_fruity_cocktail_to_cocktails() -> None:
+    items = [
+        MenuCandidate(
+            id=1,
+            external_id="CO001",
+            category="Masao Cocktails",
+            name="Okinawa",
+            description="Japanese Yuzu Aperitif, Elderflower, Strawberry",
+            price=10.0,
+            tags=["fruity", "fresh"],
+            is_available=True,
+            language_code="en",
+        ),
+        MenuCandidate(
+            id=2,
+            external_id="CC009",
+            category="Classic Cocktails",
+            name="Long Drinks",
+            description="Classic long drinks selection",
+            price=9.0,
+            tags=["fresh", "classic"],
+            is_available=True,
+            language_code="en",
+        ),
+        MenuCandidate(
+            id=3,
+            external_id="DR003",
+            category="Soft Drinks",
+            name="Three Cents Pink Grapefruit Soda",
+            description="Pink grapefruit soda 200ml",
+            price=4.0,
+            tags=["fruity", "fresh"],
+            is_available=True,
+            language_code="en",
+        ),
+    ]
+
+    recommendations = choose_recommendations("θέλω ένα φρουτώδες cocktail", items)
+
+    assert [item.name for item in recommendations] == ["Okinawa"]
+
+
+def test_answer_menu_query_returns_drink_overview_for_drinks_question() -> None:
+    items = [
+        MenuCandidate(1, "CO001", "Masao Cocktails", "Okinawa", "Yuzu, Strawberry", 10.0, ["fruity"], True, "en"),
+        MenuCandidate(2, "DR004", "Soft Drinks", "Espresso", "Espresso coffee", 3.0, ["coffee"], True, "en"),
+        MenuCandidate(3, "WW001", "White Wines", "Oinos Grigoriadi", "Sauvignon Blanc", 32.0, ["dry"], True, "en"),
+        MenuCandidate(4, "UR009", "Uramaki / Hossomaki (6pcs)", "Spicy Suzuki", "Sea bass roll", 9.5, ["spicy"], True, "en"),
+    ]
+
+    answer = answer_menu_query("σε ποτά τι έχει", items)
+
+    assert answer.intent == "category_overview"
+    assert "Cocktails" in answer.reply
+    assert "Soft Drinks" in answer.reply
+    assert "White Wines" in answer.reply
+    assert "Spicy Suzuki" not in answer.reply
+    assert answer.recommendations == []
+
+
+def test_answer_menu_query_returns_long_drinks_detail_without_inventing() -> None:
+    items = [
+        MenuCandidate(
+            id=1,
+            external_id="CC009",
+            category="Classic Cocktails",
+            name="Long Drinks",
+            description="Classic Long Drinks",
+            price=9.0,
+            tags=["fresh", "classic"],
+            is_available=True,
+            language_code="en",
+        ),
+        MenuCandidate(
+            id=2,
+            external_id="DR005",
+            category="Soft Drinks",
+            name="Tea",
+            description="Tea",
+            price=3.0,
+            tags=["hot"],
+            is_available=True,
+            language_code="en",
+        ),
+    ]
+
+    answer = answer_menu_query("τι έχει το long drinks", items)
+
+    assert answer.intent == "item_detail"
+    assert answer.recommendations[0].name == "Long Drinks"
+    assert "Classic Long Drinks" in answer.reply
+    assert "δεν έχω αναλυτικά συστατικά" in answer.reply
+    assert "Tea" not in answer.reply
+
+
+def test_answer_menu_query_returns_exact_item_detail_for_cucumber_maki() -> None:
+    items = [
+        MenuCandidate(
+            id=1,
+            external_id="UR001",
+            category="Uramaki / Hossomaki (6pcs)",
+            name="Cucumber Maki",
+            description="cucumber",
+            price=8.0,
+            tags=["fresh", "vegan"],
+            is_available=True,
+            language_code="en",
+        ),
+        MenuCandidate(
+            id=2,
+            external_id="UR007",
+            category="Uramaki / Hossomaki (6pcs)",
+            name="Shrimp Tempura",
+            description="shrimp tempura, avocado, spicy mayo",
+            price=9.3,
+            tags=["shrimp", "spicy"],
+            is_available=True,
+            language_code="en",
+        ),
+    ]
+
+    answer = answer_menu_query("τι περιέχει το cucumber maki", items)
+
+    assert answer.intent == "item_detail"
+    assert answer.recommendations[0].name == "Cucumber Maki"
+    assert "cucumber" in answer.reply
+    assert "Shrimp Tempura" not in answer.reply
