@@ -37,9 +37,12 @@ git push -u origin main
 2. Συμπλήρωσε τα secrets που ζητά το dashboard:
    - `DATABASE_URL` = το Supabase pooled connection string σε μορφή
      `postgresql+asyncpg://USER:PASSWORD@HOST:5432/postgres`
+     ⚠️ Η Supabase το δίνει ως `postgresql://...` — πρόσθεσε το `+asyncpg`.
    - `ANTHROPIC_API_KEY` = το (νέο) Anthropic key
-   - `CORS_ALLOWED_ORIGINS` = προσωρινά `http://localhost:3000` — θα το
-     αλλάξεις στο Βήμα 4 με το πραγματικό Vercel URL.
+   - `CORS_ALLOWED_ORIGINS` = `https://masao-project.vercel.app` (placeholder —
+     θα το αλλάξεις στο Βήμα 4 με το πραγματικό Vercel URL).
+     ⚠️ ΟΧΙ localhost: σε production το config απαιτεί https origin,
+     αλλιώς το app δεν ξεκινά καθόλου.
 3. Deploy. Όταν τελειώσει, δοκίμασε: `https://<service>.onrender.com/ready`
    → πρέπει να επιστρέφει `{"status":"ready",...}`.
 
