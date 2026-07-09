@@ -97,6 +97,19 @@ class Settings(BaseSettings):
 
     internal_api_key: str = Field(default=os.getenv("INTERNAL_API_KEY", "change-this-for-internal-admin-endpoints"))
 
+    anthropic_api_key: str | None = Field(default=os.getenv("ANTHROPIC_API_KEY", _yaml_config.get("ai", {}).get("api_key")))
+    anthropic_model: str = Field(default=os.getenv("ANTHROPIC_MODEL", _yaml_config.get("ai", {}).get("model", "claude-opus-4-8")))
+    anthropic_max_tokens: int = Field(default=int(os.getenv("ANTHROPIC_MAX_TOKENS", _yaml_config.get("ai", {}).get("max_tokens", 1024))), gt=0)
+    anthropic_timeout_seconds: float = Field(
+        default=float(
+            os.getenv(
+                "ANTHROPIC_TIMEOUT_SECONDS",
+                _yaml_config.get("ai", {}).get("timeout_seconds", 60.0),
+            )
+        ),
+        gt=0,
+    )
+
     @field_validator("environment", "chat_rate_limit_backend")
     @classmethod
     def normalize_lower_text(cls, value: str) -> str:

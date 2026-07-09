@@ -24,6 +24,12 @@ cors:
     - "POST"
     - "OPTIONS"
 
+ai:
+  # api_key: set ANTHROPIC_API_KEY in .env instead of committing it here.
+  model: "claude-opus-4-8"
+  max_tokens: 1024
+  timeout_seconds: 60.0
+
 chat:
   history_limit: 20
   max_user_message_chars: 1000

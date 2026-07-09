@@ -14,6 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.config import settings
 from api.schemas.chat import ChatMessageResponse, ChatRequest, ChatResponse, MenuItemResponse
+from api.services.llm_service import LlmUnavailableError, get_llm_chat_service
 from api.services.menu_service import MenuCandidate, MenuService
 
 logger = logging.getLogger(__name__)
@@ -154,6 +155,105 @@ OVERVIEW_PATTERNS = (
 )
 
 RECOMMENDATION_TERMS = {"προτεινεις", "προτεινε", "recommend", "suggest", "θελω", "want"}
+
+# Κείμενα του deterministic fallback ανά γλώσσα (όταν το LLM δεν είναι διαθέσιμο).
+FALLBACK_TEXTS: dict[str, dict[str, str]] = {
+    "el": {
+        "no_match": (
+            "Μπορώ να βοηθήσω με sushi, bao, noodles, burgers, cocktails ή shisha. "
+            "Πες μου αν θέλεις κάτι καυτερό, vegan, με γαρίδα, με κοτόπουλο ή κάτι γλυκό."
+        ),
+        "suggest": "Σου προτείνω το {name} ({price:.2f}€). {description}",
+        "also": " Επίσης ταιριάζουν: {names}.",
+        "detail": "Το {name} ({price:.2f}€) περιέχει: {description}.",
+        "detail_generic": (
+            "Για το {name} ({price:.2f}€), το μενού γράφει: {description}. "
+            "δεν έχω αναλυτικά συστατικά για αυτό το item, οπότε δεν θα τα επινοήσω."
+        ),
+        "overview_intro": "Στα ποτά υπάρχουν οι εξής επιλογές: ",
+        "overview_sample": "Ενδεικτικά",
+        "overview_empty": "Δεν βρήκα διαθέσιμες επιλογές σε αυτή την κατηγορία.",
+    },
+    "en": {
+        "no_match": (
+            "I can help with sushi, bao, noodles, burgers, cocktails or shisha. "
+            "Tell me if you'd like something spicy, vegan, with shrimp, with chicken or something sweet."
+        ),
+        "suggest": "I recommend the {name} ({price:.2f}€). {description}",
+        "also": " These also match: {names}.",
+        "detail": "The {name} ({price:.2f}€) contains: {description}.",
+        "detail_generic": (
+            "For the {name} ({price:.2f}€), the menu says: {description}. "
+            "I don't have detailed ingredients for this item, so I won't make them up."
+        ),
+        "overview_intro": "Here are the drink options: ",
+        "overview_sample": "For example",
+        "overview_empty": "I couldn't find available options in that category.",
+    },
+    "de": {
+        "no_match": (
+            "Ich kann mit Sushi, Bao, Noodles, Burgern, Cocktails oder Shisha helfen. "
+            "Sagen Sie mir, ob Sie etwas Scharfes, Veganes, mit Garnelen, mit Hähnchen oder etwas Süßes möchten."
+        ),
+        "suggest": "Ich empfehle {name} ({price:.2f}€). {description}",
+        "also": " Ebenfalls passend: {names}.",
+        "detail": "{name} ({price:.2f}€) enthält: {description}.",
+        "detail_generic": (
+            "Zu {name} ({price:.2f}€) steht im Menü: {description}. "
+            "Detaillierte Zutaten habe ich für diesen Artikel nicht, also erfinde ich keine."
+        ),
+        "overview_intro": "Bei den Getränken gibt es folgende Optionen: ",
+        "overview_sample": "Zum Beispiel",
+        "overview_empty": "Ich habe in dieser Kategorie keine verfügbaren Optionen gefunden.",
+    },
+    "it": {
+        "no_match": (
+            "Posso aiutarti con sushi, bao, noodles, burger, cocktail o shisha. "
+            "Dimmi se preferisci qualcosa di piccante, vegano, con gamberi, con pollo o qualcosa di dolce."
+        ),
+        "suggest": "Ti consiglio {name} ({price:.2f}€). {description}",
+        "also": " Si abbinano anche: {names}.",
+        "detail": "{name} ({price:.2f}€) contiene: {description}.",
+        "detail_generic": (
+            "Per {name} ({price:.2f}€), il menu dice: {description}. "
+            "Non ho gli ingredienti dettagliati per questo articolo, quindi non li inventerò."
+        ),
+        "overview_intro": "Per le bevande ci sono queste opzioni: ",
+        "overview_sample": "Ad esempio",
+        "overview_empty": "Non ho trovato opzioni disponibili in questa categoria.",
+    },
+    "sv": {
+        "no_match": (
+            "Jag kan hjälpa till med sushi, bao, noodles, burgare, cocktails eller shisha. "
+            "Säg till om du vill ha något kryddigt, veganskt, med räkor, med kyckling eller något sött."
+        ),
+        "suggest": "Jag rekommenderar {name} ({price:.2f}€). {description}",
+        "also": " Dessa passar också: {names}.",
+        "detail": "{name} ({price:.2f}€) innehåller: {description}.",
+        "detail_generic": (
+            "För {name} ({price:.2f}€) säger menyn: {description}. "
+            "Jag har inga detaljerade ingredienser för denna rätt, så jag hittar inte på några."
+        ),
+        "overview_intro": "Bland dryckerna finns följande alternativ: ",
+        "overview_sample": "Till exempel",
+        "overview_empty": "Jag hittade inga tillgängliga alternativ i den kategorin.",
+    },
+}
+
+
+def fallback_texts(language_code: str) -> dict[str, str]:
+    """Return fallback reply templates for a guest language.
+
+    Args:
+        language_code: Guest language code.
+
+    Returns:
+        dict[str, str]: Reply templates, defaulting to Greek.
+
+    Raises:
+        None.
+    """
+    return FALLBACK_TEXTS.get(language_code, FALLBACK_TEXTS["el"])
 
 
 @dataclass(frozen=True)
@@ -399,11 +499,12 @@ def find_item_detail_match(user_message: str, menu_items: list[MenuCandidate]) -
     return sorted(matches, key=lambda item: (-len(item.name), item.name))[0]
 
 
-def build_item_detail_reply(item: MenuCandidate) -> str:
+def build_item_detail_reply(item: MenuCandidate, language_code: str = "el") -> str:
     """Build a factual item detail reply without inventing missing ingredients.
 
     Args:
         item: Matched menu item.
+        language_code: Guest language code.
 
     Returns:
         str: Assistant reply.
@@ -411,6 +512,7 @@ def build_item_detail_reply(item: MenuCandidate) -> str:
     Raises:
         None.
     """
+    texts = fallback_texts(language_code)
     normalized_name = normalize_text(item.name)
     normalized_description = normalize_text(item.description)
     generic_descriptions = {
@@ -419,20 +521,21 @@ def build_item_detail_reply(item: MenuCandidate) -> str:
         f"{normalized_name} selection",
         f"classic {normalized_name} selection",
     }
-    if normalized_description in generic_descriptions:
-        return (
-            f"Για το {item.name} ({item.price:.2f}€), το μενού γράφει: {item.description}. "
-            "δεν έχω αναλυτικά συστατικά για αυτό το item, οπότε δεν θα τα επινοήσω."
-        )
-    return f"Το {item.name} ({item.price:.2f}€) περιέχει: {item.description}."
+    template = texts["detail_generic"] if normalized_description in generic_descriptions else texts["detail"]
+    return template.format(name=item.name, price=item.price, description=item.description)
 
 
-def build_category_overview_reply(groups: set[str], menu_items: list[MenuCandidate]) -> str:
+def build_category_overview_reply(
+    groups: set[str],
+    menu_items: list[MenuCandidate],
+    language_code: str = "el",
+) -> str:
     """Build a category overview for drinks/cocktails/wines style questions.
 
     Args:
         groups: Requested high-level group ids.
         menu_items: Available menu candidates.
+        language_code: Guest language code.
 
     Returns:
         str: Assistant reply with category names and sample items.
@@ -440,6 +543,7 @@ def build_category_overview_reply(groups: set[str], menu_items: list[MenuCandida
     Raises:
         None.
     """
+    texts = fallback_texts(language_code)
     lines = []
     for group in ("cocktails", "drinks", "wines", "shisha"):
         if group not in groups:
@@ -449,20 +553,26 @@ def build_category_overview_reply(groups: set[str], menu_items: list[MenuCandida
             continue
         categories = sorted({item.category for item in grouped_items})
         sample_names = ", ".join(item.name for item in grouped_items[:3])
-        lines.append(f"{GROUP_LABELS[group]}: {', '.join(categories)}. Ενδεικτικά: {sample_names}.")
+        lines.append(f"{GROUP_LABELS[group]}: {', '.join(categories)}. {texts['overview_sample']}: {sample_names}.")
 
     if not lines:
-        return "Δεν βρήκα διαθέσιμες επιλογές σε αυτή την κατηγορία."
-    return "Στα ποτά υπάρχουν οι εξής επιλογές: " + " ".join(lines)
+        return texts["overview_empty"]
+    return texts["overview_intro"] + " ".join(lines)
 
 
-def answer_menu_query(user_message: str, menu_items: list[MenuCandidate], limit: int = 3) -> ChatAnswer:
+def answer_menu_query(
+    user_message: str,
+    menu_items: list[MenuCandidate],
+    limit: int = 3,
+    language_code: str = "el",
+) -> ChatAnswer:
     """Answer a menu query using deterministic intent handling.
 
     Args:
         user_message: Raw guest message.
         menu_items: Available menu candidates.
         limit: Maximum recommendation count.
+        language_code: Guest language code.
 
     Returns:
         ChatAnswer: Intent, assistant reply and recommended items.
@@ -475,7 +585,7 @@ def answer_menu_query(user_message: str, menu_items: list[MenuCandidate], limit:
         if item is not None:
             return ChatAnswer(
                 intent="item_detail",
-                reply=build_item_detail_reply(item),
+                reply=build_item_detail_reply(item, language_code=language_code),
                 recommendations=[item],
             )
 
@@ -483,24 +593,29 @@ def answer_menu_query(user_message: str, menu_items: list[MenuCandidate], limit:
     if groups and is_overview_question(user_message):
         return ChatAnswer(
             intent="category_overview",
-            reply=build_category_overview_reply(groups, menu_items),
+            reply=build_category_overview_reply(groups, menu_items, language_code=language_code),
             recommendations=[],
         )
 
     recommendations = choose_recommendations(user_message, menu_items, limit=limit)
     return ChatAnswer(
         intent="recommendation",
-        reply=build_assistant_reply(user_message, recommendations),
+        reply=build_assistant_reply(user_message, recommendations, language_code=language_code),
         recommendations=recommendations,
     )
 
 
-def build_assistant_reply(user_message: str, recommendations: list[MenuCandidate]) -> str:
-    """Build a menu-aware assistant reply for the MVP.
+def build_assistant_reply(
+    user_message: str,
+    recommendations: list[MenuCandidate],
+    language_code: str = "el",
+) -> str:
+    """Build a menu-aware assistant reply for the deterministic fallback.
 
     Args:
         user_message: Original user message.
         recommendations: Ranked menu recommendations.
+        language_code: Guest language code.
 
     Returns:
         str: Assistant message to store and return to the frontend.
@@ -508,21 +623,16 @@ def build_assistant_reply(user_message: str, recommendations: list[MenuCandidate
     Raises:
         None.
     """
+    texts = fallback_texts(language_code)
     if not recommendations:
-        return (
-            "Μπορώ να βοηθήσω με sushi, bao, noodles, burgers, cocktails ή shisha. "
-            "Πες μου αν θέλεις κάτι καυτερό, vegan, με γαρίδα, με κοτόπουλο ή κάτι γλυκό."
-        )
+        return texts["no_match"]
 
     first = recommendations[0]
     also = recommendations[1:]
-    reply = (
-        f"Σου προτείνω το {first.name} ({first.price:.2f}€). "
-        f"{first.description}"
-    )
+    reply = texts["suggest"].format(name=first.name, price=first.price, description=first.description)
     if also:
         names = ", ".join(item.name for item in also)
-        reply += f" Επίσης ταιριάζουν: {names}."
+        reply += texts["also"].format(names=names)
     return reply
 
 
@@ -550,9 +660,12 @@ class ChatService:
             session_id = await self._get_or_create_session(request.device_id, request.table_number)
             await self._insert_message(session_id, "user", request.user_message)
             menu_items = await self._fetch_menu_items(request.language_code)
-            answer = answer_menu_query(request.user_message, menu_items)
-            recommendations = answer.recommendations
-            assistant_content = answer.reply
+            history = await self._fetch_messages(session_id)
+            assistant_content, recommendations = await self._generate_answer(
+                request=request,
+                menu_items=menu_items,
+                history=history,
+            )
             assistant_message = await self._insert_message(session_id, "assistant", assistant_content)
             messages = await self._fetch_messages(session_id)
         except SQLAlchemyError:
@@ -580,6 +693,51 @@ class ChatService:
             messages=messages,
             recommended_items=[self._menu_response(item) for item in recommendations],
         )
+
+    async def _generate_answer(
+        self,
+        request: ChatRequest,
+        menu_items: list[MenuCandidate],
+        history: list[ChatMessageResponse],
+    ) -> tuple[str, list[MenuCandidate]]:
+        """Produce the assistant reply, preferring the LLM over keyword matching.
+
+        Args:
+            request: Validated chat request.
+            menu_items: Available menu candidates in the guest's language.
+            history: Recent conversation messages ending with the current user message.
+
+        Returns:
+            tuple[str, list[MenuCandidate]]: Reply text and recommended items.
+
+        Raises:
+            None. LLM failures fall back to the deterministic answer.
+        """
+        llm = get_llm_chat_service()
+        if llm.is_configured():
+            try:
+                llm_answer = await llm.answer(
+                    history=[(message.role, message.content) for message in history],
+                    menu_items=menu_items,
+                    language_code=request.language_code,
+                )
+            except LlmUnavailableError:
+                logger.exception("LLM answer failed; using deterministic fallback")
+            else:
+                items_by_id = {item.id: item for item in menu_items}
+                recommendations = [
+                    items_by_id[item_id]
+                    for item_id in llm_answer.recommended_item_ids
+                    if item_id in items_by_id
+                ]
+                return llm_answer.reply, recommendations
+
+        answer = answer_menu_query(
+            request.user_message,
+            menu_items,
+            language_code=request.language_code,
+        )
+        return answer.reply, answer.recommendations
 
     async def _get_or_create_session(self, device_id: str, table_number: int) -> UUID:
         result = await self.session.execute(

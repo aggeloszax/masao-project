@@ -1,0 +1,44 @@
+# Render Blueprint — Masao backend (FastAPI) + Redis for production rate limiting.
+# Deploy: Render dashboard -> New -> Blueprint -> point at this repository.
+services:
+  - type: web
+    name: masao-backend
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /ready
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: ENVIRONMENT
+        value: production
+      - key: DATABASE_URL
+        sync: false # Supabase pooled URL (postgresql+asyncpg://...) — set in dashboard
+      - key: ANTHROPIC_API_KEY
+        sync: false # set in dashboard, never in git
+      - key: ANTHROPIC_MODEL
+        value: claude-haiku-4-5
+      - key: INTERNAL_API_KEY
+        generateValue: true
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false # e.g. https://masao.vercel.app — set after the Vercel deploy
+      - key: CORS_ALLOWED_METHODS
+        value: GET,POST,OPTIONS
+      - key: RATE_LIMIT_BACKEND
+        value: redis
+      - key: REDIS_KEY_PREFIX
+        value: masao
+      - key: RATE_LIMIT_FAIL_CLOSED
+        value: "true"
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: masao-redis
+          property: connectionString
+
+  - type: keyvalue
+    name: masao-redis
+    plan: free
+    ipAllowList: [] # internal connections only

@@ -9,7 +9,7 @@
 
 ### 1. Τι κάνει αυτό το εργαλείο (Plain Greek)
 
-Το backend κρατάει το μενού του Masao, ανοίγει ξεχωριστή συνομιλία για κάθε κινητό και τραπέζι, και αποθηκεύει όλα τα μηνύματα της συνομιλίας. Όταν ο πελάτης γράφει τι θέλει, το API ψάχνει τα διαθέσιμα πιάτα και επιστρέφει μια πρόταση σε μορφή που το Next.js frontend μπορεί να εμφανίσει άμεσα σαν chat bubbles. Η βάση είναι σχεδιασμένη για Supabase/PostgreSQL και για πολλούς πελάτες που σκανάρουν το ίδιο QR τραπεζιού από διαφορετικά κινητά.
+Το backend κρατάει το μενού του Masao, ανοίγει ξεχωριστή συνομιλία για κάθε κινητό και τραπέζι, και αποθηκεύει όλα τα μηνύματα της συνομιλίας. Όταν ο πελάτης γράφει τι θέλει, ο AI σερβιτόρος (Claude API) απαντά σαν άνθρωπος «μαθημένος» στο μενού: όλο το μενού (στη γλώσσα του πελάτη) μπαίνει στο system prompt, μαζί με το ιστορικό της συνομιλίας, και το μοντέλο επιστρέφει απάντηση + προτεινόμενα πιάτα (ids) που το Next.js frontend εμφανίζει σαν chat bubbles και κάρτες. Αν δεν υπάρχει `ANTHROPIC_API_KEY` ή το API αποτύχει, το σύστημα πέφτει αυτόματα στο ντετερμινιστικό keyword-matching fallback (πλέον πολυγλωσσικό), ώστε το chat να μη μένει ποτέ χωρίς απάντηση. Η βάση είναι σχεδιασμένη για Supabase/PostgreSQL και για πολλούς πελάτες που σκανάρουν το ίδιο QR τραπεζιού από διαφορετικά κινητά.
 
 ---
 
@@ -28,7 +28,8 @@ api/services/chat_service.py
      ├── get/create active chat_sessions row
      ├── insert user chat_messages row
      ├── fetch available menu_items + menu_categories
-     ├── classify menu intent + choose deterministic answer
+     ├── ask Claude (menu in system prompt + chat history) via api/services/llm_service.py
+     ├── on LLM failure/missing key: deterministic keyword fallback
      └── insert assistant chat_messages row
      │
      ▼
@@ -60,6 +61,10 @@ pip install -r requirements.txt
 ```text
 DATABASE_URL=          # PostgreSQL/Supabase async SQLAlchemy URL
 INTERNAL_API_KEY=      # API key reserved for future internal/admin endpoints
+ANTHROPIC_API_KEY=     # Anthropic API key — enables the Claude-powered AI waiter
+ANTHROPIC_MODEL=       # Optional, defaults to claude-opus-4-8
+ANTHROPIC_MAX_TOKENS=  # Optional, defaults to 1024
+ANTHROPIC_TIMEOUT_SECONDS= # Optional, defaults to 30
 ENVIRONMENT=           # development, staging, or production
 CORS_ALLOWED_ORIGINS=  # Comma-separated Render/frontend origins allowed by CORS
 CORS_ALLOWED_METHODS=  # Comma-separated methods, usually GET,POST,OPTIONS

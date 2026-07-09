@@ -7,6 +7,7 @@ import {
   getOrCreateDeviceId,
   getTableNumberFromUrl,
   sendChatMessage,
+  type ChatApiMenuItem,
   type ChatApiMessage,
 } from "@/lib/chat-api";
 import type { Lang } from "@/i18n/config";
@@ -31,10 +32,19 @@ const RATE_LIMIT_COPY: Record<Lang, string> = {
   sv: "Vänta en stund innan du skickar ett nytt meddelande.",
 };
 
+const SUGGESTIONS_COPY: Record<Lang, string> = {
+  el: "Προτάσεις από το μενού",
+  en: "Suggestions from the menu",
+  de: "Vorschläge aus der Karte",
+  it: "Suggerimenti dal menu",
+  sv: "Förslag från menyn",
+};
+
 export function Chat() {
   const { lang, t } = useLanguage();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [recommendedItems, setRecommendedItems] = useState<ChatApiMenuItem[]>([]);
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
   const [deviceId, setDeviceId] = useState(() =>
@@ -65,6 +75,7 @@ export function Chat() {
 
     const userMsg: Message = { id: `local-${nextId.current++}`, role: "user", text };
     setMessages((prev) => [...prev, userMsg]);
+    setRecommendedItems([]);
     setInput("");
     setTyping(true);
 
@@ -77,6 +88,7 @@ export function Chat() {
         languageCode: lang,
       });
       setMessages(response.messages.map(mapApiMessage));
+      setRecommendedItems(response.recommended_items);
     } catch (error) {
       const text =
         error instanceof ChatApiError && error.status === 429
@@ -137,6 +149,9 @@ export function Chat() {
               {messages.map((m) => (
                 <Bubble key={m.id} role={m.role} text={m.text} />
               ))}
+              {!typing && recommendedItems.length > 0 && (
+                <RecommendedItems items={recommendedItems} title={SUGGESTIONS_COPY[lang]} />
+              )}
               {typing && <TypingIndicator typingLabel={t.chatTyping} />}
             </div>
 
@@ -189,6 +204,30 @@ function Bubble({ role, text }: { role: "user" | "bot"; text: string }) {
       >
         {text}
       </p>
+    </div>
+  );
+}
+
+function RecommendedItems({ items, title }: { items: ChatApiMenuItem[]; title: string }) {
+  return (
+    <div className="space-y-2">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent-soft">
+        {title}
+      </p>
+      {items.map((item) => (
+        <div
+          key={item.id}
+          className="rounded-2xl rounded-bl-sm border border-hairline bg-surface px-3.5 py-2.5"
+        >
+          <div className="flex items-baseline justify-between gap-3">
+            <p className="text-sm font-semibold text-foreground">{item.name}</p>
+            <p className="shrink-0 text-sm text-accent">{item.price.toFixed(2)}€</p>
+          </div>
+          {item.description && (
+            <p className="mt-0.5 text-xs leading-relaxed text-muted">{item.description}</p>
+          )}
+        </div>
+      ))}
     </div>
   );
 }
