@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Any
+from typing import Annotated, Any
 
 import yaml
 from dotenv import load_dotenv
 from pydantic import Field, field_validator, model_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
@@ -59,13 +59,14 @@ class Settings(BaseSettings):
     database_max_overflow: int = Field(default=_yaml_config.get("database", {}).get("max_overflow", 20))
     database_pool_timeout_seconds: int = Field(default=_yaml_config.get("database", {}).get("pool_timeout_seconds", 30))
 
-    cors_allowed_origins: list[str] = Field(
+    # NoDecode: τα env values είναι CSV, όχι JSON — τα αναλύει ο parse_csv_list validator.
+    cors_allowed_origins: Annotated[list[str], NoDecode] = Field(
         default=os.getenv(
             "CORS_ALLOWED_ORIGINS",
             _yaml_config.get("cors", {}).get("allowed_origins", []),
         )
     )
-    cors_allowed_methods: list[str] = Field(
+    cors_allowed_methods: Annotated[list[str], NoDecode] = Field(
         default=os.getenv(
             "CORS_ALLOWED_METHODS",
             _yaml_config.get("cors", {}).get("allowed_methods", ["GET", "POST", "OPTIONS"]),
