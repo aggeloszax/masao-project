@@ -38,7 +38,7 @@ export const UI: Record<Lang, UIStrings> = {
     chatLauncher: "Συνομιλία με τον σερβιτόρο",
     chatSubtitle: "Ο σερβιτόρος σας",
     chatGreeting:
-      "Καλώς ήρθατε στο Masao! Πείτε μου τι σας αρέσει — κάτι καυτερό, με γαρίδα, vegan; — και θα σας προτείνω κάτι.",
+      "Καλώς ήρθατε στο Masao! Είμαι ο ψηφιακός σας σερβιτόρος. Ρωτήστε με ό,τι θέλετε για το μενού, ή πείτε μου τι σας αρέσει και θα σας προτείνω κάτι.",
     chatPlaceholder: "Γράψτε ένα μήνυμα…",
     chatSend: "Αποστολή",
     chatClose: "Κλείσιμο",
@@ -53,7 +53,7 @@ export const UI: Record<Lang, UIStrings> = {
     chatLauncher: "Chat with AI Waiter",
     chatSubtitle: "Your waiter",
     chatGreeting:
-      "Welcome to Masao! Tell me what you fancy — something spicy, with shrimp, vegan? — and I'll suggest something.",
+      "Welcome to Masao! I'm your digital waiter. Ask me anything about the menu, or tell me what you're in the mood for and I'll suggest something.",
     chatPlaceholder: "Type a message…",
     chatSend: "Send",
     chatClose: "Close",
@@ -68,7 +68,7 @@ export const UI: Record<Lang, UIStrings> = {
     chatLauncher: "Mit dem Kellner chatten",
     chatSubtitle: "Ihr Kellner",
     chatGreeting:
-      "Willkommen bei Masao! Sagen Sie mir, worauf Sie Lust haben — etwas Scharfes, mit Garnelen, vegan? — und ich empfehle Ihnen etwas.",
+      "Willkommen bei Masao! Ich bin Ihr digitaler Kellner. Fragen Sie mich alles zur Karte, oder sagen Sie mir, worauf Sie Lust haben, und ich empfehle Ihnen etwas.",
     chatPlaceholder: "Nachricht schreiben…",
     chatSend: "Senden",
     chatClose: "Schließen",
@@ -83,7 +83,7 @@ export const UI: Record<Lang, UIStrings> = {
     chatLauncher: "Chatta con il cameriere",
     chatSubtitle: "Il vostro cameriere",
     chatGreeting:
-      "Benvenuti da Masao! Ditemi cosa vi piace — qualcosa di piccante, con gamberi, vegano? — e vi consiglierò qualcosa.",
+      "Benvenuti da Masao! Sono il vostro cameriere digitale. Chiedetemi qualsiasi cosa sul menu, oppure ditemi cosa vi va e vi consiglierò qualcosa.",
     chatPlaceholder: "Scrivi un messaggio…",
     chatSend: "Invia",
     chatClose: "Chiudi",
@@ -98,7 +98,7 @@ export const UI: Record<Lang, UIStrings> = {
     chatLauncher: "Chatta med kyparen",
     chatSubtitle: "Din kypare",
     chatGreeting:
-      "Välkommen till Masao! Berätta vad du är sugen på — något starkt, med räkor, veganskt? — så föreslår jag något.",
+      "Välkommen till Masao! Jag är din digitala kypare. Fråga mig vad som helst om menyn, eller berätta vad du är sugen på så föreslår jag något.",
     chatPlaceholder: "Skriv ett meddelande…",
     chatSend: "Skicka",
     chatClose: "Stäng",
