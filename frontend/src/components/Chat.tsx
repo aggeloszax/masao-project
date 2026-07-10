@@ -110,9 +110,10 @@ export function Chat() {
             type="button"
             onClick={() => setOpen(true)}
             aria-label={t.chatLauncher}
-            className="pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full bg-accent text-white shadow-lg transition-transform active:scale-95"
+            className="pointer-events-auto flex h-14 items-center gap-2.5 rounded-full bg-accent px-5 text-white shadow-lg transition-transform active:scale-95"
           >
             <ChatIcon />
+            <span className="text-sm font-semibold tracking-wide">{t.chatBadge}</span>
           </button>
         )}
       </div>
@@ -165,7 +166,7 @@ export function Chat() {
                 onChange={(e) => setInput(e.target.value)}
                 placeholder={t.chatPlaceholder}
                 aria-label={t.chatPlaceholder}
-                className="flex-1 rounded-full border border-hairline bg-surface px-4 py-2.5 text-sm text-foreground outline-none placeholder:text-muted focus:border-accent"
+                className="flex-1 rounded-full border border-hairline bg-surface px-4 py-2.5 text-base text-foreground outline-none placeholder:text-muted focus:border-accent"
               />
               <button
                 type="submit"

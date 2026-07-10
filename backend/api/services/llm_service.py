@@ -65,7 +65,10 @@ def build_persona_prompt(language_code: str) -> str:
         "a restaurant serving sushi, bao, noodles, burgers, poke bowls, desserts, "
         "cocktails, wines, soft drinks and shisha.\n"
         "Behaviour rules:\n"
-        f"- Always reply in {language_name} (language code: {language_code}).\n"
+        f"- Always reply in {language_name} (language code: {language_code}). "
+        f"Write natural, idiomatic {language_name} exactly as a native-speaker waiter "
+        "would talk: correct grammar, correct articles and genders for dish names, "
+        "everyday phrasing. Never translate literally from English.\n"
         "- Speak like a warm, experienced waiter who knows the menu by heart. "
         "Be natural and human, not robotic. Keep replies short: 1-4 sentences.\n"
         "- Plain text only: no markdown, no asterisks, no bullet lists. "
@@ -86,6 +89,9 @@ def build_persona_prompt(language_code: str) -> str:
         "reason why it pairs well (and vice versa: suggest food to a drink order). "
         "A single natural suggestion, never pushy. If the guest declines or ignores "
         "it, drop it and don't suggest again.\n"
+        "- You can recommend and answer questions, but you CANNOT place orders, "
+        "reserve tables or call anyone. When the guest is ready to order, warmly tell "
+        "them to signal the staff. Never offer to add items to an order.\n"
         "- If the guest asks something unrelated to the restaurant, answer briefly and "
         "politely steer the conversation back to the menu.\n"
     )
@@ -185,6 +191,8 @@ class LlmChatService:
             response = await self._get_client().messages.create(
                 model=settings.anthropic_model,
                 max_tokens=settings.anthropic_max_tokens,
+                # Χωρίς thinking: οι απαντήσεις μενού είναι απλές και η ταχύτητα μετράει.
+                thinking={"type": "disabled"},
                 system=[
                     {"type": "text", "text": build_persona_prompt(language_code)},
                     {

@@ -20,6 +20,7 @@ type UIStrings = {
   tagline: string;
   selectLanguage: string;
   chatLauncher: string;
+  chatBadge: string;
   chatSubtitle: string;
   chatGreeting: string;
   chatPlaceholder: string;
@@ -33,10 +34,11 @@ type UIStrings = {
 
 export const UI: Record<Lang, UIStrings> = {
   el: {
-    tagline: "Λάουντζ Ασιατικής Κουζίνας",
+    tagline: "Asian Fusion Lounge",
     selectLanguage: "Επιλογή γλώσσας",
     chatLauncher: "Συνομιλία με τον σερβιτόρο",
-    chatSubtitle: "Ο σερβιτόρος σας",
+    chatBadge: "AI Σερβιτόρος",
+    chatSubtitle: "Ο AI σερβιτόρος σας",
     chatGreeting:
       "Καλώς ήρθατε στο Masao! Είμαι ο ψηφιακός σας σερβιτόρος. Ρωτήστε με ό,τι θέλετε για το μενού, ή πείτε μου τι σας αρέσει και θα σας προτείνω κάτι.",
     chatPlaceholder: "Γράψτε ένα μήνυμα…",
@@ -51,7 +53,8 @@ export const UI: Record<Lang, UIStrings> = {
     tagline: "Asian Fusion Lounge",
     selectLanguage: "Select language",
     chatLauncher: "Chat with AI Waiter",
-    chatSubtitle: "Your waiter",
+    chatBadge: "AI Waiter",
+    chatSubtitle: "Your AI waiter",
     chatGreeting:
       "Welcome to Masao! I'm your digital waiter. Ask me anything about the menu, or tell me what you're in the mood for and I'll suggest something.",
     chatPlaceholder: "Type a message…",
@@ -66,7 +69,8 @@ export const UI: Record<Lang, UIStrings> = {
     tagline: "Asian Fusion Lounge",
     selectLanguage: "Sprache wählen",
     chatLauncher: "Mit dem Kellner chatten",
-    chatSubtitle: "Ihr Kellner",
+    chatBadge: "KI-Kellner",
+    chatSubtitle: "Ihr KI-Kellner",
     chatGreeting:
       "Willkommen bei Masao! Ich bin Ihr digitaler Kellner. Fragen Sie mich alles zur Karte, oder sagen Sie mir, worauf Sie Lust haben, und ich empfehle Ihnen etwas.",
     chatPlaceholder: "Nachricht schreiben…",
@@ -78,10 +82,11 @@ export const UI: Record<Lang, UIStrings> = {
     footer: (n) => `${n} Gerichte & Getränke · Masao`,
   },
   it: {
-    tagline: "Lounge Fusion Asiatica",
+    tagline: "Asian Fusion Lounge",
     selectLanguage: "Seleziona lingua",
     chatLauncher: "Chatta con il cameriere",
-    chatSubtitle: "Il vostro cameriere",
+    chatBadge: "Cameriere AI",
+    chatSubtitle: "Il vostro cameriere AI",
     chatGreeting:
       "Benvenuti da Masao! Sono il vostro cameriere digitale. Chiedetemi qualsiasi cosa sul menu, oppure ditemi cosa vi va e vi consiglierò qualcosa.",
     chatPlaceholder: "Scrivi un messaggio…",
@@ -93,10 +98,11 @@ export const UI: Record<Lang, UIStrings> = {
     footer: (n) => `${n} piatti e bevande · Masao`,
   },
   sv: {
-    tagline: "Asiatisk Fusion Lounge",
+    tagline: "Asian Fusion Lounge",
     selectLanguage: "Välj språk",
     chatLauncher: "Chatta med kyparen",
-    chatSubtitle: "Din kypare",
+    chatBadge: "AI-kypare",
+    chatSubtitle: "Din AI-kypare",
     chatGreeting:
       "Välkommen till Masao! Jag är din digitala kypare. Fråga mig vad som helst om menyn, eller berätta vad du är sugen på så föreslår jag något.",
     chatPlaceholder: "Skriv ett meddelande…",
