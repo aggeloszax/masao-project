@@ -16,9 +16,12 @@ type MenuResult = {
   status: "ready" | "fallback";
 };
 
+const ALL_GROUPS = "all";
+
 export function MenuApp() {
   const { lang, rtl, t } = useLanguage();
   const [menuResult, setMenuResult] = useState<MenuResult | null>(null);
+  const [selectedGroup, setSelectedGroup] = useState(ALL_GROUPS);
 
   useEffect(() => {
     let cancelled = false;
@@ -51,10 +54,25 @@ export function MenuApp() {
     [menuGroups],
   );
 
-  const tabs = menuGroups.map((group) => ({
-    id: group.id,
-    label: group.label || GROUP_LABELS[group.id]?.[lang] || group.id,
-  }));
+  const tabs = [
+    { id: ALL_GROUPS, label: t.allCategories },
+    ...menuGroups.map((group) => ({
+      id: group.id,
+      label: group.label || GROUP_LABELS[group.id]?.[lang] || group.id,
+    })),
+  ];
+
+  // Εμφάνιση μόνο της επιλεγμένης κατηγορίας, ή όλων με το tab «Όλα».
+  const filteredGroups = menuGroups.filter((group) => group.id === selectedGroup);
+  const visibleGroups =
+    selectedGroup === ALL_GROUPS || filteredGroups.length === 0
+      ? menuGroups
+      : filteredGroups;
+
+  function handleSelectGroup(id: string) {
+    setSelectedGroup(id);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 
   return (
     <div
@@ -84,10 +102,10 @@ export function MenuApp() {
         <p className="px-6 pb-3 text-center text-xs text-muted">{t.menuFallback}</p>
       )}
 
-      <MenuNav tabs={tabs} />
+      <MenuNav tabs={tabs} selected={selectedGroup} onSelect={handleSelectGroup} />
 
       <main className="px-6 pb-20">
-        {menuGroups.map((group) => (
+        {visibleGroups.map((group) => (
           <section key={group.id} id={group.id} className="scroll-mt-16 pt-10">
             {/* Group header */}
             <div className="flex items-center gap-3">
