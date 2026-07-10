@@ -3570,7 +3570,7 @@
     "id": "WW001",
     "name": "Oinos Grigoriadi",
     "price": 32,
-    "description": "Sauvignon Blanc, Assyrtiko — glass: 7.00",
+    "description": "Sauvignon Blanc, Assyrtiko · glass: 7.00",
     "category": "White Wines",
     "tags": [
       "δροσερό",
@@ -3582,22 +3582,22 @@
     "translations": {
       "en": {
         "name": "Oinos Grigoriadi",
-        "description": "Sauvignon Blanc, Assyrtiko — glass: €7",
+        "description": "Sauvignon Blanc, Assyrtiko · glass: €7",
         "category": "White Wines"
       },
       "de": {
         "name": "Oinos Grigoriadi",
-        "description": "Sauvignon Blanc, Assyrtiko — Glas: 7€",
+        "description": "Sauvignon Blanc, Assyrtiko · Glas: 7€",
         "category": "Weißweine"
       },
       "it": {
         "name": "Oinos Grigoriadi",
-        "description": "Sauvignon Blanc, Assyrtiko — calice: 7€",
+        "description": "Sauvignon Blanc, Assyrtiko · calice: 7€",
         "category": "Vini Bianchi"
       },
       "sv": {
         "name": "Oinos Grigoriadi",
-        "description": "Sauvignon Blanc, Assyrtiko — glas: 7€",
+        "description": "Sauvignon Blanc, Assyrtiko · glas: 7€",
         "category": "Vita Viner"
       }
     }
@@ -3606,7 +3606,7 @@
     "id": "WW002",
     "name": "Monolithos | Bairaktaris Winery",
     "price": 30,
-    "description": "Malagouzia, Assyrtiko, Muscat — glass: 7.00",
+    "description": "Malagouzia, Assyrtiko, Muscat · glass: 7.00",
     "category": "White Wines",
     "tags": [
       "αρωματικό",
@@ -3617,22 +3617,22 @@
     "translations": {
       "en": {
         "name": "Monolithos | Bairaktaris Winery",
-        "description": "Malagouzia, Assyrtiko, Muscat — glass: €7",
+        "description": "Malagouzia, Assyrtiko, Muscat · glass: €7",
         "category": "White Wines"
       },
       "de": {
         "name": "Monolithos | Bairaktaris Winery",
-        "description": "Malagouzia, Assyrtiko, Muskat — Glas: 7€",
+        "description": "Malagouzia, Assyrtiko, Muskat · Glas: 7€",
         "category": "Weißweine"
       },
       "it": {
         "name": "Monolithos | Bairaktaris Winery",
-        "description": "Malagouzia, Assyrtiko, Moscato — calice: 7€",
+        "description": "Malagouzia, Assyrtiko, Moscato · calice: 7€",
         "category": "Vini Bianchi"
       },
       "sv": {
         "name": "Monolithos | Bairaktaris Winery",
-        "description": "Malagouzia, Assyrtiko, Muscat — glas: 7€",
+        "description": "Malagouzia, Assyrtiko, Muscat · glas: 7€",
         "category": "Vita Viner"
       }
     }
@@ -3955,7 +3955,7 @@
     "id": "RO001",
     "name": "4-6H | Gaia Wines",
     "price": 30,
-    "description": "Agiorgitiko — glass: 7.00",
+    "description": "Agiorgitiko · glass: 7.00",
     "category": "Rose Wines",
     "tags": [
       "φρουτώδες",
@@ -3966,22 +3966,22 @@
     "translations": {
       "en": {
         "name": "4-6H | Gaia Wines",
-        "description": "Agiorgitiko rosé — glass: €7",
+        "description": "Agiorgitiko rosé · glass: €7",
         "category": "Rosé Wines"
       },
       "de": {
         "name": "4-6H | Gaia Wines",
-        "description": "Agiorgitiko Rosé — Glas: 7€",
+        "description": "Agiorgitiko Rosé · Glas: 7€",
         "category": "Roséweine"
       },
       "it": {
         "name": "4-6H | Gaia Wines",
-        "description": "Agiorgitiko rosato — calice: 7€",
+        "description": "Agiorgitiko rosato · calice: 7€",
         "category": "Vini Rosati"
       },
       "sv": {
         "name": "4-6H | Gaia Wines",
-        "description": "Agiorgitiko rosé — glas: 7€",
+        "description": "Agiorgitiko rosé · glas: 7€",
         "category": "Rosévin"
       }
     }
@@ -3990,7 +3990,7 @@
     "id": "RO002",
     "name": "Joker Semi Dry | Liappis Boutique Winery",
     "price": 30,
-    "description": "Muscat, Syrah — glass: 7.00",
+    "description": "Muscat, Syrah · glass: 7.00",
     "category": "Rose Wines",
     "tags": [
       "ημίξηρο",
@@ -4001,22 +4001,22 @@
     "translations": {
       "en": {
         "name": "Joker Semi Dry | Liappis Boutique Winery",
-        "description": "Muscat, Syrah rosé — glass: €7",
+        "description": "Muscat, Syrah rosé · glass: €7",
         "category": "Rosé Wines"
       },
       "de": {
         "name": "Joker Halbtrocken | Liappis Boutique Winery",
-        "description": "Muskat, Syrah Rosé — Glas: 7€",
+        "description": "Muskat, Syrah Rosé · Glas: 7€",
         "category": "Roséweine"
       },
       "it": {
         "name": "Joker Semi Dry | Liappis Boutique Winery",
-        "description": "Moscato, Syrah rosato — calice: 7€",
+        "description": "Moscato, Syrah rosato · calice: 7€",
         "category": "Vini Rosati"
       },
       "sv": {
         "name": "Joker Halvtorrt | Liappis Boutique Winery",
-        "description": "Muscat, Syrah rosé — glas: 7€",
+        "description": "Muscat, Syrah rosé · glas: 7€",
         "category": "Rosévin"
       }
     }
@@ -4236,7 +4236,7 @@
     "id": "RE001",
     "name": "Kompsos | Karavitakis Winery",
     "price": 30,
-    "description": "Liatiko — glass: 7.00",
+    "description": "Liatiko · glass: 7.00",
     "category": "Red Wines",
     "tags": [
       "φρουτώδες",
@@ -4247,22 +4247,22 @@
     "translations": {
       "en": {
         "name": "Kompsos | Karavitakis Winery",
-        "description": "Liatiko red — glass: €7",
+        "description": "Liatiko red · glass: €7",
         "category": "Red Wines"
       },
       "de": {
         "name": "Kompsos | Karavitakis Winery",
-        "description": "Liatiko Rotwein — Glas: 7€",
+        "description": "Liatiko Rotwein · Glas: 7€",
         "category": "Rotweine"
       },
       "it": {
         "name": "Kompsos | Karavitakis Winery",
-        "description": "Liatiko rosso — calice: 7€",
+        "description": "Liatiko rosso · calice: 7€",
         "category": "Vini Rossi"
       },
       "sv": {
         "name": "Kompsos | Karavitakis Winery",
-        "description": "Liatiko rödvin — glas: 7€",
+        "description": "Liatiko rödvin · glas: 7€",
         "category": "Röda Viner"
       }
     }
@@ -4341,7 +4341,7 @@
     "id": "SP001",
     "name": "Martini Prosecco D.O.C",
     "price": 35,
-    "description": "Prosecco — glass: 8.00",
+    "description": "Prosecco · glass: 8.00",
     "category": "Champagne & Sparkling",
     "tags": [
       "αφρώδες",
@@ -4352,22 +4352,22 @@
     "translations": {
       "en": {
         "name": "Martini Prosecco D.O.C",
-        "description": "Prosecco — glass: €8",
+        "description": "Prosecco · glass: €8",
         "category": "Champagne & Sparkling"
       },
       "de": {
         "name": "Martini Prosecco D.O.C",
-        "description": "Prosecco — Glas: 8€",
+        "description": "Prosecco · Glas: 8€",
         "category": "Champagner & Sekt"
       },
       "it": {
         "name": "Martini Prosecco D.O.C",
-        "description": "Prosecco — calice: 8€",
+        "description": "Prosecco · calice: 8€",
         "category": "Champagne & Spumanti"
       },
       "sv": {
         "name": "Martini Prosecco D.O.C",
-        "description": "Prosecco — glas: 8€",
+        "description": "Prosecco · glas: 8€",
         "category": "Champagne & Mousserande"
       }
     }
@@ -4376,7 +4376,7 @@
     "id": "SP002",
     "name": "Martini Asti Semi Sweet",
     "price": 35,
-    "description": "Semi sweet sparkling — glass: 8.00",
+    "description": "Semi sweet sparkling · glass: 8.00",
     "category": "Champagne & Sparkling",
     "tags": [
       "αφρώδες",
@@ -4387,22 +4387,22 @@
     "translations": {
       "en": {
         "name": "Martini Asti Semi Sweet",
-        "description": "Semi-sweet sparkling wine — glass: €8",
+        "description": "Semi-sweet sparkling wine · glass: €8",
         "category": "Champagne & Sparkling"
       },
       "de": {
         "name": "Martini Asti Halbsüß",
-        "description": "Halbsüßer Schaumwein — Glas: 8€",
+        "description": "Halbsüßer Schaumwein · Glas: 8€",
         "category": "Champagner & Sekt"
       },
       "it": {
         "name": "Martini Asti Semidolce",
-        "description": "Spumante semidolce — calice: 8€",
+        "description": "Spumante semidolce · calice: 8€",
         "category": "Champagne & Spumanti"
       },
       "sv": {
         "name": "Martini Asti Halvsött",
-        "description": "Halvt sött mousserande vin — glas: 8€",
+        "description": "Halvt sött mousserande vin · glas: 8€",
         "category": "Champagne & Mousserande"
       }
     }
