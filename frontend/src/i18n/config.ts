@@ -19,7 +19,6 @@ export function isRtl(lang: Lang): boolean {
 type UIStrings = {
   tagline: string;
   selectLanguage: string;
-  allCategories: string;
   chatLauncher: string;
   chatBadge: string;
   chatSubtitle: string;
@@ -37,7 +36,6 @@ export const UI: Record<Lang, UIStrings> = {
   el: {
     tagline: "Asian Fusion Lounge",
     selectLanguage: "Επιλογή γλώσσας",
-    allCategories: "Όλα",
     chatLauncher: "Συνομιλία με τον σερβιτόρο",
     chatBadge: "AI Σερβιτόρος",
     chatSubtitle: "Ο AI σερβιτόρος σας",
@@ -54,7 +52,6 @@ export const UI: Record<Lang, UIStrings> = {
   en: {
     tagline: "Asian Fusion Lounge",
     selectLanguage: "Select language",
-    allCategories: "All",
     chatLauncher: "Chat with AI Waiter",
     chatBadge: "AI Waiter",
     chatSubtitle: "Your AI waiter",
@@ -71,7 +68,6 @@ export const UI: Record<Lang, UIStrings> = {
   de: {
     tagline: "Asian Fusion Lounge",
     selectLanguage: "Sprache wählen",
-    allCategories: "Alle",
     chatLauncher: "Mit dem Kellner chatten",
     chatBadge: "KI-Kellner",
     chatSubtitle: "Ihr KI-Kellner",
@@ -88,7 +84,6 @@ export const UI: Record<Lang, UIStrings> = {
   it: {
     tagline: "Asian Fusion Lounge",
     selectLanguage: "Seleziona lingua",
-    allCategories: "Tutti",
     chatLauncher: "Chatta con il cameriere",
     chatBadge: "Cameriere AI",
     chatSubtitle: "Il vostro cameriere AI",
@@ -105,7 +100,6 @@ export const UI: Record<Lang, UIStrings> = {
   sv: {
     tagline: "Asian Fusion Lounge",
     selectLanguage: "Välj språk",
-    allCategories: "Alla",
     chatLauncher: "Chatta med kyparen",
     chatBadge: "AI-kypare",
     chatSubtitle: "Din AI-kypare",

@@ -16,12 +16,10 @@ type MenuResult = {
   status: "ready" | "fallback";
 };
 
-const ALL_GROUPS = "all";
-
 export function MenuApp() {
   const { lang, rtl, t } = useLanguage();
   const [menuResult, setMenuResult] = useState<MenuResult | null>(null);
-  const [selectedGroup, setSelectedGroup] = useState(ALL_GROUPS);
+  const [selectedGroup, setSelectedGroup] = useState(staticMenuGroups[0]?.id ?? "");
 
   useEffect(() => {
     let cancelled = false;
@@ -54,20 +52,14 @@ export function MenuApp() {
     [menuGroups],
   );
 
-  const tabs = [
-    { id: ALL_GROUPS, label: t.allCategories },
-    ...menuGroups.map((group) => ({
-      id: group.id,
-      label: group.label || GROUP_LABELS[group.id]?.[lang] || group.id,
-    })),
-  ];
+  const tabs = menuGroups.map((group) => ({
+    id: group.id,
+    label: group.label || GROUP_LABELS[group.id]?.[lang] || group.id,
+  }));
 
-  // Εμφάνιση μόνο της επιλεγμένης κατηγορίας, ή όλων με το tab «Όλα».
+  // Εμφάνιση μόνο της επιλεγμένης κατηγορίας· fallback στην πρώτη αν λείπει.
   const filteredGroups = menuGroups.filter((group) => group.id === selectedGroup);
-  const visibleGroups =
-    selectedGroup === ALL_GROUPS || filteredGroups.length === 0
-      ? menuGroups
-      : filteredGroups;
+  const visibleGroups = filteredGroups.length > 0 ? filteredGroups : menuGroups.slice(0, 1);
 
   function handleSelectGroup(id: string) {
     setSelectedGroup(id);
