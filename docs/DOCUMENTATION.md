@@ -93,7 +93,13 @@ postgresql+asyncpg://USER:PASSWORD@HOST:PORT/DATABASE
 psql "$DATABASE_URL" -f backend/sql/001_init_masao_schema.sql
 psql "$DATABASE_URL" -f backend/sql/003_remove_hebrew_translations.sql  # only if old Hebrew-enabled schema exists
 psql "$DATABASE_URL" -f backend/sql/002_seed_full_menu_from_frontend.sql
+psql "$DATABASE_URL" -f backend/sql/004_add_allergens.sql  # allergy alerts: menu allergens + customer profiles
 ```
+
+> ⚠️ Το `004_add_allergens.sql` κάνει best-effort seed των allergens από τις
+> περιγραφές συστατικών. Το εστιατόριο πρέπει να επαληθεύσει τα allergens κάθε
+> πιάτου (μέσω `PATCH /api/admin/menu/items/{id}` με πεδίο `allergens`) πριν
+> θεωρηθούν αξιόπιστα τα alerts.
 
 If an older schema with Hebrew (`he`) support was already applied, run this cleanup migration before applying the regenerated seed:
 
@@ -107,6 +113,7 @@ If using the Supabase dashboard, paste the contents of:
 backend/sql/001_init_masao_schema.sql
 backend/sql/003_remove_hebrew_translations.sql
 backend/sql/002_seed_full_menu_from_frontend.sql
+backend/sql/004_add_allergens.sql
 ```
 
 **Frontend environment for backend chat integration:**

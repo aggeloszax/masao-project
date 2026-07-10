@@ -1,13 +1,128 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from decimal import Decimal
+import time
+from dataclasses import dataclass, field
 
-from sqlalchemy import RowMapping, text
+from sqlalchemy import RowMapping, event, text
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session as OrmSession
 
 from api.config import settings
 from api.schemas.menu import MenuCategoryPublicResponse, MenuItemPublicResponse, MenuResponse
+from api.services.allergens import match_allergens
+
+
+class MenuCache:
+    """In-process TTL cache for menu rows per language.
+
+    Το μενού αλλάζει σπάνια αλλά διαβάζεται σε κάθε chat μήνυμα και κάθε
+    άνοιγμα του μενού· το cache γλιτώνει το 4-πινάκων query στο hot path.
+    Η ακύρωση από admin writes είναι best effort (per process)· το TTL
+    φράσσει το staleness σε multi-worker deployments.
+    """
+
+    def __init__(self, clock=time.monotonic) -> None:
+        self._clock = clock
+        self._entries: dict[str, tuple[float, list[MenuItemRecord]]] = {}
+
+    def get(self, language_code: str, ttl_seconds: float) -> list[MenuItemRecord] | None:
+        """Return cached rows for a language if they are still fresh.
+
+        Args:
+            language_code: Menu translation language.
+            ttl_seconds: Freshness window; 0 disables caching entirely.
+
+        Returns:
+            list[MenuItemRecord] | None: Cached rows, or None on miss/expiry.
+
+        Raises:
+            None.
+        """
+        if ttl_seconds <= 0:
+            return None
+        entry = self._entries.get(language_code)
+        if entry is None:
+            return None
+        stored_at, items = entry
+        if self._clock() - stored_at > ttl_seconds:
+            self._entries.pop(language_code, None)
+            return None
+        return items
+
+    def store(self, language_code: str, items: list[MenuItemRecord], ttl_seconds: float) -> None:
+        """Cache menu rows for a language.
+
+        Args:
+            language_code: Menu translation language.
+            items: Menu records to reuse across requests. Θεώρησέ τα αμετάβλητα:
+                τα ίδια αντικείμενα (και οι εσωτερικές λίστες tags/allergens)
+                μοιράζονται σε όλα τα requests μέχρι το invalidate/TTL.
+            ttl_seconds: Cache policy; 0 or less disables storing entirely.
+
+        Returns:
+            None.
+
+        Raises:
+            None.
+        """
+        if ttl_seconds <= 0:
+            return
+        self._entries[language_code] = (self._clock(), items)
+
+    def invalidate(self) -> None:
+        """Drop every cached language after a menu mutation.
+
+        Args:
+            None.
+
+        Returns:
+            None.
+
+        Raises:
+            None.
+        """
+        self._entries.clear()
+
+
+menu_cache = MenuCache()
+
+# Session.info key: τα admin writes το θέτουν και το cache ακυρώνεται ΜΕΤΑ το
+# commit. Ακύρωση πριν το commit άφηνε race: αναγνώστης ξαναγέμιζε το cache με
+# τα προ-commit (παλιά) δεδομένα που επιβίωναν μέχρι το TTL.
+MENU_CACHE_DIRTY_KEY = "menu_cache_dirty"
+
+
+@event.listens_for(OrmSession, "after_commit")
+def invalidate_menu_cache_after_commit(session: OrmSession) -> None:
+    """Invalidate the menu cache once a menu mutation actually commits.
+
+    Args:
+        session: ORM session that just committed (sync side of AsyncSession).
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+    if session.info.pop(MENU_CACHE_DIRTY_KEY, False):
+        menu_cache.invalidate()
+
+
+@event.listens_for(OrmSession, "after_rollback")
+def clear_menu_cache_flag_after_rollback(session: OrmSession) -> None:
+    """Drop the dirty flag when a menu mutation rolls back.
+
+    Args:
+        session: ORM session that just rolled back.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+    session.info.pop(MENU_CACHE_DIRTY_KEY, None)
 
 
 @dataclass(frozen=True)
@@ -21,6 +136,8 @@ class MenuCandidate:
     tags: list[str]
     is_available: bool
     language_code: str
+    # Στο τέλος με default ώστε παλαιότερες positional κατασκευές να μη σπάνε.
+    allergens: list[str] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -38,14 +155,20 @@ class MenuItemRecord:
     is_available: bool
     display_order: int
     language_code: str
+    allergens: list[str] = field(default_factory=list)
 
 
-def group_menu_items(items: list[MenuItemRecord], include_unavailable: bool = False) -> list[MenuCategoryPublicResponse]:
+def group_menu_items(
+    items: list[MenuItemRecord],
+    include_unavailable: bool = False,
+    customer_allergens: set[str] | None = None,
+) -> list[MenuCategoryPublicResponse]:
     """Group flat menu rows into frontend-friendly category sections.
 
     Args:
         items: Ordered menu records fetched from PostgreSQL.
         include_unavailable: Whether unavailable items should remain in the response.
+        customer_allergens: Declared guest allergens; matching items get allergen_alert.
 
     Returns:
         list[MenuCategoryPublicResponse]: Categories with nested items, preserving database display order.
@@ -53,6 +176,7 @@ def group_menu_items(items: list[MenuItemRecord], include_unavailable: bool = Fa
     Raises:
         None.
     """
+    declared = customer_allergens or set()
     categories: dict[int, MenuCategoryPublicResponse] = {}
     for item in items:
         if not include_unavailable and not item.is_available:
@@ -69,6 +193,7 @@ def group_menu_items(items: list[MenuItemRecord], include_unavailable: bool = Fa
             )
             categories[item.category_id] = category
 
+        matched = match_allergens(item.allergens, declared)
         category.items.append(
             MenuItemPublicResponse(
                 id=item.id,
@@ -80,6 +205,9 @@ def group_menu_items(items: list[MenuItemRecord], include_unavailable: bool = Fa
                 description=item.description,
                 price=item.price,
                 tags=item.tags,
+                allergens=item.allergens,
+                matched_allergens=matched,
+                allergen_alert=bool(matched),
                 is_available=item.is_available,
                 display_order=item.display_order,
                 language_code=item.language_code,  # type: ignore[arg-type]
@@ -98,6 +226,7 @@ class MenuService:
         restaurant_slug: str,
         language_code: str,
         include_unavailable: bool = False,
+        customer_allergens: set[str] | None = None,
     ) -> MenuResponse:
         """Fetch the public menu grouped for frontend rendering.
 
@@ -105,6 +234,7 @@ class MenuService:
             restaurant_slug: Restaurant identifier requested by the frontend.
             language_code: Requested translation language.
             include_unavailable: Whether unavailable items should be included.
+            customer_allergens: Declared guest allergens for alert annotation.
 
         Returns:
             MenuResponse: Grouped menu categories and items.
@@ -115,13 +245,19 @@ class MenuService:
         if restaurant_slug != settings.restaurant_slug:
             raise ValueError(f"Unsupported restaurant_slug: {restaurant_slug}")
 
+        declared = customer_allergens or set()
         items = await self.fetch_items(language_code=language_code)
-        categories = group_menu_items(items, include_unavailable=include_unavailable)
+        categories = group_menu_items(
+            items,
+            include_unavailable=include_unavailable,
+            customer_allergens=declared,
+        )
         return MenuResponse(
             restaurant_slug=restaurant_slug,
             language_code=language_code,  # type: ignore[arg-type]
             total_categories=len(categories),
             total_items=sum(len(category.items) for category in categories),
+            customer_allergens=sorted(declared),
             categories=categories,
         )
 
@@ -147,6 +283,7 @@ class MenuService:
                 description=item.description,
                 price=item.price,
                 tags=item.tags,
+                allergens=item.allergens,
                 is_available=item.is_available,
                 language_code=item.language_code,
             )
@@ -166,6 +303,10 @@ class MenuService:
         Raises:
             SQLAlchemyError: Propagated by SQLAlchemy if the database query fails.
         """
+        cached = menu_cache.get(language_code, settings.menu_cache_ttl_seconds)
+        if cached is not None:
+            return cached
+
         result = await self.session.execute(
             text(
                 """
@@ -180,6 +321,7 @@ class MenuService:
                     coalesce(mit.description, mi.description) as description,
                     mi.price,
                     mi.tags,
+                    mi.allergens,
                     mi.is_available,
                     mi.display_order,
                     :language_code as language_code
@@ -196,11 +338,12 @@ class MenuService:
             ),
             {"language_code": language_code},
         )
-        return [self._item_record(row) for row in result.mappings().all()]
+        items = [self._item_record(row) for row in result.mappings().all()]
+        menu_cache.store(language_code, items, settings.menu_cache_ttl_seconds)
+        return items
 
     @staticmethod
     def _item_record(row: RowMapping) -> MenuItemRecord:
-        price = row["price"]
         return MenuItemRecord(
             id=row["id"],
             external_id=row["external_id"],
@@ -210,8 +353,9 @@ class MenuService:
             category_display_order=row["category_display_order"],
             name=row["name"],
             description=row["description"],
-            price=float(price if not isinstance(price, Decimal) else price),
+            price=float(row["price"]),
             tags=list(row["tags"] or []),
+            allergens=list(row["allergens"] or []),
             is_available=row["is_available"],
             display_order=row["display_order"],
             language_code=row["language_code"],

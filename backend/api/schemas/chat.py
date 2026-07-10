@@ -40,6 +40,10 @@ class MenuItemResponse(BaseModel):
     tags: list[str]
     is_available: bool
     language_code: Literal["el", "en", "de", "it", "sv"]
+    # Alert πεδία με βάση το allergy profile της συσκευής που στέλνει το chat.
+    allergens: list[str] = []
+    matched_allergens: list[str] = []
+    allergen_alert: bool = False
 
 
 class ChatResponse(BaseModel):

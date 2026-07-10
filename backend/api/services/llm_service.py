@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from anthropic import AsyncAnthropic
 
 from api.config import settings
+from api.services.allergens import format_allergen_names
 from api.services.menu_service import MenuCandidate
 
 logger = logging.getLogger(__name__)
@@ -84,6 +85,10 @@ def build_persona_prompt(language_code: str) -> str:
         "Leave the list empty for greetings or general questions.\n"
         "- Ask a short follow-up question when it helps (allergies, spice preference, "
         "food vs drink), like a real waiter would.\n"
+        "- Menu items may list allergens in [allergens: ...]. If the guest mentions an "
+        "allergy or a GUEST ALLERGY PROFILE is provided, NEVER suggest a dish containing "
+        "those allergens without an explicit warning, and always advise confirming with "
+        "the staff. Items without listed allergens are unverified, not allergen-free.\n"
         "- Gentle upselling: when the guest settles on food, suggest ONE specific "
         "matching drink or dessert from the menu — by name and price, with a short "
         "reason why it pairs well (and vice versa: suggest food to a drink order). "
@@ -118,9 +123,33 @@ def build_menu_prompt(menu_items: list[MenuCandidate]) -> str:
             current_category = item.category
             lines.append(f"\n## {item.category}")
         tags = f" [tags: {', '.join(item.tags)}]" if item.tags else ""
+        allergens = f" [allergens: {', '.join(item.allergens)}]" if item.allergens else ""
         description = item.description.strip()
-        lines.append(f"- id={item.id} | {item.name} | {item.price:.2f}€ | {description}{tags}")
+        lines.append(f"- id={item.id} | {item.name} | {item.price:.2f}€ | {description}{tags}{allergens}")
     return "\n".join(lines)
+
+
+def build_allergy_prompt(customer_allergens: list[str], language_code: str) -> str:
+    """Build the per-guest allergy context block.
+
+    Args:
+        customer_allergens: Canonical allergen codes declared by the guest.
+        language_code: Guest language code for localized allergen names.
+
+    Returns:
+        str: Guest allergy profile block for the system prompt.
+
+    Raises:
+        None.
+    """
+    localized = format_allergen_names(customer_allergens, language_code)
+    return (
+        "GUEST ALLERGY PROFILE: the guest has declared allergies to: "
+        f"{', '.join(customer_allergens)} ({localized}).\n"
+        "Never recommend an item whose [allergens] list includes any of these without "
+        "a clear warning naming the allergen. Prefer safe alternatives, and remind the "
+        "guest to confirm with the staff because allergen data may be incomplete."
+    )
 
 
 class LlmChatService:
@@ -157,6 +186,7 @@ class LlmChatService:
         history: list[tuple[str, str]],
         menu_items: list[MenuCandidate],
         language_code: str,
+        customer_allergens: list[str] | None = None,
     ) -> LlmAnswer:
         """Generate a menu-grounded assistant reply with Claude.
 
@@ -165,6 +195,7 @@ class LlmChatService:
                 ending with the latest user message.
             menu_items: Available menu candidates in the guest's language.
             language_code: Guest language code.
+            customer_allergens: Declared guest allergens for warning behaviour.
 
         Returns:
             LlmAnswer: Reply text and validated recommended menu item ids.
@@ -187,21 +218,29 @@ class LlmChatService:
         if not messages:
             raise LlmUnavailableError("No usable conversation history")
 
+        system_blocks: list[dict] = [
+            {"type": "text", "text": build_persona_prompt(language_code)},
+            {
+                "type": "text",
+                "text": build_menu_prompt(menu_items),
+                # Το μενού είναι σταθερό ανά γλώσσα: cache για χαμηλότερο κόστος/latency.
+                "cache_control": {"type": "ephemeral"},
+            },
+        ]
+        if customer_allergens:
+            # Μετά το cached block: το allergy profile αλλάζει ανά πελάτη και
+            # δεν πρέπει να ακυρώνει το cache του persona+menu prefix.
+            system_blocks.append(
+                {"type": "text", "text": build_allergy_prompt(customer_allergens, language_code)}
+            )
+
         try:
             response = await self._get_client().messages.create(
                 model=settings.anthropic_model,
                 max_tokens=settings.anthropic_max_tokens,
                 # Χωρίς thinking: οι απαντήσεις μενού είναι απλές και η ταχύτητα μετράει.
                 thinking={"type": "disabled"},
-                system=[
-                    {"type": "text", "text": build_persona_prompt(language_code)},
-                    {
-                        "type": "text",
-                        "text": build_menu_prompt(menu_items),
-                        # Το μενού είναι σταθερό ανά γλώσσα: cache για χαμηλότερο κόστος/latency.
-                        "cache_control": {"type": "ephemeral"},
-                    },
-                ],
+                system=system_blocks,
                 messages=messages,
                 output_config={"format": {"type": "json_schema", "schema": RESPONSE_SCHEMA}},
             )
@@ -229,9 +268,12 @@ class LlmChatService:
             raise LlmUnavailableError("Model returned an empty reply")
 
         available_ids = {item.id for item in menu_items if item.is_available}
-        recommended_ids = [
+        valid_ids = [
             int(item_id) for item_id in raw_ids if isinstance(item_id, int) and item_id in available_ids
-        ][:3]
+        ]
+        # dict.fromkeys: το μοντέλο μπορεί να επαναλάβει id — χωρίς dedup θα
+        # διπλασιάζονταν τα recommended items και τα allergy warnings.
+        recommended_ids = list(dict.fromkeys(valid_ids))[:3]
 
         return LlmAnswer(reply=reply, recommended_item_ids=recommended_ids)
 

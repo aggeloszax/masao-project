@@ -3,8 +3,8 @@ from __future__ import annotations
 import logging
 import re
 import unicodedata
-import hashlib
 from dataclasses import dataclass
+from functools import lru_cache
 from typing import Literal
 from uuid import UUID
 
@@ -14,14 +14,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.config import settings
 from api.schemas.chat import ChatMessageResponse, ChatRequest, ChatResponse, MenuItemResponse
+from api.services.allergens import format_allergen_names, match_allergens
+from api.services.allergy_service import AllergyService
 from api.services.llm_service import LlmUnavailableError, get_llm_chat_service
 from api.services.menu_service import MenuCandidate, MenuService
+from api.utils import device_log_hash
 
 logger = logging.getLogger(__name__)
-
-
-def _device_log_hash(device_id: str) -> str:
-    return hashlib.sha256(device_id.encode("utf-8")).hexdigest()[:12]
 
 
 STOPWORDS = {
@@ -173,6 +172,10 @@ FALLBACK_TEXTS: dict[str, dict[str, str]] = {
         "overview_intro": "Στα ποτά υπάρχουν οι εξής επιλογές: ",
         "overview_sample": "Ενδεικτικά",
         "overview_empty": "Δεν βρήκα διαθέσιμες επιλογές σε αυτή την κατηγορία.",
+        "allergy_warning": (
+            " Προσοχή: το {name} περιέχει {allergens} που έχεις δηλώσει ως αλλεργία. "
+            "Επιβεβαίωσέ το με το προσωπικό."
+        ),
     },
     "en": {
         "no_match": (
@@ -189,6 +192,10 @@ FALLBACK_TEXTS: dict[str, dict[str, str]] = {
         "overview_intro": "Here are the drink options: ",
         "overview_sample": "For example",
         "overview_empty": "I couldn't find available options in that category.",
+        "allergy_warning": (
+            " Warning: {name} contains {allergens}, which you have declared as an allergy. "
+            "Please confirm with the staff."
+        ),
     },
     "de": {
         "no_match": (
@@ -205,6 +212,10 @@ FALLBACK_TEXTS: dict[str, dict[str, str]] = {
         "overview_intro": "Bei den Getränken gibt es folgende Optionen: ",
         "overview_sample": "Zum Beispiel",
         "overview_empty": "Ich habe in dieser Kategorie keine verfügbaren Optionen gefunden.",
+        "allergy_warning": (
+            " Achtung: {name} enthält {allergens}, was Sie als Allergie angegeben haben. "
+            "Bitte bestätigen Sie es beim Personal."
+        ),
     },
     "it": {
         "no_match": (
@@ -221,6 +232,10 @@ FALLBACK_TEXTS: dict[str, dict[str, str]] = {
         "overview_intro": "Per le bevande ci sono queste opzioni: ",
         "overview_sample": "Ad esempio",
         "overview_empty": "Non ho trovato opzioni disponibili in questa categoria.",
+        "allergy_warning": (
+            " Attenzione: {name} contiene {allergens}, che hai dichiarato come allergia. "
+            "Conferma con il personale."
+        ),
     },
     "sv": {
         "no_match": (
@@ -237,6 +252,10 @@ FALLBACK_TEXTS: dict[str, dict[str, str]] = {
         "overview_intro": "Bland dryckerna finns följande alternativ: ",
         "overview_sample": "Till exempel",
         "overview_empty": "Jag hittade inga tillgängliga alternativ i den kategorin.",
+        "allergy_warning": (
+            " Varning: {name} innehåller {allergens}, som du har angett som allergi. "
+            "Bekräfta med personalen."
+        ),
     },
 }
 
@@ -296,6 +315,18 @@ def tokenize(value: str) -> list[str]:
     return [token for token in tokens if len(token) >= 2 and token not in STOPWORDS]
 
 
+# Προϋπολογισμένα normalized group keywords: αποφεύγεται το normalize_text
+# ανά keyword σε κάθε εισερχόμενο μήνυμα.
+GROUP_KEYWORD_PHRASES: dict[str, set[str]] = {
+    group: {normalize_text(keyword) for keyword in keywords if " " in normalize_text(keyword)}
+    for group, keywords in GROUP_KEYWORDS.items()
+}
+GROUP_KEYWORD_WORDS: dict[str, set[str]] = {
+    group: {normalize_text(keyword) for keyword in keywords if " " not in normalize_text(keyword)}
+    for group, keywords in GROUP_KEYWORDS.items()
+}
+
+
 def expand_terms(tokens: list[str]) -> set[str]:
     """Expand user tokens with known menu-intent synonyms.
 
@@ -315,6 +346,29 @@ def expand_terms(tokens: list[str]) -> set[str]:
     return {normalize_text(term) for term in terms}
 
 
+@lru_cache(maxsize=256)
+def _category_group(category: str) -> str | None:
+    """Return the high-level menu group of a category name.
+
+    Args:
+        category: Raw category name from the database.
+
+    Returns:
+        str | None: Group id such as cocktails, drinks, wines or shisha.
+
+    Raises:
+        None.
+    """
+    # lru_cache: οι κατηγορίες είναι λίγες και επαναλαμβάνονται σε κάθε item,
+    # οπότε το regex normalization τρέχει μία φορά ανά κατηγορία ανά process.
+    normalized_category = normalize_text(category).replace("&", " ")
+    normalized_category = re.sub(r"[^0-9a-zα-ω]+", " ", normalized_category).strip()
+    for group, categories in MENU_GROUP_CATEGORIES.items():
+        if normalized_category in categories:
+            return group
+    return None
+
+
 def item_group(item: MenuCandidate) -> str | None:
     """Return the high-level menu group for a menu item.
 
@@ -327,12 +381,7 @@ def item_group(item: MenuCandidate) -> str | None:
     Raises:
         None.
     """
-    normalized_category = normalize_text(item.category).replace("&", " ")
-    normalized_category = re.sub(r"[^0-9a-zα-ω]+", " ", normalized_category).strip()
-    for group, categories in MENU_GROUP_CATEGORIES.items():
-        if normalized_category in categories:
-            return group
-    return None
+    return _category_group(item.category)
 
 
 def requested_groups(user_message: str) -> set[str]:
@@ -354,15 +403,13 @@ def requested_groups(user_message: str) -> set[str]:
     if terms & BROAD_DRINK_TERMS:
         return {"cocktails", "drinks", "wines"}
 
+    # Το expand_terms περιέχει ήδη κάθε token, οπότε αρκεί το terms.
     groups: set[str] = set()
-    for group, keywords in GROUP_KEYWORDS.items():
-        for keyword in keywords:
-            normalized_keyword = normalize_text(keyword)
-            if " " in normalized_keyword:
-                if normalized_keyword in normalized_message:
-                    groups.add(group)
-            elif normalized_keyword in terms or normalized_keyword in tokens:
-                groups.add(group)
+    for group in GROUP_KEYWORDS:
+        if GROUP_KEYWORD_WORDS[group] & terms:
+            groups.add(group)
+        elif any(phrase in normalized_message for phrase in GROUP_KEYWORD_PHRASES[group]):
+            groups.add(group)
     return groups
 
 
@@ -380,8 +427,8 @@ def group_keyword_terms(groups: set[str]) -> set[str]:
     """
     terms: set[str] = set()
     for group in groups:
-        for keyword in GROUP_KEYWORDS.get(group, set()):
-            terms.add(normalize_text(keyword))
+        terms |= GROUP_KEYWORD_WORDS.get(group, set())
+        terms |= GROUP_KEYWORD_PHRASES.get(group, set())
     return terms
 
 
@@ -419,21 +466,26 @@ def is_item_detail_question(user_message: str) -> bool:
     return any(pattern in normalized_message for pattern in DETAIL_PATTERNS)
 
 
-def score_menu_item(item: MenuCandidate, terms: set[str]) -> int:
-    """Score a menu item by term overlap.
+@lru_cache(maxsize=2048)
+def _cached_haystack(name: str, description: str, category: str, tags: tuple[str, ...]) -> str:
+    # lru_cache σε string keys: το unicode normalization ανά item τρέχει μία
+    # φορά ανά μοναδικό κείμενο ανά process, όχι σε κάθε chat μήνυμα.
+    return normalize_text(" ".join([name, description, category, " ".join(tags)]))
+
+
+def item_haystack(item: MenuCandidate) -> str:
+    """Build the normalized searchable text of a menu item.
 
     Args:
         item: Menu item candidate.
-        terms: Expanded normalized search terms.
 
     Returns:
-        int: Number of matched terms. Higher score means stronger recommendation.
+        str: Lowercase accent-free text of name, description, category and tags.
 
     Raises:
         None.
     """
-    haystack = normalize_text(" ".join([item.name, item.description, item.category, " ".join(item.tags)]))
-    return sum(1 for term in terms if term and term in haystack)
+    return _cached_haystack(item.name, item.description, item.category, tuple(item.tags))
 
 
 def choose_recommendations(user_message: str, menu_items: list[MenuCandidate], limit: int = 3) -> list[MenuCandidate]:
@@ -455,23 +507,22 @@ def choose_recommendations(user_message: str, menu_items: list[MenuCandidate], l
         return []
 
     groups = requested_groups(user_message)
-    scoped_items = [
-        item
-        for item in menu_items
-        if item.is_available and (not groups or item_group(item) in groups)
-    ]
     preference_terms = terms - group_keyword_terms(groups)
 
     # Επιλογή πιάτων με βάση overlap σε όνομα, περιγραφή, κατηγορία και AI tags.
-    scored = [
-        (item, score_menu_item(item, terms))
-        for item in scoped_items
-        if not preference_terms or score_menu_item(item, preference_terms) > 0
-    ]
-    ranked = sorted(
-        ((item, score) for item, score in scored if score > 0),
-        key=lambda pair: (-pair[1], item_group(pair[0]) or "", pair[0].price, pair[0].name),
-    )
+    # Ένα πέρασμα ανά item: το haystack χτίζεται μία φορά και για τα δύο σκορ.
+    ranked: list[tuple[MenuCandidate, int]] = []
+    for item in menu_items:
+        if not item.is_available or (groups and item_group(item) not in groups):
+            continue
+        haystack = item_haystack(item)
+        if preference_terms and not any(term in haystack for term in preference_terms):
+            continue
+        score = sum(1 for term in terms if term in haystack)
+        if score > 0:
+            ranked.append((item, score))
+
+    ranked.sort(key=lambda pair: (-pair[1], item_group(pair[0]) or "", pair[0].price, pair[0].name))
     return [item for item, _score in ranked[:limit]]
 
 
@@ -529,6 +580,7 @@ def build_category_overview_reply(
     groups: set[str],
     menu_items: list[MenuCandidate],
     language_code: str = "el",
+    customer_allergens: set[str] | None = None,
 ) -> str:
     """Build a category overview for drinks/cocktails/wines style questions.
 
@@ -536,6 +588,8 @@ def build_category_overview_reply(
         groups: Requested high-level group ids.
         menu_items: Available menu candidates.
         language_code: Guest language code.
+        customer_allergens: Declared guest allergens; sampled items that match
+            get a warning appended (π.χ. θειώδη στα κρασιά).
 
     Returns:
         str: Assistant reply with category names and sample items.
@@ -545,6 +599,7 @@ def build_category_overview_reply(
     """
     texts = fallback_texts(language_code)
     lines = []
+    sampled_items: list[MenuCandidate] = []
     for group in ("cocktails", "drinks", "wines", "shisha"):
         if group not in groups:
             continue
@@ -552,12 +607,49 @@ def build_category_overview_reply(
         if not grouped_items:
             continue
         categories = sorted({item.category for item in grouped_items})
-        sample_names = ", ".join(item.name for item in grouped_items[:3])
+        samples = grouped_items[:3]
+        sampled_items.extend(samples)
+        sample_names = ", ".join(item.name for item in samples)
         lines.append(f"{GROUP_LABELS[group]}: {', '.join(categories)}. {texts['overview_sample']}: {sample_names}.")
 
     if not lines:
         return texts["overview_empty"]
-    return texts["overview_intro"] + " ".join(lines)
+    reply = texts["overview_intro"] + " ".join(lines)
+    return append_allergy_warnings(reply, sampled_items, customer_allergens or set(), language_code=language_code)
+
+
+def append_allergy_warnings(
+    reply: str,
+    items: list[MenuCandidate],
+    customer_allergens: set[str],
+    language_code: str = "el",
+) -> str:
+    """Append localized allergy warnings for flagged recommended items.
+
+    Args:
+        reply: Assistant reply built so far.
+        items: Menu items mentioned or recommended in the reply.
+        customer_allergens: Canonical allergen codes declared by the guest.
+        language_code: Guest language code.
+
+    Returns:
+        str: Reply with one warning sentence per flagged item.
+
+    Raises:
+        None.
+    """
+    if not customer_allergens:
+        return reply
+
+    texts = fallback_texts(language_code)
+    for item in items:
+        matched = match_allergens(item.allergens, customer_allergens)
+        if matched:
+            reply += texts["allergy_warning"].format(
+                name=item.name,
+                allergens=format_allergen_names(matched, language_code),
+            )
+    return reply
 
 
 def answer_menu_query(
@@ -565,6 +657,7 @@ def answer_menu_query(
     menu_items: list[MenuCandidate],
     limit: int = 3,
     language_code: str = "el",
+    customer_allergens: set[str] | None = None,
 ) -> ChatAnswer:
     """Answer a menu query using deterministic intent handling.
 
@@ -573,6 +666,7 @@ def answer_menu_query(
         menu_items: Available menu candidates.
         limit: Maximum recommendation count.
         language_code: Guest language code.
+        customer_allergens: Declared guest allergens for reply warnings.
 
     Returns:
         ChatAnswer: Intent, assistant reply and recommended items.
@@ -580,29 +674,31 @@ def answer_menu_query(
     Raises:
         None.
     """
+    declared = customer_allergens or set()
     if is_item_detail_question(user_message):
         item = find_item_detail_match(user_message, menu_items)
         if item is not None:
-            return ChatAnswer(
-                intent="item_detail",
-                reply=build_item_detail_reply(item, language_code=language_code),
-                recommendations=[item],
-            )
+            reply = build_item_detail_reply(item, language_code=language_code)
+            reply = append_allergy_warnings(reply, [item], declared, language_code=language_code)
+            return ChatAnswer(intent="item_detail", reply=reply, recommendations=[item])
 
     groups = requested_groups(user_message)
     if groups and is_overview_question(user_message):
         return ChatAnswer(
             intent="category_overview",
-            reply=build_category_overview_reply(groups, menu_items, language_code=language_code),
+            reply=build_category_overview_reply(
+                groups,
+                menu_items,
+                language_code=language_code,
+                customer_allergens=declared,
+            ),
             recommendations=[],
         )
 
     recommendations = choose_recommendations(user_message, menu_items, limit=limit)
-    return ChatAnswer(
-        intent="recommendation",
-        reply=build_assistant_reply(user_message, recommendations, language_code=language_code),
-        recommendations=recommendations,
-    )
+    reply = build_assistant_reply(user_message, recommendations, language_code=language_code)
+    reply = append_allergy_warnings(reply, recommendations, declared, language_code=language_code)
+    return ChatAnswer(intent="recommendation", reply=reply, recommendations=recommendations)
 
 
 def build_assistant_reply(
@@ -660,18 +756,22 @@ class ChatService:
             session_id = await self._get_or_create_session(request.device_id, request.table_number)
             await self._insert_message(session_id, "user", request.user_message)
             menu_items = await self._fetch_menu_items(request.language_code)
+            customer_allergens = await self._fetch_customer_allergens(request.device_id)
             history = await self._fetch_messages(session_id)
             assistant_content, recommendations = await self._generate_answer(
                 request=request,
                 menu_items=menu_items,
                 history=history,
+                customer_allergens=customer_allergens,
             )
             assistant_message = await self._insert_message(session_id, "assistant", assistant_content)
-            messages = await self._fetch_messages(session_id)
+            # Το history περιέχει ήδη το τρέχον user μήνυμα· χτίζουμε τη λίστα
+            # in-memory αντί για δεύτερο SELECT ανά chat μήνυμα.
+            messages = (history + [assistant_message])[-settings.chat_history_limit :]
         except SQLAlchemyError:
             logger.exception(
                 "Chat persistence failed for device_hash=%s table=%s",
-                _device_log_hash(request.device_id),
+                device_log_hash(request.device_id),
                 request.table_number,
             )
             raise
@@ -680,7 +780,7 @@ class ChatService:
             "Chat handled for restaurant=%s table=%s device_hash=%s recommendations=%s",
             request.restaurant_slug,
             request.table_number,
-            _device_log_hash(request.device_id),
+            device_log_hash(request.device_id),
             len(recommendations),
         )
         return ChatResponse(
@@ -691,7 +791,9 @@ class ChatService:
             language_code=request.language_code,
             assistant_message=assistant_message,
             messages=messages,
-            recommended_items=[self._menu_response(item) for item in recommendations],
+            recommended_items=[
+                self._menu_response(item, customer_allergens) for item in recommendations
+            ],
         )
 
     async def _generate_answer(
@@ -699,6 +801,7 @@ class ChatService:
         request: ChatRequest,
         menu_items: list[MenuCandidate],
         history: list[ChatMessageResponse],
+        customer_allergens: set[str] | None = None,
     ) -> tuple[str, list[MenuCandidate]]:
         """Produce the assistant reply, preferring the LLM over keyword matching.
 
@@ -706,6 +809,7 @@ class ChatService:
             request: Validated chat request.
             menu_items: Available menu candidates in the guest's language.
             history: Recent conversation messages ending with the current user message.
+            customer_allergens: Declared guest allergens for warnings.
 
         Returns:
             tuple[str, list[MenuCandidate]]: Reply text and recommended items.
@@ -713,6 +817,7 @@ class ChatService:
         Raises:
             None. LLM failures fall back to the deterministic answer.
         """
+        declared = customer_allergens or set()
         llm = get_llm_chat_service()
         if llm.is_configured():
             try:
@@ -720,6 +825,7 @@ class ChatService:
                     history=[(message.role, message.content) for message in history],
                     menu_items=menu_items,
                     language_code=request.language_code,
+                    customer_allergens=sorted(declared),
                 )
             except LlmUnavailableError:
                 logger.exception("LLM answer failed; using deterministic fallback")
@@ -730,12 +836,22 @@ class ChatService:
                     for item_id in llm_answer.recommended_item_ids
                     if item_id in items_by_id
                 ]
-                return llm_answer.reply, recommendations
+                # Εγγυημένη προειδοποίηση και στο LLM path: το prompt ζητά
+                # warning αλλά η ασφάλεια δεν αφήνεται στη συμμόρφωση του
+                # μοντέλου. Τυχόν διπλή αναφορά είναι αποδεκτό κόστος.
+                reply = append_allergy_warnings(
+                    llm_answer.reply,
+                    recommendations,
+                    declared,
+                    language_code=request.language_code,
+                )
+                return reply, recommendations
 
         answer = answer_menu_query(
             request.user_message,
             menu_items,
             language_code=request.language_code,
+            customer_allergens=declared,
         )
         return answer.reply, answer.recommendations
 
@@ -789,6 +905,9 @@ class ChatService:
     async def _fetch_menu_items(self, language_code: str) -> list[MenuCandidate]:
         return await MenuService(self.session).fetch_candidates(language_code=language_code)
 
+    async def _fetch_customer_allergens(self, device_id: str) -> set[str]:
+        return await AllergyService(self.session).try_get_customer_allergens(device_id)
+
     @staticmethod
     def _message_response(row: RowMapping) -> ChatMessageResponse:
         return ChatMessageResponse(
@@ -800,7 +919,8 @@ class ChatService:
         )
 
     @staticmethod
-    def _menu_response(item: MenuCandidate) -> MenuItemResponse:
+    def _menu_response(item: MenuCandidate, customer_allergens: set[str] | None = None) -> MenuItemResponse:
+        matched = match_allergens(item.allergens, customer_allergens or set())
         return MenuItemResponse(
             id=item.id,
             external_id=item.external_id,
@@ -811,4 +931,7 @@ class ChatService:
             tags=item.tags,
             is_available=item.is_available,
             language_code=item.language_code,
+            allergens=item.allergens,
+            matched_allergens=matched,
+            allergen_alert=bool(matched),
         )

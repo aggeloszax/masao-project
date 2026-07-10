@@ -1,6 +1,5 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
-from decimal import Decimal
 from typing import Any
 
 from sqlalchemy import RowMapping, text
@@ -19,6 +18,7 @@ from api.schemas.admin_menu import (
     MenuItemUpdateRequest,
     patch_payload,
 )
+from api.services.menu_service import MENU_CACHE_DIRTY_KEY
 
 
 def build_update_statement(table_name: str, fields: dict[str, Any], allowed_fields: set[str]) -> tuple[str, dict[str, Any]]:
@@ -50,6 +50,20 @@ class AdminMenuService:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
+    def _mark_menu_mutated(self) -> None:
+        """Schedule menu cache invalidation for after this session commits.
+
+        Args:
+            None.
+
+        Returns:
+            None.
+
+        Raises:
+            None.
+        """
+        self.session.info[MENU_CACHE_DIRTY_KEY] = True
+
     async def create_category(self, request: MenuCategoryCreateRequest) -> MenuCategoryAdminResponse:
         """Create a menu category.
 
@@ -72,6 +86,7 @@ class AdminMenuService:
             ),
             request.model_dump(),
         )
+        self._mark_menu_mutated()
         return self._category_response(result.mappings().one())
 
     async def update_category(self, category_id: int, request: MenuCategoryUpdateRequest) -> MenuCategoryAdminResponse:
@@ -109,6 +124,7 @@ class AdminMenuService:
         row = result.mappings().one_or_none()
         if row is None:
             raise LookupError(f"Menu category not found: {category_id}")
+        self._mark_menu_mutated()
         return self._category_response(row)
 
     async def upsert_category_translation(
@@ -145,6 +161,7 @@ class AdminMenuService:
             ),
             {"category_id": category_id, "language_code": language_code, **request.model_dump()},
         )
+        self._mark_menu_mutated()
         return self._category_translation_response(result.mappings().one())
 
     async def create_item(self, request: MenuItemCreateRequest) -> MenuItemAdminResponse:
@@ -169,6 +186,7 @@ class AdminMenuService:
                     description,
                     price,
                     tags,
+                    allergens,
                     is_available,
                     display_order
                 )
@@ -179,14 +197,16 @@ class AdminMenuService:
                     :description,
                     :price,
                     :tags,
+                    :allergens,
                     :is_available,
                     :display_order
                 )
-                returning id, external_id, category_id, name, description, price, tags, is_available, display_order
+                returning id, external_id, category_id, name, description, price, tags, allergens, is_available, display_order
                 """
             ),
             request.model_dump(),
         )
+        self._mark_menu_mutated()
         return self._item_response(result.mappings().one())
 
     async def update_item(self, item_id: int, request: MenuItemUpdateRequest) -> MenuItemAdminResponse:
@@ -207,7 +227,17 @@ class AdminMenuService:
         assignments, params = build_update_statement(
             "item",
             fields,
-            {"category_id", "external_id", "name", "description", "price", "tags", "is_available", "display_order"},
+            {
+                "category_id",
+                "external_id",
+                "name",
+                "description",
+                "price",
+                "tags",
+                "allergens",
+                "is_available",
+                "display_order",
+            },
         )
         params["item_id"] = item_id
         result = await self.session.execute(
@@ -216,7 +246,7 @@ class AdminMenuService:
                 update menu_items
                 set {assignments}
                 where id = :item_id
-                returning id, external_id, category_id, name, description, price, tags, is_available, display_order
+                returning id, external_id, category_id, name, description, price, tags, allergens, is_available, display_order
                 """
             ),
             params,
@@ -224,6 +254,7 @@ class AdminMenuService:
         row = result.mappings().one_or_none()
         if row is None:
             raise LookupError(f"Menu item not found: {item_id}")
+        self._mark_menu_mutated()
         return self._item_response(row)
 
     async def upsert_item_translation(
@@ -261,6 +292,7 @@ class AdminMenuService:
             ),
             {"item_id": item_id, "language_code": language_code, **request.model_dump()},
         )
+        self._mark_menu_mutated()
         return self._item_translation_response(result.mappings().one())
 
     async def _ensure_category_exists(self, category_id: int) -> None:
@@ -298,15 +330,15 @@ class AdminMenuService:
 
     @staticmethod
     def _item_response(row: RowMapping) -> MenuItemAdminResponse:
-        price = row["price"]
         return MenuItemAdminResponse(
             id=row["id"],
             external_id=row["external_id"],
             category_id=row["category_id"],
             name=row["name"],
             description=row["description"],
-            price=float(price if not isinstance(price, Decimal) else price),
+            price=float(row["price"]),
             tags=list(row["tags"] or []),
+            allergens=list(row["allergens"] or []),
             is_available=row["is_available"],
             display_order=row["display_order"],
         )

@@ -20,6 +20,12 @@ class MenuItemPublicResponse(BaseModel):
     is_available: bool
     display_order: int
     language_code: LanguageCode
+    # Δηλωμένα αλλεργιογόνα του πιάτου· άδεια λίστα = μη αξιολογημένο πιάτο.
+    allergens: list[str] = []
+    # Alert πεδία: γεμίζουν μόνο όταν το request συνοδεύεται από device_id
+    # με αποθηκευμένο allergy profile.
+    matched_allergens: list[str] = []
+    allergen_alert: bool = False
 
 
 class MenuCategoryPublicResponse(BaseModel):
@@ -35,4 +41,6 @@ class MenuResponse(BaseModel):
     language_code: LanguageCode
     total_categories: int
     total_items: int
+    # Echo των αλλεργιών που εφαρμόστηκαν στα alerts, για επιβεβαίωση στο UI.
+    customer_allergens: list[str] = []
     categories: list[MenuCategoryPublicResponse]

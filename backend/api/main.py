@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 import time
 from collections.abc import Awaitable, Callable
@@ -13,7 +14,7 @@ from sqlalchemy import text
 
 from api.config import settings
 from api.dependencies import check_chat_rate_limiter_ready, close_chat_rate_limiter
-from api.routers import admin_menu, chat, menu
+from api.routers import admin_menu, allergy, chat, menu
 from database import close_database, engine
 
 logging.basicConfig(
@@ -51,6 +52,7 @@ app.add_middleware(
 
 app.include_router(chat.router, prefix="/api", tags=["Chat"])
 app.include_router(menu.router, prefix="/api", tags=["Menu"])
+app.include_router(allergy.router, prefix="/api", tags=["Allergy"])
 app.include_router(admin_menu.router, prefix="/api/admin", tags=["Admin Menu"])
 
 
@@ -150,16 +152,22 @@ async def ready() -> JSONResponse:
     """
     checks = {"database": "ok", "rate_limiter": "ok"}
 
-    try:
-        await check_database_ready()
-    except Exception:
-        logger.exception("Readiness database check failed")
+    # Ανεξάρτητα checks: τρέχουν παράλληλα ώστε το /ready να απαντά στο
+    # μέγιστο (όχι στο άθροισμα) των δύο latencies.
+    database_result, rate_limiter_result = await asyncio.gather(
+        check_database_ready(),
+        check_rate_limiter_ready(),
+        return_exceptions=True,
+    )
+    # Η ακύρωση δεν είναι "unavailable" — πρέπει να διαδοθεί κανονικά.
+    for result in (database_result, rate_limiter_result):
+        if isinstance(result, asyncio.CancelledError):
+            raise result
+    if isinstance(database_result, BaseException):
+        logger.error("Readiness database check failed", exc_info=database_result)
         checks["database"] = "unavailable"
-
-    try:
-        await check_rate_limiter_ready()
-    except Exception:
-        logger.exception("Readiness rate limiter check failed")
+    if isinstance(rate_limiter_result, BaseException):
+        logger.error("Readiness rate limiter check failed", exc_info=rate_limiter_result)
         checks["rate_limiter"] = "unavailable"
 
     if any(value != "ok" for value in checks.values()):

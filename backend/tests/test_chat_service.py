@@ -1,4 +1,5 @@
 from api.services.chat_service import (
+    FALLBACK_TEXTS,
     MenuCandidate,
     answer_menu_query,
     build_assistant_reply,
@@ -6,6 +7,15 @@ from api.services.chat_service import (
     expand_terms,
     tokenize,
 )
+
+
+def test_fallback_texts_have_identical_keys_in_every_language() -> None:
+    # Guard: αν προστεθεί κλειδί σε μία γλώσσα και ξεχαστεί σε άλλη, το
+    # texts["..."] θα σκάσει με KeyError σε παραγωγή για εκείνη τη γλώσσα.
+    reference_keys = set(FALLBACK_TEXTS["el"])
+
+    for language_code, texts in FALLBACK_TEXTS.items():
+        assert set(texts) == reference_keys, f"key mismatch for {language_code}"
 
 
 def test_tokenize_supports_latin_input() -> None:

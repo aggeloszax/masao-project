@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import hashlib
 import secrets
 
 from fastapi import Depends, HTTPException, Security
@@ -9,27 +8,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.config import settings
 from api.services.admin_menu_service import AdminMenuService
+from api.services.allergy_service import AllergyService
 from api.services.chat_service import ChatService
 from api.services.menu_service import MenuService
 from api.services.rate_limiter import InMemoryRateLimiter, RateLimiter, RedisRateLimiter
+# Re-export για τους routers που ήδη το εισάγουν από εδώ.
+from api.utils import device_log_hash  # noqa: F401
 from database import get_db_session
 
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=True)
-
-
-def device_log_hash(device_id: str) -> str:
-    """Return a short stable hash for anonymous device ids in logs.
-
-    Args:
-        device_id: Raw anonymous frontend device id.
-
-    Returns:
-        str: First 12 hex characters of the SHA-256 digest.
-
-    Raises:
-        None.
-    """
-    return hashlib.sha256(device_id.encode("utf-8")).hexdigest()[:12]
 
 
 def create_chat_rate_limiter() -> RateLimiter:
@@ -114,6 +101,21 @@ async def get_menu_service(session: AsyncSession = Depends(get_db_session)) -> M
         None.
     """
     return MenuService(session=session)
+
+
+async def get_allergy_service(session: AsyncSession = Depends(get_db_session)) -> AllergyService:
+    """Create an AllergyService bound to the current async DB session.
+
+    Args:
+        session: Async SQLAlchemy session injected by FastAPI.
+
+    Returns:
+        AllergyService: Service object for customer allergy profiles.
+
+    Raises:
+        None.
+    """
+    return AllergyService(session=session)
 
 
 async def get_admin_menu_service(session: AsyncSession = Depends(get_db_session)) -> AdminMenuService:
