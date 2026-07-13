@@ -5,10 +5,12 @@ import time
 from collections import OrderedDict
 from datetime import datetime
 
-from sqlalchemy import text
+from sqlalchemy import event, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session as OrmSession
 
+from api.config import settings
 from api.schemas.allergy import AllergyProfileResponse
 from api.services.allergens import to_canonical_order
 from api.utils import device_log_hash
@@ -98,6 +100,44 @@ class ProfileCache:
 
 profile_cache = ProfileCache()
 
+# Session.info key: το upsert_profile προσθέτει εδώ τα device_ids που άλλαξαν
+# και το cache ακυρώνεται ΜΕΤΑ το commit (ίδιο pattern με το menu cache —
+# ακύρωση πριν το commit θα άφηνε race με αναγνώστες που ξαναγεμίζουν stale).
+PROFILE_CACHE_DIRTY_KEY = "allergy_profile_cache_dirty"
+
+
+@event.listens_for(OrmSession, "after_commit")
+def invalidate_profile_cache_after_commit(session: OrmSession) -> None:
+    """Invalidate cached profiles once a profile upsert actually commits.
+
+    Args:
+        session: ORM session that just committed (sync side of AsyncSession).
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+    for device_id in session.info.pop(PROFILE_CACHE_DIRTY_KEY, ()):
+        profile_cache.invalidate(device_id)
+
+
+@event.listens_for(OrmSession, "after_rollback")
+def clear_profile_cache_flag_after_rollback(session: OrmSession) -> None:
+    """Drop the dirty flag when a profile upsert rolls back.
+
+    Args:
+        session: ORM session that just rolled back.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+    session.info.pop(PROFILE_CACHE_DIRTY_KEY, None)
+
 
 class AllergyService:
     def __init__(self, session: AsyncSession) -> None:
@@ -162,18 +202,27 @@ class AllergyService:
         Raises:
             None.
         """
+        ttl_seconds = settings.allergy_profile_cache_ttl_seconds
+        cached = profile_cache.get(device_id, ttl_seconds)
+        if cached is not None:
+            return set(cached)
+
         try:
             # SAVEPOINT: αποτυχία εδώ δεν πρέπει να αφήσει aborted το
             # transaction για τα επόμενα queries του ίδιου request.
             async with self.session.begin_nested():
-                return await self.get_customer_allergens(device_id)
+                allergens = await self.get_customer_allergens(device_id)
         except SQLAlchemyError:
             logger.warning(
                 "Allergy profile lookup failed; continuing without alerts for device_hash=%s",
                 device_log_hash(device_id),
                 exc_info=True,
             )
+            # Οι αποτυχίες ΔΕΝ μπαίνουν στο cache: το επόμενο request ξαναδοκιμάζει.
             return set()
+
+        profile_cache.store(device_id, allergens, ttl_seconds)
+        return allergens
 
     async def upsert_profile(self, device_id: str, allergens: list[str]) -> AllergyProfileResponse:
         """Create or replace the allergy profile of a device.
@@ -203,6 +252,8 @@ class AllergyService:
             {"device_id": device_id, "allergens": allergens},
         )
         row = result.mappings().one()
+        # Σημάδεψε το session· το cache ακυρώνεται από τον after_commit listener.
+        self.session.info.setdefault(PROFILE_CACHE_DIRTY_KEY, set()).add(device_id)
         return self._profile_response(row["device_id"], list(row["allergens"] or []), row["updated_at"])
 
     @staticmethod

@@ -82,3 +82,24 @@ def test_profile_cache_invalidate_all() -> None:
 
     assert cache.get("a", ttl_seconds=60.0) is None
     assert cache.get("b", ttl_seconds=60.0) is None
+
+
+def test_profile_cache_restore_refreshes_lru_position() -> None:
+    cache = ProfileCache(clock=FakeClock(), max_entries=2)
+
+    cache.store("a", {"milk"}, ttl_seconds=60.0)
+    cache.store("b", {"eggs"}, ttl_seconds=60.0)
+    # Το ξανα-store του "a" το κάνει πιο πρόσφατο από το "b"...
+    cache.store("a", {"fish"}, ttl_seconds=60.0)
+    cache.store("c", {"nuts"}, ttl_seconds=60.0)
+
+    # ...οπότε πετιέται το "b", όχι το μόλις ενημερωμένο "a".
+    assert cache.get("b", ttl_seconds=60.0) is None
+    assert cache.get("a", ttl_seconds=60.0) == frozenset({"fish"})
+
+
+def test_profile_cache_get_disabled_when_ttl_is_zero() -> None:
+    cache = ProfileCache(clock=FakeClock())
+    cache.store("device-1", {"milk"}, ttl_seconds=60.0)
+
+    assert cache.get("device-1", ttl_seconds=0) is None
