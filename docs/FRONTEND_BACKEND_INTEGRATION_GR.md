@@ -354,3 +354,40 @@ Next.js MenuApp -> FastAPI GET /api/menu -> Supabase menu_items/translations -> 
 ```
 
 Μετά, μπορεί να μπει LLM layer πάνω από το deterministic recommendation logic, με αυστηρό JSON output και fallback στα ίδια menu rows.
+
+---
+
+## 11. Allergy UX — συμβόλαιο για το frontend (2026-07-13)
+
+Συμφωνημένο flow (το UI υλοποιείται στο frontend· το backend είναι έτοιμο):
+
+### Bottom-sheet «Έχεις κάποια αλλεργία;» (πρώτο άνοιγμα του μενού)
+
+- Λίστα επιλογών: `GET /api/allergens?language_code=<lang>` →
+  `{allergens: [{code, label}]}` στις 5 γλώσσες. Η λίστα είναι τα πάγια 14
+  αλλεργιογόνα της ΕΕ — μπορεί να μπει και στατικά στο frontend ώστε το
+  sheet να ανοίγει ακαριαία (χωρίς αναμονή σε Render cold start).
+- Αποθήκευση: `PUT /api/profile/allergies` με body
+  `{"device_id": "<masao-device-id>", "allergens": ["milk", ...]}`.
+  Χρησιμοποιήστε το ΙΔΙΟ device_id που ήδη κρατά το chat στο localStorage
+  (`masao-device-id`, βλ. getOrCreateDeviceId στο chat-api.ts). Το
+  «Δεν έχω αλλεργίες» στέλνει κενή λίστα `[]`.
+- Prefill στην επεξεργασία: `GET /api/profile/allergies?device_id=...` →
+  `{device_id, allergens, updated_at}` (κενό allergens όταν δεν υπάρχει
+  προφίλ). Το endpoint διαβάζει πάντα τη βάση — ποτέ stale μετά από PUT.
+
+### Badges στο μενού — ΧΩΡΙΣ device_id
+
+Το `GET /api/menu` επιστρέφει ήδη `allergens: [...]` σε κάθε πιάτο χωρίς
+κανένα επιπλέον παράμετρο. Το ταίριασμα με το προφίλ του χρήστη γίνεται
+client-side (τομή των δύο λιστών). ΜΗ στέλνετε device_id στο /api/menu:
+θα προσθέσει ένα DB lookup ανά request χωρίς λόγο, ενώ το client-side
+ταίριασμα ενημερώνει τα badges στιγμιαία όταν αλλάζει το προφίλ.
+
+### Chat — καμία αλλαγή
+
+Το POST /api/chat δεν αλλάζει. Όταν υπάρχει προφίλ, το backend προσθέτει
+αυτόματα την υπενθύμιση («ζήτησε να αφαιρεθεί από το πιάτο αν γίνεται,
+αλλιώς προτίμησε κάτι άλλο») σε κάθε απάντηση που αφορά πιάτο με δηλωμένο
+αλλεργιογόνο, και τα `recommended_items` έχουν ήδη
+`allergens / matched_allergens / allergen_alert` για το ⚠ badge.
