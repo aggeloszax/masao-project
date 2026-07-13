@@ -78,6 +78,7 @@ class ScriptedSession:
         self.calls.append("commit")
 
     async def execute(self, statement, params=None) -> FakeResult:
+        self.calls.append("execute")
         sql = " ".join(str(statement).split())
         if "insert into chat_sessions" in sql:
             return FakeResult([], scalar=SESSION_ID)
@@ -141,4 +142,7 @@ async def test_handle_chat_commits_before_calling_the_llm(monkeypatch) -> None:
     assert "llm" in calls and "commit" in calls
     # Η σύνδεση πρέπει να επιστρέφει στο pool ΠΡΙΝ την αργή κλήση στο LLM.
     assert calls.index("commit") < calls.index("llm")
+    # Κανένα query ανάμεσα στο commit και στο LLM: αλλιώς ξανανοίγει
+    # transaction (autobegin) και η σύνδεση κρατιέται στη διάρκεια του LLM.
+    assert "execute" not in calls[calls.index("commit") : calls.index("llm")]
     assert response.assistant_message.content == "Enjoy!"
