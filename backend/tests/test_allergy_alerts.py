@@ -95,7 +95,7 @@ def test_answer_menu_query_warns_on_flagged_recommendation() -> None:
 
     assert answer.recommendations[0].name == "Shrimp Tempura"
     assert "Warning" in answer.reply
-    assert "leave it out" in answer.reply
+    assert "have it without" in answer.reply
 
 
 def test_answer_menu_query_item_detail_includes_warning() -> None:

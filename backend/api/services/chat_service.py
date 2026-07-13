@@ -174,8 +174,7 @@ FALLBACK_TEXTS: dict[str, dict[str, str]] = {
         "overview_empty": "Δεν βρήκα διαθέσιμες επιλογές σε αυτή την κατηγορία.",
         "allergy_warning": (
             " Προσοχή: το {name} περιέχει {allergens} που έχεις δηλώσει ως αλλεργία. "
-            "Ζήτησε από το προσωπικό να το αφαιρέσουν από το πιάτο αν γίνεται, "
-            "αλλιώς προτίμησε κάτι άλλο."
+            "Ρώτησε το προσωπικό αν γίνεται χωρίς, αλλιώς προτίμησε κάτι άλλο."
         ),
     },
     "en": {
@@ -195,7 +194,7 @@ FALLBACK_TEXTS: dict[str, dict[str, str]] = {
         "overview_empty": "I couldn't find available options in that category.",
         "allergy_warning": (
             " Warning: {name} contains {allergens}, which you have declared as an allergy. "
-            "Ask the staff to leave it out if possible, or choose something else."
+            "Ask the staff if you can have it without, or choose something else."
         ),
     },
     "de": {
@@ -215,7 +214,7 @@ FALLBACK_TEXTS: dict[str, dict[str, str]] = {
         "overview_empty": "Ich habe in dieser Kategorie keine verfügbaren Optionen gefunden.",
         "allergy_warning": (
             " Achtung: {name} enthält {allergens}, was Sie als Allergie angegeben haben. "
-            "Bitten Sie das Personal, es nach Möglichkeit wegzulassen, "
+            "Fragen Sie das Personal, ob es auch ohne geht, "
             "oder wählen Sie lieber etwas anderes."
         ),
     },
@@ -236,8 +235,7 @@ FALLBACK_TEXTS: dict[str, dict[str, str]] = {
         "overview_empty": "Non ho trovato opzioni disponibili in questa categoria.",
         "allergy_warning": (
             " Attenzione: {name} contiene {allergens}, che hai dichiarato come allergia. "
-            "Chiedi al personale di toglierlo dal piatto se possibile, "
-            "oppure scegli qualcos'altro."
+            "Chiedi al personale se si può fare senza, oppure scegli qualcos'altro."
         ),
     },
     "sv": {
@@ -257,7 +255,7 @@ FALLBACK_TEXTS: dict[str, dict[str, str]] = {
         "overview_empty": "Jag hittade inga tillgängliga alternativ i den kategorin.",
         "allergy_warning": (
             " Varning: {name} innehåller {allergens}, som du har angett som allergi. "
-            "Be personalen ta bort det om det går, eller välj något annat."
+            "Fråga personalen om det går att få utan, eller välj något annat."
         ),
     },
 }
