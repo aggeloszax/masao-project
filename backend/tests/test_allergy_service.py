@@ -5,7 +5,6 @@ from api.services.allergy_service import (
     PROFILE_CACHE_DIRTY_KEY,
     AllergyService,
     invalidate_profile_cache_after_commit,
-    profile_cache,
 )
 
 
@@ -98,6 +97,19 @@ async def test_try_get_customer_allergens_uses_cache_within_ttl() -> None:
 
     assert session.execute_calls == 1
     assert first == second == {"milk"}
+
+
+@pytest.mark.asyncio
+async def test_try_get_customer_allergens_caches_empty_profiles() -> None:
+    session = RecordingSession([])  # καμία εγγραφή προφίλ για τη συσκευή
+    service = AllergyService(session=session)
+
+    first = await service.try_get_customer_allergens("device-12345")
+    second = await service.try_get_customer_allergens("device-12345")
+
+    # Το κενό προφίλ είναι κανονικό cache hit (negative caching) — 1 query.
+    assert session.execute_calls == 1
+    assert first == second == set()
 
 
 @pytest.mark.asyncio

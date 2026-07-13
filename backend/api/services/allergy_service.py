@@ -103,6 +103,8 @@ profile_cache = ProfileCache()
 # Session.info key: το upsert_profile προσθέτει εδώ τα device_ids που άλλαξαν
 # και το cache ακυρώνεται ΜΕΤΑ το commit (ίδιο pattern με το menu cache —
 # ακύρωση πριν το commit θα άφηνε race με αναγνώστες που ξαναγεμίζουν stale).
+# Παράθυρο staleness παραμένει: reader που τρέχει παράλληλα με το commit
+# μπορεί να ξανα-cache-άρει το παλιό προφίλ έως το TTL (όπως στο menu cache).
 PROFILE_CACHE_DIRTY_KEY = "allergy_profile_cache_dirty"
 
 
