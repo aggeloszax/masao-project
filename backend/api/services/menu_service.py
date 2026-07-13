@@ -331,46 +331,64 @@ class MenuService:
         if cached is not None:
             return cached
 
+        # TTL <= 0 σημαίνει cache off (π.χ. tests): χωρίς cache να ξαναγεμίσει,
+        # το lock απλώς θα σειριοποιούσε άσκοπα τα queries.
+        if settings.menu_cache_ttl_seconds <= 0:
+            return await self._query_items(language_code)
+
         async with _fetch_lock(language_code):
             # Double-check: όσο περιμέναμε το lock, ο πρώτος miss γέμισε το cache.
             cached = menu_cache.get(language_code, settings.menu_cache_ttl_seconds)
             if cached is not None:
                 return cached
-
-            result = await self.session.execute(
-                text(
-                    """
-                    select
-                        mi.id,
-                        mi.external_id,
-                        mc.id as category_id,
-                        mc.slug as category_slug,
-                        coalesce(mct.name, mc.name) as category_name,
-                        mc.display_order as category_display_order,
-                        coalesce(mit.name, mi.name) as name,
-                        coalesce(mit.description, mi.description) as description,
-                        mi.price,
-                        mi.tags,
-                        mi.allergens,
-                        mi.is_available,
-                        mi.display_order,
-                        :language_code as language_code
-                    from menu_items mi
-                    join menu_categories mc on mc.id = mi.category_id
-                    left join menu_item_translations mit
-                        on mit.menu_item_id = mi.id
-                       and mit.language_code = :language_code
-                    left join menu_category_translations mct
-                        on mct.category_id = mc.id
-                       and mct.language_code = :language_code
-                    order by mc.display_order asc, mi.display_order asc, mi.id asc
-                    """
-                ),
-                {"language_code": language_code},
-            )
-            items = [self._item_record(row) for row in result.mappings().all()]
+            items = await self._query_items(language_code)
             menu_cache.store(language_code, items, settings.menu_cache_ttl_seconds)
             return items
+
+    async def _query_items(self, language_code: str) -> list[MenuItemRecord]:
+        """Run the 4-table menu query and build the flat records.
+
+        Args:
+            language_code: Requested translation language.
+
+        Returns:
+            list[MenuItemRecord]: Flat menu rows ordered by category and item display order.
+
+        Raises:
+            SQLAlchemyError: Propagated by SQLAlchemy if the database query fails.
+        """
+        result = await self.session.execute(
+            text(
+                """
+                select
+                    mi.id,
+                    mi.external_id,
+                    mc.id as category_id,
+                    mc.slug as category_slug,
+                    coalesce(mct.name, mc.name) as category_name,
+                    mc.display_order as category_display_order,
+                    coalesce(mit.name, mi.name) as name,
+                    coalesce(mit.description, mi.description) as description,
+                    mi.price,
+                    mi.tags,
+                    mi.allergens,
+                    mi.is_available,
+                    mi.display_order,
+                    :language_code as language_code
+                from menu_items mi
+                join menu_categories mc on mc.id = mi.category_id
+                left join menu_item_translations mit
+                    on mit.menu_item_id = mi.id
+                   and mit.language_code = :language_code
+                left join menu_category_translations mct
+                    on mct.category_id = mc.id
+                   and mct.language_code = :language_code
+                order by mc.display_order asc, mi.display_order asc, mi.id asc
+                """
+            ),
+            {"language_code": language_code},
+        )
+        return [self._item_record(row) for row in result.mappings().all()]
 
     @staticmethod
     def _item_record(row: RowMapping) -> MenuItemRecord:

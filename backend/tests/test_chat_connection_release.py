@@ -81,6 +81,7 @@ class ScriptedSession:
         self.calls.append("execute")
         sql = " ".join(str(statement).split())
         if "insert into chat_sessions" in sql:
+            self.calls.append("session-insert")
             return FakeResult([], scalar=SESSION_ID)
         if "insert into chat_messages" in sql:
             self._message_id += 1
@@ -110,6 +111,7 @@ class ScriptedSession:
         if "from customer_allergy_profiles" in sql:
             return FakeResult([])
         if "from menu_items" in sql:
+            self.calls.append("menu-select")
             return FakeResult([MENU_ROW])
         raise AssertionError(f"unexpected SQL: {sql}")
 
@@ -142,6 +144,9 @@ async def test_handle_chat_commits_before_calling_the_llm(monkeypatch) -> None:
     assert "llm" in calls and "commit" in calls
     # Η σύνδεση πρέπει να επιστρέφει στο pool ΠΡΙΝ την αργή κλήση στο LLM.
     assert calls.index("commit") < calls.index("llm")
+    # Το menu fetch προηγείται του πρώτου INSERT: η αναμονή στο single-flight
+    # lock δεν πρέπει να βρίσκει το request με ανοιχτό transaction.
+    assert calls.index("menu-select") < calls.index("session-insert")
     # Κανένα query ανάμεσα στο commit και στο LLM: αλλιώς ξανανοίγει
     # transaction (autobegin) και η σύνδεση κρατιέται στη διάρκεια του LLM.
     assert "execute" not in calls[calls.index("commit") : calls.index("llm")]

@@ -753,9 +753,13 @@ class ChatService:
             raise ValueError(f"Unsupported restaurant_slug: {request.restaurant_slug}")
 
         try:
+            # Το μενού πρώτα, πριν ανοίξει transaction: σε cold cache το
+            # request περιμένει το single-flight lock ΧΩΡΙΣ να κρατά pooled
+            # connection (αλλιώς: lock holder χωρίς connection + waiters με
+            # connections = αμοιβαία αναμονή μέχρι το pool_timeout).
+            menu_items = await self._fetch_menu_items(request.language_code)
             session_id = await self._get_or_create_session(request.device_id, request.table_number)
             await self._insert_message(session_id, "user", request.user_message)
-            menu_items = await self._fetch_menu_items(request.language_code)
             customer_allergens = await self._fetch_customer_allergens(request.device_id)
             history = await self._fetch_messages(session_id)
             # Επιστροφή της σύνδεσης στο pool πριν το LLM: η κλήση κρατά

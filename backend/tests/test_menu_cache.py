@@ -198,3 +198,19 @@ async def test_concurrent_cold_cache_fetches_run_a_single_query() -> None:
 
     assert session.execute_calls == 1
     assert all(result == results[0] for result in results)
+
+
+@pytest.mark.asyncio
+async def test_ttl_zero_bypasses_the_single_flight_lock(monkeypatch) -> None:
+    from api.config import settings
+    from api.services.menu_service import _fetch_locks
+
+    monkeypatch.setattr(settings, "menu_cache_ttl_seconds", 0.0)
+    session = SlowSession([MENU_ROW])
+    service = MenuService(session=session)
+
+    await asyncio.gather(*(service.fetch_items(language_code="en") for _ in range(3)))
+
+    # Χωρίς cache: κάθε request τρέχει το δικό του query, κανένα lock δεν φτιάχνεται.
+    assert session.execute_calls == 3
+    assert _fetch_locks == {}
