@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import logging
+import time
+from collections import OrderedDict
 from datetime import datetime
 
 from sqlalchemy import text
@@ -12,6 +14,89 @@ from api.services.allergens import to_canonical_order
 from api.utils import device_log_hash
 
 logger = logging.getLogger(__name__)
+
+
+class ProfileCache:
+    """In-process TTL/LRU cache των δηλωμένων αλλεργιογόνων ανά συσκευή.
+
+    Το προφίλ διαβάζεται σε κάθε chat μήνυμα και κάθε /api/menu?device_id=,
+    ενώ αλλάζει σπάνια· με cross-region βάση το lookup κοστίζει ~0.6-0.9s.
+    Κρατάει και κενά προφίλ (negative caching) γιατί οι περισσότεροι πελάτες
+    δεν έχουν δηλώσει τίποτα. Φραγμένο μέγεθος ώστε 200+ συσκευές να μη
+    φουσκώνουν τη μνήμη· invalidation μετά το commit του upsert, staleness
+    σε multi-worker deployments φράσσεται από το TTL (όπως το MenuCache).
+    """
+
+    def __init__(self, clock=time.monotonic, max_entries: int = 5000) -> None:
+        self._clock = clock
+        self._max_entries = max_entries
+        self._entries: OrderedDict[str, tuple[float, frozenset[str]]] = OrderedDict()
+
+    def get(self, device_id: str, ttl_seconds: float) -> frozenset[str] | None:
+        """Return cached allergens for a device if still fresh.
+
+        Args:
+            device_id: Anonymous frontend device id.
+            ttl_seconds: Freshness window; 0 disables caching entirely.
+
+        Returns:
+            frozenset[str] | None: Cached codes (possibly empty), None on miss.
+
+        Raises:
+            None.
+        """
+        if ttl_seconds <= 0:
+            return None
+        entry = self._entries.get(device_id)
+        if entry is None:
+            return None
+        stored_at, allergens = entry
+        if self._clock() - stored_at > ttl_seconds:
+            self._entries.pop(device_id, None)
+            return None
+        self._entries.move_to_end(device_id)
+        return allergens
+
+    def store(self, device_id: str, allergens: set[str], ttl_seconds: float) -> None:
+        """Cache the declared allergens of a device.
+
+        Args:
+            device_id: Anonymous frontend device id.
+            allergens: Canonical codes; an empty set is cached too.
+            ttl_seconds: Cache policy; 0 or less disables storing entirely.
+
+        Returns:
+            None.
+
+        Raises:
+            None.
+        """
+        if ttl_seconds <= 0:
+            return
+        self._entries[device_id] = (self._clock(), frozenset(allergens))
+        self._entries.move_to_end(device_id)
+        while len(self._entries) > self._max_entries:
+            self._entries.popitem(last=False)
+
+    def invalidate(self, device_id: str | None = None) -> None:
+        """Drop one device entry, or everything when no device is given.
+
+        Args:
+            device_id: Device to evict; None clears the whole cache.
+
+        Returns:
+            None.
+
+        Raises:
+            None.
+        """
+        if device_id is None:
+            self._entries.clear()
+        else:
+            self._entries.pop(device_id, None)
+
+
+profile_cache = ProfileCache()
 
 
 class AllergyService:

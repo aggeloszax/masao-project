@@ -35,6 +35,9 @@ chat:
   max_user_message_chars: 1000
   default_table_number: 1
 
+allergy:
+  profile_cache_ttl_seconds: 60.0
+
 rate_limit:
   backend: "memory"
   chat_requests: 20
