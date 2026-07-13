@@ -95,7 +95,7 @@ def test_answer_menu_query_warns_on_flagged_recommendation() -> None:
 
     assert answer.recommendations[0].name == "Shrimp Tempura"
     assert "Warning" in answer.reply
-    assert "confirm with the staff" in answer.reply
+    assert "leave it out" in answer.reply
 
 
 def test_answer_menu_query_item_detail_includes_warning() -> None:
@@ -223,3 +223,12 @@ async def test_llm_answer_puts_allergy_block_after_cached_menu_block() -> None:
     assert system_blocks[1].get("cache_control") == {"type": "ephemeral"}
     assert "GUEST ALLERGY PROFILE" in system_blocks[2]["text"]
     assert "cache_control" not in system_blocks[2]
+
+
+@pytest.mark.parametrize("lang", ["el", "en", "de", "it", "sv"])
+def test_allergy_warning_keeps_format_placeholders(lang: str) -> None:
+    from api.services.chat_service import FALLBACK_TEXTS
+
+    text = FALLBACK_TEXTS[lang]["allergy_warning"]
+    assert "{name}" in text
+    assert "{allergens}" in text
