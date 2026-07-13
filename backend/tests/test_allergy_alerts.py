@@ -187,6 +187,7 @@ def test_build_allergy_prompt_names_codes_and_localized_labels() -> None:
     assert "Crustaceans (shrimp, crab)" in prompt
     assert "confirm with the staff" in prompt
     assert "leave the ingredient out" in prompt
+    assert "Prefer recommending items that do not contain" in prompt
 
 
 @pytest.mark.asyncio
