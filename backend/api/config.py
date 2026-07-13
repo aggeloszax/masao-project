@@ -84,7 +84,7 @@ class Settings(BaseSettings):
         ge=0,
     )
 
-    # TTL του in-process cache προφίλ αλλεργιών· 0 το απενεργοποιεί (tests).
+    # TTL του in-process cache προφίλ αλλεργιών· 0 το απενεργοποιεί.
     allergy_profile_cache_ttl_seconds: float = Field(
         default=float(
             os.getenv(

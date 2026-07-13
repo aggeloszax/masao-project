@@ -44,6 +44,10 @@ async def menu(
     try:
         customer_allergens: set[str] = set()
         if device_id:
+            # Ζέσταμα του menu cache πριν το profile lookup: η αναμονή στο
+            # single-flight lock δεν πρέπει να βρίσκει το request με ήδη
+            # δεσμευμένη σύνδεση (ίδιο pattern με το chat, βλ. handle_chat).
+            await service.fetch_items(language_code=language_code)
             # Fail-open: βλάβη στο allergy lookup δεν ρίχνει το μενού,
             # απλώς το σερβίρει χωρίς alerts (και καταγράφεται warning).
             customer_allergens = await allergy_service.try_get_customer_allergens(device_id.strip())
