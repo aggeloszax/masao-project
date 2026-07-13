@@ -758,6 +758,11 @@ class ChatService:
             menu_items = await self._fetch_menu_items(request.language_code)
             customer_allergens = await self._fetch_customer_allergens(request.device_id)
             history = await self._fetch_messages(session_id)
+            # Επιστροφή της σύνδεσης στο pool πριν το LLM: η κλήση κρατά
+            # δευτερόλεπτα, το pool έχει 30 slots — με ανοιχτό transaction
+            # εδώ, ~30 ταυτόχρονα μηνύματα αρκούν για pool exhaustion. Το
+            # insert του assistant message ανοίγει νέο transaction μετά.
+            await self.session.commit()
             assistant_content, recommendations = await self._generate_answer(
                 request=request,
                 menu_items=menu_items,
