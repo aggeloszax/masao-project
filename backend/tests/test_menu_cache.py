@@ -1,3 +1,5 @@
+import asyncio
+
 import pytest
 
 from api.services.admin_menu_service import AdminMenuService
@@ -173,3 +175,26 @@ async def test_admin_item_update_invalidates_menu_cache_after_commit() -> None:
     # ...και ακυρώνεται μόλις το commit ολοκληρωθεί (after_commit listener).
     invalidate_menu_cache_after_commit(admin_session)
     assert menu_cache.get("en", ttl_seconds=60.0) is None
+
+
+class SlowSession(FakeSession):
+    """FakeSession που αργεί, ώστε όλα τα tasks να προλάβουν το miss path."""
+
+    async def execute(self, statement, params=None) -> FakeResult:
+        self.execute_calls += 1
+        await asyncio.sleep(0.02)
+        return FakeResult(self.rows)
+
+
+@pytest.mark.asyncio
+async def test_concurrent_cold_cache_fetches_run_a_single_query() -> None:
+    """Anti-stampede: σε TTL expiry με N ταυτόχρονα requests, 1 query."""
+    session = SlowSession([MENU_ROW])
+    service = MenuService(session=session)
+
+    results = await asyncio.gather(
+        *(service.fetch_items(language_code="en") for _ in range(8))
+    )
+
+    assert session.execute_calls == 1
+    assert all(result == results[0] for result in results)

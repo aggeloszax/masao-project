@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import time
 from dataclasses import dataclass, field
 
@@ -123,6 +124,29 @@ def clear_menu_cache_flag_after_rollback(session: OrmSession) -> None:
         None.
     """
     session.info.pop(MENU_CACHE_DIRTY_KEY, None)
+
+
+# Ένα lock ανά γλώσσα: όταν λήγει το TTL με ταυτόχρονα requests, μόνο ένα
+# τρέχει το 4-πινάκων query· τα υπόλοιπα διαβάζουν το φρέσκο cache.
+_fetch_locks: dict[str, asyncio.Lock] = {}
+
+
+def _fetch_lock(language_code: str) -> asyncio.Lock:
+    """Return the per-language single-flight lock, creating it lazily.
+
+    Args:
+        language_code: Menu translation language (φραγμένο σύνολο — LanguageCode).
+
+    Returns:
+        asyncio.Lock: Shared lock for that language's cache fills.
+
+    Raises:
+        None.
+    """
+    lock = _fetch_locks.get(language_code)
+    if lock is None:
+        lock = _fetch_locks.setdefault(language_code, asyncio.Lock())
+    return lock
 
 
 @dataclass(frozen=True)
@@ -307,40 +331,46 @@ class MenuService:
         if cached is not None:
             return cached
 
-        result = await self.session.execute(
-            text(
-                """
-                select
-                    mi.id,
-                    mi.external_id,
-                    mc.id as category_id,
-                    mc.slug as category_slug,
-                    coalesce(mct.name, mc.name) as category_name,
-                    mc.display_order as category_display_order,
-                    coalesce(mit.name, mi.name) as name,
-                    coalesce(mit.description, mi.description) as description,
-                    mi.price,
-                    mi.tags,
-                    mi.allergens,
-                    mi.is_available,
-                    mi.display_order,
-                    :language_code as language_code
-                from menu_items mi
-                join menu_categories mc on mc.id = mi.category_id
-                left join menu_item_translations mit
-                    on mit.menu_item_id = mi.id
-                   and mit.language_code = :language_code
-                left join menu_category_translations mct
-                    on mct.category_id = mc.id
-                   and mct.language_code = :language_code
-                order by mc.display_order asc, mi.display_order asc, mi.id asc
-                """
-            ),
-            {"language_code": language_code},
-        )
-        items = [self._item_record(row) for row in result.mappings().all()]
-        menu_cache.store(language_code, items, settings.menu_cache_ttl_seconds)
-        return items
+        async with _fetch_lock(language_code):
+            # Double-check: όσο περιμέναμε το lock, ο πρώτος miss γέμισε το cache.
+            cached = menu_cache.get(language_code, settings.menu_cache_ttl_seconds)
+            if cached is not None:
+                return cached
+
+            result = await self.session.execute(
+                text(
+                    """
+                    select
+                        mi.id,
+                        mi.external_id,
+                        mc.id as category_id,
+                        mc.slug as category_slug,
+                        coalesce(mct.name, mc.name) as category_name,
+                        mc.display_order as category_display_order,
+                        coalesce(mit.name, mi.name) as name,
+                        coalesce(mit.description, mi.description) as description,
+                        mi.price,
+                        mi.tags,
+                        mi.allergens,
+                        mi.is_available,
+                        mi.display_order,
+                        :language_code as language_code
+                    from menu_items mi
+                    join menu_categories mc on mc.id = mi.category_id
+                    left join menu_item_translations mit
+                        on mit.menu_item_id = mi.id
+                       and mit.language_code = :language_code
+                    left join menu_category_translations mct
+                        on mct.category_id = mc.id
+                       and mct.language_code = :language_code
+                    order by mc.display_order asc, mi.display_order asc, mi.id asc
+                    """
+                ),
+                {"language_code": language_code},
+            )
+            items = [self._item_record(row) for row in result.mappings().all()]
+            menu_cache.store(language_code, items, settings.menu_cache_ttl_seconds)
+            return items
 
     @staticmethod
     def _item_record(row: RowMapping) -> MenuItemRecord:
