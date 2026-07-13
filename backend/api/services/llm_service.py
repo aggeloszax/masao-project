@@ -88,7 +88,9 @@ def build_persona_prompt(language_code: str) -> str:
         "- Menu items may list allergens in [allergens: ...]. If the guest mentions an "
         "allergy or a GUEST ALLERGY PROFILE is provided, NEVER suggest a dish containing "
         "those allergens without an explicit warning, and always advise confirming with "
-        "the staff. Items without listed allergens are unverified, not allergen-free.\n"
+        "the staff. Offer to ask the kitchen to leave the ingredient out where possible, "
+        "or point to a safe alternative. Items without listed allergens are unverified, "
+        "not allergen-free.\n"
         "- Gentle upselling: when the guest settles on food, suggest ONE specific "
         "matching drink or dessert from the menu — by name and price, with a short "
         "reason why it pairs well (and vice versa: suggest food to a drink order). "
@@ -147,8 +149,10 @@ def build_allergy_prompt(customer_allergens: list[str], language_code: str) -> s
         "GUEST ALLERGY PROFILE: the guest has declared allergies to: "
         f"{', '.join(customer_allergens)} ({localized}).\n"
         "Never recommend an item whose [allergens] list includes any of these without "
-        "a clear warning naming the allergen. Prefer safe alternatives, and remind the "
-        "guest to confirm with the staff because allergen data may be incomplete."
+        "a clear warning naming the allergen. When the guest asks about such an item, "
+        "remind them they can ask the kitchen to leave the ingredient out where "
+        "possible, or suggest a safe alternative instead. Remind the guest to confirm "
+        "with the staff because allergen data may be incomplete."
     )
 
 

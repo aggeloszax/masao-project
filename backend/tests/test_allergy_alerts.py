@@ -186,6 +186,7 @@ def test_build_allergy_prompt_names_codes_and_localized_labels() -> None:
     assert "crustaceans" in prompt
     assert "Crustaceans (shrimp, crab)" in prompt
     assert "confirm with the staff" in prompt
+    assert "leave the ingredient out" in prompt
 
 
 @pytest.mark.asyncio
@@ -232,3 +233,8 @@ def test_allergy_warning_keeps_format_placeholders(lang: str) -> None:
     text = FALLBACK_TEXTS[lang]["allergy_warning"]
     assert "{name}" in text
     assert "{allergens}" in text
+    # Το leading space είναι load-bearing (γίνεται append σε υπάρχον reply)
+    # και το format() πιάνει τυχόν αδέσποτα άγκιστρα από μελλοντικές αλλαγές.
+    assert text.startswith(" ")
+    formatted = text.format(name="X", allergens="Y")
+    assert "X" in formatted and "Y" in formatted
