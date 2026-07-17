@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import logging
 import re
 import unicodedata
@@ -21,6 +22,11 @@ from api.services.menu_service import MenuCandidate, MenuService
 from api.utils import device_log_hash
 
 logger = logging.getLogger(__name__)
+
+
+def device_storage_hash(device_id: str) -> str:
+    """Return the irreversible device identifier persisted with chat sessions."""
+    return hashlib.sha256(device_id.encode("utf-8")).hexdigest()
 
 
 STOPWORDS = {
@@ -759,6 +765,7 @@ class ChatService:
             # connection (αλλιώς: lock holder χωρίς connection + waiters με
             # connections = αμοιβαία αναμονή μέχρι το pool_timeout).
             menu_items = await self._fetch_menu_items(request.language_code)
+            await self._delete_expired_sessions()
             session_id = await self._get_or_create_session(request.device_id, request.table_number)
             await self._insert_message(session_id, "user", request.user_message)
             customer_allergens = await self._fetch_customer_allergens(request.device_id)
@@ -866,6 +873,7 @@ class ChatService:
         return answer.reply, answer.recommendations
 
     async def _get_or_create_session(self, device_id: str, table_number: int) -> UUID:
+        hashed_device_id = device_storage_hash(device_id)
         result = await self.session.execute(
             text(
                 """
@@ -876,9 +884,21 @@ class ChatService:
                 returning id
                 """
             ),
-            {"device_id": device_id, "table_number": table_number},
+            {"device_id": hashed_device_id, "table_number": table_number},
         )
         return result.scalar_one()
+
+    async def _delete_expired_sessions(self) -> None:
+        """Delete expired sessions; chat messages are removed by the foreign-key cascade."""
+        await self.session.execute(
+            text(
+                """
+                delete from chat_sessions
+                where created_at < now() - make_interval(days => :retention_days)
+                """
+            ),
+            {"retention_days": settings.chat_retention_days},
+        )
 
     async def _insert_message(self, session_id: UUID, role: str, content: str) -> ChatMessageResponse:
         result = await self.session.execute(

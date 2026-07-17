@@ -292,3 +292,10 @@ def chat_rate_limit_key(request: ChatRequest) -> str:
         None.
     """
     return f"chat:{request.restaurant_slug}:{request.table_number}:{request.device_id}"
+
+
+def chat_ip_rate_limit_key(client_host: str) -> str:
+    """Build a pseudonymous limiter key from the connection IP address."""
+    normalized_host = client_host.strip().lower() or "unknown"
+    host_hash = hashlib.sha256(normalized_host.encode("utf-8")).hexdigest()
+    return f"chat:ip:{host_hash}"

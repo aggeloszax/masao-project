@@ -2,13 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { getLocalized, menuGroups as staticMenuGroups, type MenuGroup } from "@/data/menu";
-import { GROUP_LABELS } from "@/i18n/config";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { MenuNav } from "@/components/MenuNav";
 import { MenuCard } from "@/components/MenuCard";
 import { Chat } from "@/components/Chat";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { fetchMenuGroups } from "@/lib/menu-api";
+import { resolveActiveGroupId, resolveMenuGroupLabel } from "@/lib/menu-selection";
 
 type MenuResult = {
   lang: string;
@@ -42,6 +42,7 @@ export function MenuApp() {
   const menuStatus = menuResult?.lang === lang ? menuResult.status : "loading";
   const menuGroups =
     menuResult?.lang === lang && menuResult.groups ? menuResult.groups : staticMenuGroups;
+  const activeGroupId = resolveActiveGroupId(menuGroups, selectedGroup);
   const itemCount = useMemo(
     () =>
       menuGroups.reduce(
@@ -54,12 +55,11 @@ export function MenuApp() {
 
   const tabs = menuGroups.map((group) => ({
     id: group.id,
-    label: group.label || GROUP_LABELS[group.id]?.[lang] || group.id,
+    label: resolveMenuGroupLabel(group, lang),
   }));
 
   // Εμφάνιση μόνο της επιλεγμένης κατηγορίας· fallback στην πρώτη αν λείπει.
-  const filteredGroups = menuGroups.filter((group) => group.id === selectedGroup);
-  const visibleGroups = filteredGroups.length > 0 ? filteredGroups : menuGroups.slice(0, 1);
+  const visibleGroups = menuGroups.filter((group) => group.id === activeGroupId);
 
   function handleSelectGroup(id: string) {
     setSelectedGroup(id);
@@ -94,7 +94,7 @@ export function MenuApp() {
         <p className="px-6 pb-3 text-center text-xs text-muted">{t.menuFallback}</p>
       )}
 
-      <MenuNav tabs={tabs} selected={selectedGroup} onSelect={handleSelectGroup} />
+      <MenuNav tabs={tabs} selected={activeGroupId} onSelect={handleSelectGroup} />
 
       <main className="px-6 pb-20">
         {visibleGroups.map((group) => (
@@ -102,7 +102,7 @@ export function MenuApp() {
             {/* Group header */}
             <div className="flex items-center gap-3">
               <h2 className="font-serif text-2xl uppercase tracking-[0.2em] text-accent">
-                {group.label || GROUP_LABELS[group.id]?.[lang] || group.id}
+                {resolveMenuGroupLabel(group, lang)}
               </h2>
               <div className="h-px flex-1 bg-hairline" />
             </div>
@@ -128,6 +128,9 @@ export function MenuApp() {
       </main>
 
       <footer className="border-t border-hairline px-6 py-8 text-center">
+        <p className="mx-auto mb-3 max-w-sm text-[11px] leading-relaxed text-muted">
+          {t.allergyNotice}
+        </p>
         <p className="text-xs tracking-wide text-muted">{t.footer(itemCount)}</p>
       </footer>
 

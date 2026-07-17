@@ -2,13 +2,19 @@ from __future__ import annotations
 
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from sqlalchemy.exc import SQLAlchemyError
 
-from api.dependencies import device_log_hash, get_chat_rate_limiter, get_chat_service
+from api.dependencies import device_log_hash, get_chat_ip_rate_limiter, get_chat_rate_limiter, get_chat_service
 from api.schemas.chat import ChatRequest, ChatResponse
 from api.services.chat_service import ChatService
-from api.services.rate_limiter import RateLimitBackendError, RateLimitDecision, RateLimiter, chat_rate_limit_key
+from api.services.rate_limiter import (
+    RateLimitBackendError,
+    RateLimitDecision,
+    RateLimiter,
+    chat_ip_rate_limit_key,
+    chat_rate_limit_key,
+)
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -18,8 +24,10 @@ router = APIRouter()
 async def chat(
     request: ChatRequest,
     response: Response,
+    http_request: Request,
     service: ChatService = Depends(get_chat_service),
     rate_limiter: RateLimiter = Depends(get_chat_rate_limiter),
+    ip_rate_limiter: RateLimiter = Depends(get_chat_ip_rate_limiter),
 ) -> ChatResponse:
     """Handle a restaurant chatbot message from the Next.js client.
 
@@ -41,6 +49,15 @@ async def chat(
                 status_code=429,
                 detail="Too many chat messages. Please wait before trying again.",
                 headers=rate_limit_headers(decision),
+            )
+
+        client_host = http_request.client.host if http_request.client is not None else "unknown"
+        ip_decision = await ip_rate_limiter.check(chat_ip_rate_limit_key(client_host))
+        if not ip_decision.allowed:
+            raise HTTPException(
+                status_code=429,
+                detail="Too many chat messages from this network. Please wait before trying again.",
+                headers=rate_limit_headers(ip_decision),
             )
 
         return await service.handle_chat(request)

@@ -6,7 +6,7 @@ services:
     runtime: python
     plan: free
     rootDir: backend
-    buildCommand: pip install -r requirements.txt
+    buildCommand: pip install -r requirements.lock
     startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /ready
     envVars:
@@ -32,6 +32,10 @@ services:
         value: masao
       - key: RATE_LIMIT_FAIL_CLOSED
         value: "true"
+      - key: CHAT_IP_RATE_LIMIT_REQUESTS
+        value: "120"
+      - key: CHAT_RETENTION_DAYS
+        value: "30"
       - key: REDIS_URL
         fromService:
           type: keyvalue

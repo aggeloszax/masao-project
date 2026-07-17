@@ -98,8 +98,10 @@ class Settings(BaseSettings):
     chat_history_limit: int = Field(default=_yaml_config.get("chat", {}).get("history_limit", 20))
     chat_max_user_message_chars: int = Field(default=_yaml_config.get("chat", {}).get("max_user_message_chars", 1000))
     chat_default_table_number: int = Field(default=_yaml_config.get("chat", {}).get("default_table_number", 1))
+    chat_retention_days: int = Field(default=_yaml_config.get("chat", {}).get("retention_days", 30), gt=0)
 
     chat_rate_limit_requests: int = Field(default=_yaml_config.get("rate_limit", {}).get("chat_requests", 20), gt=0)
+    chat_ip_rate_limit_requests: int = Field(default=_yaml_config.get("rate_limit", {}).get("chat_ip_requests", 120), gt=0)
     chat_rate_limit_window_seconds: int = Field(default=_yaml_config.get("rate_limit", {}).get("window_seconds", 60), gt=0)
     chat_rate_limit_max_buckets: int = Field(default=_yaml_config.get("rate_limit", {}).get("max_buckets", 5000), gt=0)
     chat_rate_limit_backend: str = Field(default=os.getenv("RATE_LIMIT_BACKEND", _yaml_config.get("rate_limit", {}).get("backend", "memory")))

@@ -56,6 +56,49 @@ export function Chat() {
 
   const nextId = useRef(1);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const previousBodyOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    inputRef.current?.focus();
+
+    function handleDialogKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setOpen(false);
+        return;
+      }
+
+      if (event.key !== "Tab") return;
+
+      const focusableElements = dialogRef.current?.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
+      );
+      if (!focusableElements?.length) return;
+
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+
+      if (event.shiftKey && document.activeElement === firstElement) {
+        event.preventDefault();
+        lastElement.focus();
+      } else if (!event.shiftKey && document.activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    }
+
+    document.addEventListener("keydown", handleDialogKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleDialogKeyDown);
+      document.body.style.overflow = previousBodyOverflow;
+      window.requestAnimationFrame(() => document.getElementById("masao-chat-launcher")?.focus());
+    };
+  }, [open]);
 
   // Auto-scroll to the latest message / typing indicator.
   useEffect(() => {
@@ -107,9 +150,12 @@ export function Chat() {
       <div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 mx-auto flex max-w-md justify-end px-5 pb-5">
         {!open && (
           <button
+            id="masao-chat-launcher"
             type="button"
             onClick={() => setOpen(true)}
             aria-label={t.chatLauncher}
+            aria-haspopup="dialog"
+            aria-expanded={open}
             className="pointer-events-auto flex h-14 items-center gap-2.5 rounded-full bg-accent px-5 text-white shadow-lg transition-transform active:scale-95"
           >
             <ChatIcon />
@@ -120,15 +166,27 @@ export function Chat() {
 
       {/* Chat panel */}
       {open && (
-        <div className="fixed inset-x-0 bottom-0 z-40 mx-auto flex max-w-md flex-col px-3 pb-3">
-          <div className="flex h-[70vh] flex-col overflow-hidden rounded-2xl border border-hairline bg-background shadow-2xl">
+        <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/20 px-3 pb-3">
+          <div
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="masao-chat-title"
+            aria-describedby="masao-chat-subtitle"
+            className="flex h-[70vh] w-full max-w-md flex-col overflow-hidden rounded-2xl border border-hairline bg-background shadow-2xl"
+          >
             {/* Header */}
             <header className="flex items-center justify-between border-b border-hairline px-4 py-3">
               <div>
-                <p className="font-serif text-sm uppercase tracking-[0.2em] text-accent">
+                <p
+                  id="masao-chat-title"
+                  className="font-serif text-sm uppercase tracking-[0.2em] text-accent"
+                >
                   Masao
                 </p>
-                <p className="text-[11px] text-muted">{t.chatSubtitle}</p>
+                <p id="masao-chat-subtitle" className="text-[11px] text-muted">
+                  {t.chatSubtitle}
+                </p>
               </div>
               <button
                 type="button"
@@ -159,11 +217,13 @@ export function Chat() {
             {/* Composer */}
             <form
               onSubmit={handleSubmit}
-              className="flex items-center gap-2 border-t border-hairline px-3 py-3"
+              className="flex flex-wrap items-center gap-2 border-t border-hairline px-3 py-3"
             >
               <input
+                ref={inputRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
+                maxLength={1000}
                 placeholder={t.chatPlaceholder}
                 aria-label={t.chatPlaceholder}
                 className="flex-1 rounded-full border border-hairline bg-surface px-4 py-2.5 text-base text-foreground outline-none placeholder:text-muted focus:border-accent"
@@ -176,6 +236,12 @@ export function Chat() {
               >
                 <SendIcon />
               </button>
+              <p className="basis-full px-1 pt-1 text-[10px] leading-relaxed text-muted">
+                {t.allergyNotice}
+              </p>
+              <p className="basis-full px-1 text-[10px] leading-relaxed text-muted">
+                {t.chatPrivacyNotice}
+              </p>
             </form>
           </div>
         </div>

@@ -19,7 +19,7 @@ from database import get_db_session
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=True)
 
 
-def create_chat_rate_limiter() -> RateLimiter:
+def create_chat_rate_limiter(limit: int | None = None) -> RateLimiter:
     """Create the configured chat rate limiter backend.
 
     Args:
@@ -31,12 +31,14 @@ def create_chat_rate_limiter() -> RateLimiter:
     Raises:
         RuntimeError: If Redis is selected without a Redis URL.
     """
+    effective_limit = limit if limit is not None else settings.chat_rate_limit_requests
+
     if settings.chat_rate_limit_backend == "redis":
         if not settings.redis_url:
             raise RuntimeError("RATE_LIMIT_BACKEND=redis requires REDIS_URL")
         return RedisRateLimiter(
             redis_url=settings.redis_url,
-            limit=settings.chat_rate_limit_requests,
+            limit=effective_limit,
             window_seconds=settings.chat_rate_limit_window_seconds,
             key_prefix=settings.redis_key_prefix,
             socket_timeout_seconds=settings.redis_socket_timeout_seconds,
@@ -45,7 +47,7 @@ def create_chat_rate_limiter() -> RateLimiter:
 
     if settings.chat_rate_limit_backend == "memory":
         return InMemoryRateLimiter(
-            limit=settings.chat_rate_limit_requests,
+            limit=effective_limit,
             window_seconds=settings.chat_rate_limit_window_seconds,
             max_buckets=settings.chat_rate_limit_max_buckets,
         )
@@ -54,6 +56,7 @@ def create_chat_rate_limiter() -> RateLimiter:
 
 
 chat_rate_limiter = create_chat_rate_limiter()
+chat_ip_rate_limiter = create_chat_rate_limiter(limit=settings.chat_ip_rate_limit_requests)
 
 
 async def verify_internal_api_key(api_key: str = Security(api_key_header)) -> str:
@@ -148,6 +151,11 @@ async def get_chat_rate_limiter() -> RateLimiter:
     return chat_rate_limiter
 
 
+async def get_chat_ip_rate_limiter() -> RateLimiter:
+    """Return the shared per-IP chat rate limiter."""
+    return chat_ip_rate_limiter
+
+
 async def close_chat_rate_limiter() -> None:
     """Close limiter resources during FastAPI shutdown.
 
@@ -160,9 +168,10 @@ async def close_chat_rate_limiter() -> None:
     Raises:
         Exception: If the configured limiter close operation fails.
     """
-    close = getattr(chat_rate_limiter, "aclose", None)
-    if close is not None:
-        await close()
+    for limiter in (chat_rate_limiter, chat_ip_rate_limiter):
+        close = getattr(limiter, "aclose", None)
+        if close is not None:
+            await close()
 
 
 async def check_chat_rate_limiter_ready() -> None:
@@ -177,6 +186,7 @@ async def check_chat_rate_limiter_ready() -> None:
     Raises:
         Exception: If the limiter backend is unavailable.
     """
-    healthcheck = getattr(chat_rate_limiter, "healthcheck", None)
-    if healthcheck is not None:
-        await healthcheck()
+    for limiter in (chat_rate_limiter, chat_ip_rate_limiter):
+        healthcheck = getattr(limiter, "healthcheck", None)
+        if healthcheck is not None:
+            await healthcheck()

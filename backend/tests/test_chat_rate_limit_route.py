@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from fastapi.testclient import TestClient
 
-from api.dependencies import get_chat_rate_limiter, get_chat_service
+from api.dependencies import get_chat_ip_rate_limiter, get_chat_rate_limiter, get_chat_service
 from api.main import app
 from api.schemas.chat import ChatMessageResponse, ChatRequest, ChatResponse
 from api.services.rate_limiter import InMemoryRateLimiter
@@ -33,7 +33,9 @@ class FakeChatService:
 
 def test_chat_route_returns_429_when_rate_limit_is_exceeded() -> None:
     limiter = InMemoryRateLimiter(limit=1, window_seconds=60, max_buckets=100)
+    ip_limiter = InMemoryRateLimiter(limit=100, window_seconds=60, max_buckets=100)
     app.dependency_overrides[get_chat_rate_limiter] = lambda: limiter
+    app.dependency_overrides[get_chat_ip_rate_limiter] = lambda: ip_limiter
     app.dependency_overrides[get_chat_service] = lambda: FakeChatService()
 
     payload = {
@@ -51,6 +53,34 @@ def test_chat_route_returns_429_when_rate_limit_is_exceeded() -> None:
 
         assert first.status_code == 200
         assert first.headers["X-RateLimit-Remaining"] == "0"
+        assert second.status_code == 429
+        assert second.headers["Retry-After"] == "60"
+    finally:
+        app.dependency_overrides.clear()
+
+
+def test_chat_route_ip_limit_cannot_be_bypassed_by_rotating_device_id() -> None:
+    device_limiter = InMemoryRateLimiter(limit=100, window_seconds=60, max_buckets=100)
+    ip_limiter = InMemoryRateLimiter(limit=1, window_seconds=60, max_buckets=100)
+    app.dependency_overrides[get_chat_rate_limiter] = lambda: device_limiter
+    app.dependency_overrides[get_chat_ip_rate_limiter] = lambda: ip_limiter
+    app.dependency_overrides[get_chat_service] = lambda: FakeChatService()
+
+    first_payload = {
+        "restaurant_slug": "masao",
+        "table_number": 12,
+        "device_id": "device-12345",
+        "user_message": "hello",
+        "language_code": "en",
+    }
+    second_payload = {**first_payload, "device_id": "device-67890"}
+
+    try:
+        with TestClient(app) as client:
+            first = client.post("/api/chat", json=first_payload)
+            second = client.post("/api/chat", json=second_payload)
+
+        assert first.status_code == 200
         assert second.status_code == 429
         assert second.headers["Retry-After"] == "60"
     finally:

@@ -1,4 +1,5 @@
 import type { Lang } from "@/i18n/config";
+import { fetchApi } from "@/lib/fetch-api";
 
 const DEVICE_STORAGE_KEY = "masao-device-id";
 const DEFAULT_API_BASE_URL = "http://localhost:8000";
@@ -85,7 +86,7 @@ export function getTableNumberFromUrl(): number {
 }
 
 export async function sendChatMessage(input: SendChatMessageInput): Promise<ChatApiResponse> {
-  const response = await fetch(`${getApiBaseUrl()}/api/chat`, {
+  const response = await fetchApi(`${getApiBaseUrl()}/api/chat`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

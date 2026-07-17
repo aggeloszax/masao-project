@@ -113,6 +113,9 @@ class ScriptedSession:
         if "from menu_items" in sql:
             self.calls.append("menu-select")
             return FakeResult([MENU_ROW])
+        if "delete from chat_sessions" in sql:
+            self.calls.append("retention-delete")
+            return FakeResult([])
         raise AssertionError(f"unexpected SQL: {sql}")
 
 

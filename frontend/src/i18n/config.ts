@@ -29,6 +29,8 @@ type UIStrings = {
   chatTyping: string;
   menuLoading: string;
   menuFallback: string;
+  allergyNotice: string;
+  chatPrivacyNotice: string;
   footer: (count: number) => string;
 };
 
@@ -47,6 +49,8 @@ export const UI: Record<Lang, UIStrings> = {
     chatTyping: "Ο σερβιτόρος πληκτρολογεί…",
     menuLoading: "Φόρτωση μενού…",
     menuFallback: "Προσωρινή εμφάνιση αποθηκευμένου μενού.",
+    allergyNotice: "Για αλλεργίες ή δυσανεξίες, παρακαλούμε ενημερώστε το προσωπικό πριν παραγγείλετε.",
+    chatPrivacyNotice: "Τα μηνύματα της συνομιλίας διατηρούνται έως 30 ημέρες για τη λειτουργία της υπηρεσίας.",
     footer: (n) => `${n} πιάτα & ποτά · Masao`,
   },
   en: {
@@ -63,6 +67,8 @@ export const UI: Record<Lang, UIStrings> = {
     chatTyping: "The waiter is typing…",
     menuLoading: "Loading menu…",
     menuFallback: "Showing the saved menu for now.",
+    allergyNotice: "For allergies or intolerances, please inform our staff before ordering.",
+    chatPrivacyNotice: "Chat messages are retained for up to 30 days to operate this service.",
     footer: (n) => `${n} dishes & drinks · Masao`,
   },
   de: {
@@ -79,6 +85,8 @@ export const UI: Record<Lang, UIStrings> = {
     chatTyping: "Der Kellner schreibt…",
     menuLoading: "Menü wird geladen…",
     menuFallback: "Vorübergehend wird das gespeicherte Menü angezeigt.",
+    allergyNotice: "Bei Allergien oder Unverträglichkeiten informieren Sie bitte vor der Bestellung unser Personal.",
+    chatPrivacyNotice: "Chatnachrichten werden für den Betrieb dieses Dienstes bis zu 30 Tage gespeichert.",
     footer: (n) => `${n} Gerichte & Getränke · Masao`,
   },
   it: {
@@ -95,6 +103,8 @@ export const UI: Record<Lang, UIStrings> = {
     chatTyping: "Il cameriere sta scrivendo…",
     menuLoading: "Caricamento del menu…",
     menuFallback: "Per ora viene mostrato il menu salvato.",
+    allergyNotice: "In caso di allergie o intolleranze, informate il personale prima di ordinare.",
+    chatPrivacyNotice: "I messaggi della chat vengono conservati fino a 30 giorni per il funzionamento del servizio.",
     footer: (n) => `${n} piatti e bevande · Masao`,
   },
   sv: {
@@ -111,6 +121,8 @@ export const UI: Record<Lang, UIStrings> = {
     chatTyping: "Kyparen skriver…",
     menuLoading: "Laddar menyn…",
     menuFallback: "Visar den sparade menyn tills vidare.",
+    allergyNotice: "Vid allergier eller intoleranser, informera personalen innan du beställer.",
+    chatPrivacyNotice: "Chattmeddelanden sparas i upp till 30 dagar för att tjänsten ska fungera.",
     footer: (n) => `${n} rätter & drycker · Masao`,
   },
 };

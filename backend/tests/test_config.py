@@ -49,3 +49,13 @@ def test_cors_origins_accept_comma_separated_render_env_value() -> None:
     )
 
     assert settings.cors_allowed_origins == ["https://masao.onrender.com", "https://masao.vercel.app"]
+
+
+def test_chat_retention_days_must_be_positive() -> None:
+    with pytest.raises(ValidationError, match="chat_retention_days"):
+        Settings(chat_retention_days=0)
+
+
+def test_chat_ip_rate_limit_must_be_positive() -> None:
+    with pytest.raises(ValidationError, match="chat_ip_rate_limit_requests"):
+        Settings(chat_ip_rate_limit_requests=0)

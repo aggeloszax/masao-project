@@ -53,7 +53,7 @@ Supabase PostgreSQL
 
 ```bash
 cd backend
-pip install -r requirements.txt
+pip install -r requirements.lock
 ```
 
 **Environment variables (copy `.env.example` -> `.env` and fill in):**
@@ -94,6 +94,7 @@ psql "$DATABASE_URL" -f backend/sql/001_init_masao_schema.sql
 psql "$DATABASE_URL" -f backend/sql/003_remove_hebrew_translations.sql  # only if old Hebrew-enabled schema exists
 psql "$DATABASE_URL" -f backend/sql/002_seed_full_menu_from_frontend.sql
 psql "$DATABASE_URL" -f backend/sql/004_add_allergens.sql  # allergy alerts: menu allergens + customer profiles
+psql "$DATABASE_URL" -f backend/sql/004_hash_device_ids_and_chat_retention.sql
 ```
 
 > ⚠️ Το `004_add_allergens.sql` κάνει best-effort seed των allergens από τις
@@ -114,6 +115,7 @@ backend/sql/001_init_masao_schema.sql
 backend/sql/003_remove_hebrew_translations.sql
 backend/sql/002_seed_full_menu_from_frontend.sql
 backend/sql/004_add_allergens.sql
+backend/sql/004_hash_device_ids_and_chat_retention.sql
 ```
 
 **Frontend environment for backend chat integration:**
@@ -936,6 +938,7 @@ The backend endpoint is ready. The frontend `MenuApp` has not been changed in th
 | 001_init_masao_schema.sql | backend/sql/ | SQL | Supabase/PostgreSQL schema |
 | 002_seed_full_menu_from_frontend.sql | backend/sql/ | SQL | Full menu seed generated from frontend JSON |
 | 003_remove_hebrew_translations.sql | backend/sql/ | SQL | Cleanup migration that removes old Hebrew rows and constraints |
+| 004_hash_device_ids_and_chat_retention.sql | backend/sql/ | SQL | Pseudonymizes existing device ids and adds the chat-retention index |
 | generate_menu_seed_sql.py | backend/scripts/ | Python | Deterministic SQL seed generator |
 | pipeline/runtime logs | backend/logs/ | Text | Future operational logs; gitignored |
 | API responses | HTTP JSON | JSON | Public menu, chat messages and recommendations for Next.js |
@@ -963,8 +966,10 @@ The backend endpoint is ready. The frontend `MenuApp` has not been changed in th
 | chat.history_limit | 20 | Maximum recent messages returned per response |
 | chat.max_user_message_chars | 1000 | Pydantic max length for user messages |
 | chat.default_table_number | 1 | Reserved default for future QR helpers |
+| chat.retention_days / CHAT_RETENTION_DAYS | 30 | Maximum age of stored chat sessions before automatic deletion |
 | rate_limit.backend | memory | Use `redis` in production, `memory` only for local development |
 | rate_limit.chat_requests | 20 | Allowed `/api/chat` requests per anonymous restaurant/table/device key |
+| rate_limit.chat_ip_requests / CHAT_IP_RATE_LIMIT_REQUESTS | 120 | Higher network-wide limit that prevents bypass by rotating device ids |
 | rate_limit.window_seconds | 60 | Sliding window in seconds for chat rate limiting |
 | rate_limit.max_buckets | 5000 | Maximum in-memory limiter buckets before pruning |
 | rate_limit.redis_url | empty | Managed Redis URL, usually supplied by `REDIS_URL` |
@@ -1058,6 +1063,7 @@ Use the SQL editor or Supabase migration tooling to apply:
 backend/sql/001_init_masao_schema.sql
 backend/sql/002_seed_full_menu_from_frontend.sql
 backend/sql/003_remove_hebrew_translations.sql
+backend/sql/004_hash_device_ids_and_chat_retention.sql
 ```
 
 **Staging (Render):**

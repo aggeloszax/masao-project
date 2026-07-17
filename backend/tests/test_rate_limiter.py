@@ -7,6 +7,7 @@ from api.services.rate_limiter import (
     RateLimitBackendError,
     RateLimitDecision,
     RedisRateLimiter,
+    chat_ip_rate_limit_key,
     chat_rate_limit_key,
 )
 
@@ -55,6 +56,14 @@ def test_chat_rate_limit_key_uses_restaurant_table_and_device() -> None:
     )
 
     assert chat_rate_limit_key(request) == "chat:masao:12:device-12345"
+
+
+def test_chat_ip_rate_limit_key_does_not_expose_raw_ip() -> None:
+    key = chat_ip_rate_limit_key("203.0.113.42")
+
+    assert key.startswith("chat:ip:")
+    assert "203.0.113.42" not in key
+    assert key == chat_ip_rate_limit_key("203.0.113.42")
 
 
 def test_rate_limit_headers_include_retry_after_only_when_blocked() -> None:

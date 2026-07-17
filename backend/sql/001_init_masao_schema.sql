@@ -98,3 +98,6 @@ create unique index if not exists uq_chat_sessions_active_device_table
 
 create index if not exists idx_chat_messages_session_created
     on chat_messages(session_id, created_at, id);
+
+create index if not exists idx_chat_sessions_created_at
+    on chat_sessions(created_at);

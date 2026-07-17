@@ -1,9 +1,16 @@
+from unittest.mock import AsyncMock, MagicMock
+from uuid import uuid4
+
+import pytest
+
 from api.services.chat_service import (
     FALLBACK_TEXTS,
+    ChatService,
     MenuCandidate,
     answer_menu_query,
     build_assistant_reply,
     choose_recommendations,
+    device_storage_hash,
     expand_terms,
     tokenize,
 )
@@ -16,6 +23,45 @@ def test_fallback_texts_have_identical_keys_in_every_language() -> None:
 
     for language_code, texts in FALLBACK_TEXTS.items():
         assert set(texts) == reference_keys, f"key mismatch for {language_code}"
+
+
+def test_device_storage_hash_is_stable_and_does_not_expose_raw_id() -> None:
+    raw_device_id = "device-12345678"
+
+    hashed = device_storage_hash(raw_device_id)
+
+    assert hashed == device_storage_hash(raw_device_id)
+    assert len(hashed) == 64
+    assert raw_device_id not in hashed
+
+
+@pytest.mark.asyncio
+async def test_get_or_create_session_persists_only_hashed_device_id() -> None:
+    session_id = uuid4()
+    result = MagicMock()
+    result.scalar_one.return_value = session_id
+    session = AsyncMock()
+    session.execute.return_value = result
+    service = ChatService(session=session)
+
+    returned_session_id = await service._get_or_create_session("device-12345678", 7)
+
+    params = session.execute.await_args.args[1]
+    assert returned_session_id == session_id
+    assert params["device_id"] == device_storage_hash("device-12345678")
+    assert params["device_id"] != "device-12345678"
+
+
+@pytest.mark.asyncio
+async def test_delete_expired_sessions_uses_configured_retention() -> None:
+    session = AsyncMock()
+    service = ChatService(session=session)
+
+    await service._delete_expired_sessions()
+
+    statement, params = session.execute.await_args.args
+    assert "delete from chat_sessions" in str(statement)
+    assert params["retention_days"] > 0
 
 
 def test_tokenize_supports_latin_input() -> None:
