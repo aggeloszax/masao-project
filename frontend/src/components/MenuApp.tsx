@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { getLocalized, menuGroups as staticMenuGroups, type MenuGroup } from "@/data/menu";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { MenuNav } from "@/components/MenuNav";
@@ -43,16 +43,6 @@ export function MenuApp() {
   const menuGroups =
     menuResult?.lang === lang && menuResult.groups ? menuResult.groups : staticMenuGroups;
   const activeGroupId = resolveActiveGroupId(menuGroups, selectedGroup);
-  const itemCount = useMemo(
-    () =>
-      menuGroups.reduce(
-        (count, group) =>
-          count + group.sections.reduce((total, section) => total + section.items.length, 0),
-        0,
-      ),
-    [menuGroups],
-  );
-
   const tabs = menuGroups.map((group) => ({
     id: group.id,
     label: resolveMenuGroupLabel(group, lang),
@@ -131,7 +121,6 @@ export function MenuApp() {
         <p className="mx-auto mb-3 max-w-sm text-[11px] leading-relaxed text-muted">
           {t.allergyNotice}
         </p>
-        <p className="text-xs tracking-wide text-muted">{t.footer(itemCount)}</p>
       </footer>
 
       <Chat />
