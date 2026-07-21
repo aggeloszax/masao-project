@@ -4,6 +4,7 @@ import { fetchApi } from "@/lib/fetch-api";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
 const MENU_ENDPOINT = "/api/menu";
+const MENU_TIMEOUT_MS = 30_000;
 
 type ApiMenuResponse = {
   restaurant_slug: string;
@@ -44,7 +45,7 @@ export async function fetchMenuGroups(lang: Lang): Promise<MenuGroup[]> {
       headers: { Accept: "application/json" },
       cache: "no-store",
     },
-    { retries: 1 },
+    { timeoutMs: MENU_TIMEOUT_MS, retries: 1 },
   );
 
   if (!response.ok) {

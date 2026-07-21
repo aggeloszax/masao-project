@@ -76,10 +76,6 @@ export function MenuApp() {
         <div className="mx-auto mt-6 h-px w-16 bg-accent" />
       </header>
 
-      {menuStatus === "loading" && (
-        <p className="px-6 pb-3 text-center text-xs text-muted">{t.menuLoading}</p>
-      )}
-
       {menuStatus === "fallback" && (
         <p className="px-6 pb-3 text-center text-xs text-muted">{t.menuFallback}</p>
       )}

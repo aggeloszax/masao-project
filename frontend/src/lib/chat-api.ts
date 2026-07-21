@@ -4,6 +4,8 @@ import { fetchApi } from "@/lib/fetch-api";
 const DEVICE_STORAGE_KEY = "masao-device-id";
 const DEFAULT_API_BASE_URL = "http://localhost:8000";
 const DEFAULT_TABLE_NUMBER = 1;
+const CHAT_TIMEOUT_MS = 75_000;
+const WARMUP_TIMEOUT_MS = 30_000;
 
 export type ChatApiRole = "user" | "assistant" | "system";
 
@@ -85,6 +87,18 @@ export function getTableNumberFromUrl(): number {
   return DEFAULT_TABLE_NUMBER;
 }
 
+export async function warmChatApi(): Promise<void> {
+  try {
+    await fetchApi(
+      `${getApiBaseUrl()}/health`,
+      { headers: { Accept: "application/json" } },
+      { timeoutMs: WARMUP_TIMEOUT_MS },
+    );
+  } catch {
+    // Best effort only: the request still wakes a sleeping Render instance.
+  }
+}
+
 export async function sendChatMessage(input: SendChatMessageInput): Promise<ChatApiResponse> {
   const response = await fetchApi(`${getApiBaseUrl()}/api/chat`, {
     method: "POST",
@@ -98,7 +112,7 @@ export async function sendChatMessage(input: SendChatMessageInput): Promise<Chat
       user_message: input.userMessage,
       language_code: input.languageCode,
     }),
-  });
+  }, { timeoutMs: CHAT_TIMEOUT_MS });
 
   if (!response.ok) {
     let detail = `Chat request failed with status ${response.status}`;

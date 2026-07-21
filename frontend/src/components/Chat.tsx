@@ -7,6 +7,7 @@ import {
   getOrCreateDeviceId,
   getTableNumberFromUrl,
   sendChatMessage,
+  warmChatApi,
   type ChatApiMenuItem,
   type ChatApiMessage,
 } from "@/lib/chat-api";
@@ -61,6 +62,8 @@ export function Chat() {
 
   useEffect(() => {
     if (!open) return;
+
+    void warmChatApi();
 
     const previousBodyOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
