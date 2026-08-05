@@ -140,8 +140,11 @@ Chat.tsx κάνει render τα returned messages σαν chat bubbles
 Υποστηριζόμενες τιμές:
 
 ```text
-el, en, de, it, sv
+el, en, de, it, sv, he
 ```
+
+Τα εβραϊκά (`he`) είναι RTL γλώσσα: το frontend γυρίζει αυτόματα το layout σε
+`dir="rtl"` μέσω του `isRtl()` στο `frontend/src/i18n/config.ts`.
 
 Το backend χρησιμοποιεί αυτό το `language_code` για να κάνει `LEFT JOIN` στα translation tables:
 
@@ -160,10 +163,10 @@ el, en, de, it, sv
 nycfqostjdjaynstaloo
 ```
 
-Το cleanup migration για αφαίρεση Hebrew (`backend/sql/003_remove_hebrew_translations.sql`) έχει επίσης εφαρμοστεί στο Supabase. Τα constraints των translation tables δέχονται πλέον μόνο:
+Το cleanup migration για αφαίρεση Hebrew (`backend/sql/003_remove_hebrew_translations.sql`) είχε εφαρμοστεί στο Supabase, αλλά τα Εβραϊκά επανήλθαν ως υποστηριζόμενη γλώσσα. Σε υπάρχουσες βάσεις πρέπει να τρέξει το `backend/sql/004_add_hebrew_language.sql` και μετά ξανά το `002_seed_full_menu_from_frontend.sql` (για τα Hebrew rows). Τα constraints των translation tables δέχονται πλέον:
 
 ```text
-el, en, de, it, sv
+el, en, de, it, sv, he
 ```
 
 Τα production tables είναι:

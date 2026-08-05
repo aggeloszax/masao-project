@@ -34,14 +34,14 @@ npm run start
 
 ## Menu Data
 
-Greek is the base language for menu records. English, German, Italian, and Swedish translations live under each item's `translations` object. The MVP language contract is `el`, `en`, `de`, `it`, and `sv`.
+Greek is the base language for menu records. English, German, Italian, Swedish, and Hebrew translations live under each item's `translations` object. The language contract is `el`, `en`, `de`, `it`, `sv`, and `he`. Hebrew is right-to-left; the app flips to `dir="rtl"` automatically via `isRtl()` in `src/i18n/config.ts`.
 
 Each menu item should keep:
 
 - a unique `id`
 - a positive numeric `price`
 - a base `name`, `description`, and `category`
-- translated `name`, `description`, and `category` for `en`, `de`, `it`, and `sv`
+- translated `name`, `description`, and `category` for `en`, `de`, `it`, `sv`, and `he`
 - dietary/flavour tags that reflect the actual ingredients
 
 ## Chat Integration

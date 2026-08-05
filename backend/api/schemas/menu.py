@@ -4,7 +4,7 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-LanguageCode = Literal["el", "en", "de", "it", "sv"]
+LanguageCode = Literal["el", "en", "de", "it", "sv", "he"]
 
 
 class MenuItemPublicResponse(BaseModel):

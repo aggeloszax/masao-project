@@ -18,6 +18,7 @@ LANGUAGE_NAMES = {
     "de": "German",
     "it": "Italian",
     "sv": "Swedish",
+    "he": "Hebrew",
 }
 
 RESPONSE_SCHEMA = {
@@ -52,7 +53,7 @@ def build_persona_prompt(language_code: str) -> str:
     """Build the waiter persona instructions for the system prompt.
 
     Args:
-        language_code: Guest language code (el, en, de, it, sv).
+        language_code: Guest language code (el, en, de, it, sv, he).
 
     Returns:
         str: Persona and behaviour rules for the assistant.

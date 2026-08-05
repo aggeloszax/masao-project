@@ -264,6 +264,26 @@ FALLBACK_TEXTS: dict[str, dict[str, str]] = {
             "Fråga personalen om det går att få utan, eller välj något annat."
         ),
     },
+    "he": {
+        "no_match": (
+            "אני יכול לעזור עם סושי, באו, נודלס, המבורגרים, קוקטיילים או נרגילה. "
+            "ספרו לי אם בא לכם משהו חריף, טבעוני, עם שרימפס, עם עוף או משהו מתוק."
+        ),
+        "suggest": "אני ממליץ על {name} ({price:.2f}€). {description}",
+        "also": " מתאימים גם: {names}.",
+        "detail": "{name} ({price:.2f}€) מכיל: {description}.",
+        "detail_generic": (
+            "לגבי {name} ({price:.2f}€), בתפריט כתוב: {description}. "
+            "אין לי רשימת מרכיבים מפורטת לפריט הזה, אז לא אמציא אותה."
+        ),
+        "overview_intro": "במשקאות יש את האפשרויות הבאות: ",
+        "overview_sample": "לדוגמה",
+        "overview_empty": "לא מצאתי אפשרויות זמינות בקטגוריה הזו.",
+        "allergy_warning": (
+            " שימו לב: {name} מכיל {allergens}, שהצהרתם עליהם כאלרגיה. "
+            "שאלו את הצוות אם אפשר בלי, או בחרו משהו אחר."
+        ),
+    },
 }
 
 

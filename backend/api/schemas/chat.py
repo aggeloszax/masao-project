@@ -12,7 +12,7 @@ class ChatRequest(BaseModel):
     table_number: int = Field(..., ge=1, le=999)
     device_id: str = Field(..., min_length=8, max_length=128)
     user_message: str = Field(..., min_length=1, max_length=1000)
-    language_code: Literal["el", "en", "de", "it", "sv"] = "el"
+    language_code: Literal["el", "en", "de", "it", "sv", "he"] = "el"
 
     @field_validator("restaurant_slug", "device_id", "user_message")
     @classmethod
@@ -39,7 +39,7 @@ class MenuItemResponse(BaseModel):
     price: float
     tags: list[str]
     is_available: bool
-    language_code: Literal["el", "en", "de", "it", "sv"]
+    language_code: Literal["el", "en", "de", "it", "sv", "he"]
     # Alert πεδία με βάση το allergy profile της συσκευής που στέλνει το chat.
     allergens: list[str] = []
     matched_allergens: list[str] = []
@@ -51,7 +51,7 @@ class ChatResponse(BaseModel):
     restaurant_slug: str
     table_number: int
     device_id: str
-    language_code: Literal["el", "en", "de", "it", "sv"]
+    language_code: Literal["el", "en", "de", "it", "sv", "he"]
     assistant_message: ChatMessageResponse
     messages: list[ChatMessageResponse]
     recommended_items: list[MenuItemResponse]

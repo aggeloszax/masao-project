@@ -29,14 +29,26 @@ def test_chat_request_accepts_language_code_from_nextjs() -> None:
     assert request.language_code == "en"
 
 
-def test_chat_request_rejects_hebrew_language_code() -> None:
+def test_chat_request_accepts_hebrew_language_code() -> None:
+    request = ChatRequest(
+        restaurant_slug="masao",
+        table_number=12,
+        device_id="device-12345",
+        user_message="hello",
+        language_code="he",
+    )
+
+    assert request.language_code == "he"
+
+
+def test_chat_request_rejects_unknown_language_code() -> None:
     with pytest.raises(ValidationError):
         ChatRequest(
             restaurant_slug="masao",
             table_number=12,
             device_id="device-12345",
             user_message="hello",
-            language_code="he",
+            language_code="fr",
         )
 
 

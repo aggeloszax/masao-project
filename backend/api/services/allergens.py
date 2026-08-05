@@ -112,6 +112,22 @@ ALLERGEN_LABELS: dict[str, dict[str, str]] = {
         "lupin": "Lupin",
         "molluscs": "Blötdjur",
     },
+    "he": {
+        "gluten": "גלוטן (דגנים)",
+        "crustaceans": "סרטנאים (שרימפס, סרטן)",
+        "eggs": "ביצים",
+        "fish": "דג",
+        "peanuts": "בוטנים",
+        "soybeans": "סויה",
+        "milk": "חלב (לקטוז)",
+        "nuts": "אגוזים",
+        "celery": "סלרי",
+        "mustard": "חרדל",
+        "sesame": "שומשום",
+        "sulphites": "סולפיטים",
+        "lupin": "תורמוס",
+        "molluscs": "רכיכות",
+    },
 }
 
 

@@ -23,6 +23,7 @@ const ERROR_COPY: Record<Lang, string> = {
   de: "Der Kellner ist gerade nicht verfügbar. Bitte versuchen Sie es gleich erneut.",
   it: "Il cameriere non è disponibile al momento. Riprovi tra poco.",
   sv: "Kyparen är inte tillgänglig just nu. Försök igen om en stund.",
+  he: "המלצר אינו זמין כרגע. נסו שוב בעוד רגע.",
 };
 
 const RATE_LIMIT_COPY: Record<Lang, string> = {
@@ -31,6 +32,7 @@ const RATE_LIMIT_COPY: Record<Lang, string> = {
   de: "Bitte warten Sie kurz, bevor Sie eine weitere Nachricht senden.",
   it: "Attenda un momento prima di inviare un altro messaggio.",
   sv: "Vänta en stund innan du skickar ett nytt meddelande.",
+  he: "המתינו רגע לפני שליחת הודעה נוספת.",
 };
 
 const SUGGESTIONS_COPY: Record<Lang, string> = {
@@ -39,6 +41,7 @@ const SUGGESTIONS_COPY: Record<Lang, string> = {
   de: "Vorschläge aus der Karte",
   it: "Suggerimenti dal menu",
   sv: "Förslag från menyn",
+  he: "הצעות מהתפריט",
 };
 
 export function Chat() {

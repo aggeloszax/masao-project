@@ -453,7 +453,7 @@ The Redis backend uses one atomic Lua script with a sorted set sliding window. L
 **Business logic it triggers:** Delegates Supabase menu reads and grouping to `MenuService`.
 
 **Errors it can return:**
-- `422` if `restaurant_slug` is unsupported or `language_code` is outside `el`, `en`, `de`, `it`, `sv`.
+- `422` if `restaurant_slug` is unsupported or `language_code` is outside `el`, `en`, `de`, `it`, `sv`, `he`.
 - `500` if database operations fail.
 
 #### `backend/api/services/menu_service.py`
@@ -643,7 +643,7 @@ Retry-After: 60       # only when response is 429
 
 ```text
 restaurant_slug=masao       # optional, defaults to masao
-language_code=en            # optional, defaults to el; allowed: el, en, de, it, sv
+language_code=en            # optional, defaults to el; allowed: el, en, de, it, sv, he
 include_unavailable=false   # optional, defaults to false
 ```
 

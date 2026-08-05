@@ -7,6 +7,7 @@ const REQUIRED_TRANSLATION_LANGS: Exclude<Lang, "el">[] = [
   "de",
   "it",
   "sv",
+  "he",
 ];
 
 describe("menu data invariants", () => {
