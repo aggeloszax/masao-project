@@ -11,12 +11,15 @@ class ChatRequest(BaseModel):
     restaurant_slug: str = Field(..., min_length=1, max_length=80)
     table_number: int = Field(..., ge=1, le=999)
     device_id: str = Field(..., min_length=8, max_length=128)
+    conversation_id: str | None = Field(default=None, min_length=8, max_length=128)
     user_message: str = Field(..., min_length=1, max_length=1000)
     language_code: Literal["el", "en", "de", "it", "sv", "he"] = "el"
 
-    @field_validator("restaurant_slug", "device_id", "user_message")
+    @field_validator("restaurant_slug", "device_id", "conversation_id", "user_message")
     @classmethod
-    def strip_text(cls, value: str) -> str:
+    def strip_text(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
         if not value.strip():
             raise ValueError("Field cannot be blank")
         return value.strip()

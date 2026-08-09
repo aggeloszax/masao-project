@@ -53,6 +53,23 @@ async def test_get_or_create_session_persists_only_hashed_device_id() -> None:
 
 
 @pytest.mark.asyncio
+async def test_get_or_create_session_separates_conversations_for_same_device() -> None:
+    session_id = uuid4()
+    result = MagicMock()
+    result.scalar_one.return_value = session_id
+    session = AsyncMock()
+    session.execute.return_value = result
+    service = ChatService(session=session)
+
+    await service._get_or_create_session("device-12345678", 7, "conversation-12345")
+
+    params = session.execute.await_args.args[1]
+    assert params["device_id"] == device_storage_hash(
+        "device-12345678:conversation-12345"
+    )
+
+
+@pytest.mark.asyncio
 async def test_delete_expired_sessions_uses_configured_retention() -> None:
     session = AsyncMock()
     service = ChatService(session=session)

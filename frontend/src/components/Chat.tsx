@@ -19,6 +19,12 @@ type Message = { id: string; role: "user" | "bot"; text: string };
 
 const RESTAURANT_SLUG = "masao";
 
+function createConversationId(): string {
+  return typeof window.crypto?.randomUUID === "function"
+    ? window.crypto.randomUUID()
+    : `chat-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
 const ERROR_COPY: Record<Lang, string> = {
   el: "Ο σερβιτόρος δεν είναι διαθέσιμος αυτή τη στιγμή. Δοκιμάστε ξανά σε λίγο.",
   en: "The waiter is unavailable right now. Please try again in a moment.",
@@ -55,6 +61,9 @@ export function Chat() {
   const [typing, setTyping] = useState(false);
   const [deviceId, setDeviceId] = useState(() =>
     typeof window === "undefined" ? "" : getOrCreateDeviceId(),
+  );
+  const [conversationId] = useState(() =>
+    typeof window === "undefined" ? "" : createConversationId(),
   );
   const [tableNumber] = useState(() =>
     typeof window === "undefined" ? 1 : (getTableNumberFromUrl() ?? 1),
@@ -135,10 +144,11 @@ export function Chat() {
         restaurantSlug: RESTAURANT_SLUG,
         tableNumber,
         deviceId: activeDeviceId,
+        conversationId: conversationId || createConversationId(),
         userMessage: text,
         languageCode: lang,
       });
-      setMessages(response.messages.map(mapApiMessage));
+      setMessages((prev) => [...prev, mapApiMessage(response.assistant_message)]);
       setRecommendedItems(response.recommended_items);
     } catch (error) {
       const text =

@@ -55,6 +55,7 @@ export type SendChatMessageInput = {
   restaurantSlug: string;
   tableNumber: number;
   deviceId: string;
+  conversationId: string;
   userMessage: string;
   languageCode: Lang;
 };
@@ -104,6 +105,7 @@ export async function sendChatMessage(input: SendChatMessageInput): Promise<Chat
       restaurant_slug: input.restaurantSlug,
       table_number: input.tableNumber,
       device_id: input.deviceId,
+      conversation_id: input.conversationId,
       user_message: input.userMessage,
       language_code: input.languageCode,
     }),

@@ -786,7 +786,11 @@ class ChatService:
             # connections = αμοιβαία αναμονή μέχρι το pool_timeout).
             menu_items = await self._fetch_menu_items(request.language_code)
             await self._delete_expired_sessions()
-            session_id = await self._get_or_create_session(request.device_id, request.table_number)
+            session_id = await self._get_or_create_session(
+                request.device_id,
+                request.table_number,
+                request.conversation_id,
+            )
             await self._insert_message(session_id, "user", request.user_message)
             customer_allergens = await self._fetch_customer_allergens(request.device_id)
             history = await self._fetch_messages(session_id)
@@ -892,8 +896,14 @@ class ChatService:
         )
         return answer.reply, answer.recommendations
 
-    async def _get_or_create_session(self, device_id: str, table_number: int) -> UUID:
-        hashed_device_id = device_storage_hash(device_id)
+    async def _get_or_create_session(
+        self,
+        device_id: str,
+        table_number: int,
+        conversation_id: str | None = None,
+    ) -> UUID:
+        session_identity = f"{device_id}:{conversation_id}" if conversation_id else device_id
+        hashed_device_id = device_storage_hash(session_identity)
         result = await self.session.execute(
             text(
                 """
