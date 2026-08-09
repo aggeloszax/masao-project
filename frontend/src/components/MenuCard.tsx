@@ -3,9 +3,12 @@
 import { getLocalized, type MenuItem } from "@/data/menu";
 import { translateTag } from "@/i18n/config";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { SELECTION_COPY } from "@/selection/copy";
+import { useSelection } from "@/selection/SelectionContext";
 
 export function MenuCard({ item }: { item: MenuItem }) {
   const { lang } = useLanguage();
+  const { addItem } = useSelection();
   const { name, description } = getLocalized(item, lang);
 
   return (
@@ -39,6 +42,15 @@ export function MenuCard({ item }: { item: MenuItem }) {
           ))}
         </ul>
       )}
+
+      <button
+        type="button"
+        onClick={() => addItem({ id: item.id, name, price: item.price })}
+        className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-accent px-3 py-1.5 text-xs font-semibold text-accent transition-colors hover:bg-accent hover:text-white active:scale-95"
+      >
+        <span aria-hidden>+</span>
+        {SELECTION_COPY[lang].add}
+      </button>
     </article>
   );
 }

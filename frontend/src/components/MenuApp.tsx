@@ -9,6 +9,7 @@ import { Chat } from "@/components/Chat";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { fetchMenuGroups } from "@/lib/menu-api";
 import { resolveActiveGroupId, resolveMenuGroupLabel } from "@/lib/menu-selection";
+import { SelectionPanel } from "@/selection/SelectionPanel";
 
 type MenuResult = {
   lang: string;
@@ -120,6 +121,7 @@ export function MenuApp() {
       </footer>
 
       <Chat />
+      <SelectionPanel />
     </div>
   );
 }

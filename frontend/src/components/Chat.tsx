@@ -12,6 +12,8 @@ import {
   type ChatApiMessage,
 } from "@/lib/chat-api";
 import type { Lang } from "@/i18n/config";
+import { SELECTION_COPY } from "@/selection/copy";
+import { useSelection } from "@/selection/SelectionContext";
 
 type Message = { id: string; role: "user" | "bot"; text: string };
 
@@ -55,7 +57,7 @@ export function Chat() {
     typeof window === "undefined" ? "" : getOrCreateDeviceId(),
   );
   const [tableNumber] = useState(() =>
-    typeof window === "undefined" ? 1 : getTableNumberFromUrl(),
+    typeof window === "undefined" ? 1 : (getTableNumberFromUrl() ?? 1),
   );
 
   const nextId = useRef(1);
@@ -282,6 +284,8 @@ function Bubble({ role, text }: { role: "user" | "bot"; text: string }) {
 }
 
 function RecommendedItems({ items, title }: { items: ChatApiMenuItem[]; title: string }) {
+  const { lang } = useLanguage();
+  const { addItem } = useSelection();
   return (
     <div className="space-y-2">
       <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent-soft">
@@ -299,6 +303,14 @@ function RecommendedItems({ items, title }: { items: ChatApiMenuItem[]; title: s
           {item.description && (
             <p className="mt-0.5 text-xs leading-relaxed text-muted">{item.description}</p>
           )}
+          <button
+            type="button"
+            onClick={() => addItem({ id: String(item.external_id ?? item.id), name: item.name, price: item.price })}
+            className="mt-2 inline-flex items-center gap-1 rounded-full border border-accent px-2.5 py-1 text-[11px] font-semibold text-accent"
+          >
+            <span aria-hidden>+</span>
+            {SELECTION_COPY[lang].add}
+          </button>
         </div>
       ))}
     </div>

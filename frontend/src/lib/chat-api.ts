@@ -1,9 +1,9 @@
 import type { Lang } from "@/i18n/config";
 import { fetchApi } from "@/lib/fetch-api";
+import { parseTableNumber } from "@/lib/table-context";
 
 const DEVICE_STORAGE_KEY = "masao-device-id";
 const DEFAULT_API_BASE_URL = "http://localhost:8000";
-const DEFAULT_TABLE_NUMBER = 1;
 const CHAT_TIMEOUT_MS = 75_000;
 const WARMUP_TIMEOUT_MS = 30_000;
 
@@ -76,15 +76,10 @@ export function getOrCreateDeviceId(): string {
   return next;
 }
 
-export function getTableNumberFromUrl(): number {
+export function getTableNumberFromUrl(): number | null {
   const params = new URLSearchParams(window.location.search);
   const raw = params.get("table") ?? params.get("table_number") ?? params.get("t");
-  const parsed = Number.parseInt(raw ?? "", 10);
-
-  if (Number.isInteger(parsed) && parsed > 0 && parsed <= 999) {
-    return parsed;
-  }
-  return DEFAULT_TABLE_NUMBER;
+  return parseTableNumber(raw);
 }
 
 export async function warmChatApi(): Promise<void> {
