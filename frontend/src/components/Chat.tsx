@@ -234,7 +234,7 @@ export function Chat() {
                 maxLength={1000}
                 placeholder={t.chatPlaceholder}
                 aria-label={t.chatPlaceholder}
-                className="flex-1 rounded-full border border-hairline bg-surface px-4 py-2.5 text-base text-foreground outline-none placeholder:text-muted focus:border-accent"
+                className="flex-1 touch-manipulation rounded-full border border-hairline bg-surface px-4 py-2.5 text-[16px] text-foreground outline-none placeholder:text-muted focus:border-accent"
               />
               <button
                 type="submit"
@@ -285,34 +285,41 @@ function Bubble({ role, text }: { role: "user" | "bot"; text: string }) {
 
 function RecommendedItems({ items, title }: { items: ChatApiMenuItem[]; title: string }) {
   const { lang } = useLanguage();
-  const { addItem } = useSelection();
+  const { addItem, items: selectedItems } = useSelection();
   return (
     <div className="space-y-2">
       <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent-soft">
         {title}
       </p>
-      {items.map((item) => (
-        <div
-          key={item.id}
-          className="rounded-2xl rounded-bl-sm border border-hairline bg-surface px-3.5 py-2.5"
-        >
-          <div className="flex items-baseline justify-between gap-3">
-            <p className="text-sm font-semibold text-foreground">{item.name}</p>
-            <p className="shrink-0 text-sm text-accent">{item.price.toFixed(2)}€</p>
-          </div>
-          {item.description && (
-            <p className="mt-0.5 text-xs leading-relaxed text-muted">{item.description}</p>
-          )}
-          <button
-            type="button"
-            onClick={() => addItem({ id: String(item.external_id ?? item.id), name: item.name, price: item.price })}
-            className="mt-2 inline-flex items-center gap-1 rounded-full border border-accent px-2.5 py-1 text-[11px] font-semibold text-accent"
+      {items.map((item) => {
+        const selectionId = String(item.external_id ?? item.id);
+        const isSelected = selectedItems.some((selectedItem) => selectedItem.id === selectionId);
+
+        return (
+          <div
+            key={item.id}
+            className="rounded-2xl rounded-bl-sm border border-hairline bg-surface px-3.5 py-2.5"
           >
-            <span aria-hidden>+</span>
-            {SELECTION_COPY[lang].add}
-          </button>
-        </div>
-      ))}
+            <div className="flex items-baseline justify-between gap-3">
+              <p className="text-sm font-semibold text-foreground">{item.name}</p>
+              <p className="shrink-0 text-sm text-accent">{item.price.toFixed(2)}€</p>
+            </div>
+            {item.description && (
+              <p className="mt-0.5 text-xs leading-relaxed text-muted">{item.description}</p>
+            )}
+            <button
+              type="button"
+              onClick={() => addItem({ id: selectionId, name: item.name, price: item.price })}
+              className={`mt-2 inline-flex items-center gap-1 rounded-full border border-accent px-2.5 py-1 text-[11px] font-semibold transition-colors ${
+                isSelected ? "bg-accent text-white" : "text-accent"
+              }`}
+            >
+              <span aria-hidden>{isSelected ? "✓" : "+"}</span>
+              {SELECTION_COPY[lang].add}
+            </button>
+          </div>
+        );
+      })}
     </div>
   );
 }
