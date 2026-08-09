@@ -40,11 +40,13 @@ export function SelectionPanel() {
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="pointer-events-auto flex h-14 items-center gap-2 rounded-full bg-foreground px-5 text-sm font-semibold text-background shadow-lg active:scale-95"
+            aria-label={`${copy.selection}: ${count}`}
+            className="pointer-events-auto relative flex h-14 w-14 items-center justify-center rounded-full bg-foreground text-background shadow-lg active:scale-95"
           >
             <BagIcon />
-            <span>{copy.selection}</span>
-            <span className="rounded-full bg-accent px-2 py-0.5 text-xs text-white">{count}</span>
+            <span className="absolute -end-1 -top-1 flex h-6 min-w-6 items-center justify-center rounded-full bg-accent px-1.5 text-[11px] font-bold text-white ring-2 ring-background">
+              {count}
+            </span>
           </button>
         </div>
       )}
