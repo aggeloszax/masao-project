@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import {
@@ -258,7 +259,10 @@ export function Chat() {
                 {t.allergyNotice}
               </p>
               <p className="basis-full px-1 text-[10px] leading-relaxed text-muted">
-                {t.chatPrivacyNotice}
+                {t.chatPrivacyNotice}{" "}
+                <Link href="/privacy" className="font-medium text-accent underline underline-offset-2">
+                  {t.privacyPolicy}
+                </Link>
               </p>
             </form>
           </div>

@@ -32,6 +32,7 @@ type UIStrings = {
   menuFallback: string;
   allergyNotice: string;
   chatPrivacyNotice: string;
+  privacyPolicy: string;
   footer: (count: number) => string;
 };
 
@@ -50,8 +51,9 @@ export const UI: Record<Lang, UIStrings> = {
     chatTyping: "Ο σερβιτόρος πληκτρολογεί…",
     menuLoading: "Φόρτωση μενού…",
     menuFallback: "Προσωρινή εμφάνιση αποθηκευμένου μενού.",
-    allergyNotice: "Για αλλεργίες ή δυσανεξίες, παρακαλούμε ενημερώστε το προσωπικό πριν παραγγείλετε.",
-    chatPrivacyNotice: "Τα μηνύματα της συνομιλίας διατηρούνται έως 30 ημέρες για τη λειτουργία της υπηρεσίας.",
+    allergyNotice: "Οι πληροφορίες αλλεργιογόνων και οι απαντήσεις του AI μπορεί να είναι ελλιπείς. Για αλλεργίες ή δυσανεξίες, ενημερώστε και επιβεβαιώστε πάντα με το προσωπικό πριν παραγγείλετε.",
+    chatPrivacyNotice: "Το chat επεξεργάζεται από AI και τα μηνύματα διατηρούνται έως 30 ημέρες. Μην γράφετε όνομα, τηλέφωνο ή άλλα στοιχεία ταυτοποίησης.",
+    privacyPolicy: "Πολιτική Απορρήτου",
     footer: (n) => `${n} πιάτα & ποτά · Masao`,
   },
   en: {
@@ -68,8 +70,9 @@ export const UI: Record<Lang, UIStrings> = {
     chatTyping: "The waiter is typing…",
     menuLoading: "Loading menu…",
     menuFallback: "Showing the saved menu for now.",
-    allergyNotice: "For allergies or intolerances, please inform our staff before ordering.",
-    chatPrivacyNotice: "Chat messages are retained for up to 30 days to operate this service.",
+    allergyNotice: "Allergen information and AI answers may be incomplete. For allergies or intolerances, always inform and confirm with our staff before ordering.",
+    chatPrivacyNotice: "The chat is processed by AI and messages are retained for up to 30 days. Do not enter your name, phone number or other identifying details.",
+    privacyPolicy: "Privacy Policy",
     footer: (n) => `${n} dishes & drinks · Masao`,
   },
   de: {
@@ -86,8 +89,9 @@ export const UI: Record<Lang, UIStrings> = {
     chatTyping: "Der Kellner schreibt…",
     menuLoading: "Menü wird geladen…",
     menuFallback: "Vorübergehend wird das gespeicherte Menü angezeigt.",
-    allergyNotice: "Bei Allergien oder Unverträglichkeiten informieren Sie bitte vor der Bestellung unser Personal.",
-    chatPrivacyNotice: "Chatnachrichten werden für den Betrieb dieses Dienstes bis zu 30 Tage gespeichert.",
+    allergyNotice: "Allergeninformationen und KI-Antworten können unvollständig sein. Informieren Sie bei Allergien oder Unverträglichkeiten vor der Bestellung immer unser Personal.",
+    chatPrivacyNotice: "Der Chat wird durch KI verarbeitet und Nachrichten werden bis zu 30 Tage gespeichert. Geben Sie keinen Namen, keine Telefonnummer oder andere Identifikationsdaten ein.",
+    privacyPolicy: "Datenschutzerklärung",
     footer: (n) => `${n} Gerichte & Getränke · Masao`,
   },
   it: {
@@ -104,8 +108,9 @@ export const UI: Record<Lang, UIStrings> = {
     chatTyping: "Il cameriere sta scrivendo…",
     menuLoading: "Caricamento del menu…",
     menuFallback: "Per ora viene mostrato il menu salvato.",
-    allergyNotice: "In caso di allergie o intolleranze, informate il personale prima di ordinare.",
-    chatPrivacyNotice: "I messaggi della chat vengono conservati fino a 30 giorni per il funzionamento del servizio.",
+    allergyNotice: "Le informazioni sugli allergeni e le risposte dell’AI possono essere incomplete. Per allergie o intolleranze, informate sempre il personale prima di ordinare.",
+    chatPrivacyNotice: "La chat è elaborata dall’AI e i messaggi sono conservati fino a 30 giorni. Non inserite nome, telefono o altri dati identificativi.",
+    privacyPolicy: "Informativa sulla privacy",
     footer: (n) => `${n} piatti e bevande · Masao`,
   },
   sv: {
@@ -122,8 +127,9 @@ export const UI: Record<Lang, UIStrings> = {
     chatTyping: "Kyparen skriver…",
     menuLoading: "Laddar menyn…",
     menuFallback: "Visar den sparade menyn tills vidare.",
-    allergyNotice: "Vid allergier eller intoleranser, informera personalen innan du beställer.",
-    chatPrivacyNotice: "Chattmeddelanden sparas i upp till 30 dagar för att tjänsten ska fungera.",
+    allergyNotice: "Allergeninformation och AI-svar kan vara ofullständiga. Vid allergier eller intoleranser ska du alltid informera personalen innan du beställer.",
+    chatPrivacyNotice: "Chatten behandlas av AI och meddelanden sparas i upp till 30 dagar. Ange inte namn, telefonnummer eller andra identifierande uppgifter.",
+    privacyPolicy: "Integritetspolicy",
     footer: (n) => `${n} rätter & drycker · Masao`,
   },
   he: {
@@ -140,8 +146,9 @@ export const UI: Record<Lang, UIStrings> = {
     chatTyping: "המלצר מקליד…",
     menuLoading: "התפריט נטען…",
     menuFallback: "מוצג כרגע התפריט השמור.",
-    allergyNotice: "במקרה של אלרגיות או רגישויות, אנא עדכנו את הצוות לפני ההזמנה.",
-    chatPrivacyNotice: "הודעות הצ'אט נשמרות עד 30 יום לצורך תפעול השירות.",
+    allergyNotice: "מידע על אלרגנים ותשובות ה-AI עלולים להיות חלקיים. במקרה של אלרגיה או רגישות יש תמיד ליידע ולאשר עם הצוות לפני ההזמנה.",
+    chatPrivacyNotice: "הצ'אט מעובד באמצעות AI וההודעות נשמרות עד 30 יום. אין להזין שם, מספר טלפון או פרטים מזהים אחרים.",
+    privacyPolicy: "מדיניות פרטיות",
     footer: (n) => `${n} מנות ומשקאות · Masao`,
   },
 };

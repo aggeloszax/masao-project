@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getLocalized, menuGroups as staticMenuGroups, type MenuGroup } from "@/data/menu";
 import { useLanguage } from "@/i18n/LanguageContext";
@@ -118,6 +119,9 @@ export function MenuApp() {
         <p className="mx-auto mb-3 max-w-sm text-[11px] leading-relaxed text-muted">
           {t.allergyNotice}
         </p>
+        <Link href="/privacy" className="text-[11px] font-medium text-accent underline underline-offset-4">
+          {t.privacyPolicy}
+        </Link>
       </footer>
 
       <Chat />

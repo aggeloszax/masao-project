@@ -120,10 +120,12 @@ function WaiterSummary({ tableNumber, onEdit }: { tableNumber: number | null; on
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex-1 overflow-y-auto px-6 py-7">
-        <div className="rounded-2xl bg-foreground px-5 py-4 text-center text-background">
-          <p className="text-xs uppercase tracking-[0.25em] opacity-70">{tableNumber ? copy.table : copy.noTable}</p>
-          {tableNumber && <p className="mt-1 font-serif text-5xl">{tableNumber}</p>}
-        </div>
+        {tableNumber && (
+          <div className="rounded-2xl bg-foreground px-5 py-4 text-center text-background">
+            <p className="text-xs uppercase tracking-[0.25em] opacity-70">{copy.table}</p>
+            <p className="mt-1 font-serif text-5xl">{tableNumber}</p>
+          </div>
+        )}
         <div className="mt-7 space-y-5">
           {items.map((item) => (
             <div key={item.id} className="flex gap-4 border-b border-hairline pb-5">
