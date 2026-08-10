@@ -13,7 +13,7 @@ import {
   type ChatApiMessage,
 } from "@/lib/chat-api";
 import type { Lang } from "@/i18n/config";
-import { SELECTION_COPY } from "@/selection/copy";
+import { SELECTION_ADDED_COPY, SELECTION_COPY } from "@/selection/copy";
 import { useSelection } from "@/selection/SelectionContext";
 
 type Message = { id: string; role: "user" | "bot"; text: string };
@@ -329,7 +329,7 @@ function RecommendedItems({ items, title }: { items: ChatApiMenuItem[]; title: s
               }`}
             >
               <span aria-hidden>{isSelected ? "✓" : "+"}</span>
-              {SELECTION_COPY[lang].add}
+              {isSelected ? SELECTION_ADDED_COPY[lang] : SELECTION_COPY[lang].add}
             </button>
           </div>
         );

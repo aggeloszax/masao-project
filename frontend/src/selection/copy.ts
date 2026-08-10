@@ -30,3 +30,12 @@ export const SELECTION_COPY: Record<Lang, SelectionCopy> = {
   sv: { add: "Lägg till", selection: "Mitt val", title: "Mitt val", empty: "Du har inte lagt till något ännu.", note: "Anteckning", notePlaceholder: "t.ex. utan lök", total: "Totalt", clear: "Rensa", clearConfirm: "Rensa hela ditt val?", showWaiter: "Redo att beställa", edit: "Redigera", waiterTitle: "Beställning", table: "Bord", noTable: "Inget bordsnummer", waiterHint: "Visa den här skärmen för kyparen", close: "Stäng", decrease: "Minska antal", increase: "Öka antal", remove: "Ta bort" },
   he: { add: "הוספה", selection: "הבחירה שלי", title: "הבחירה שלי", empty: "עדיין לא הוספתם פריטים.", note: "הערה", notePlaceholder: "למשל ללא בצל", total: "סה״כ", clear: "ניקוי", clearConfirm: "למחוק את כל הבחירה?", showWaiter: "מוכן להזמנה", edit: "עריכה", waiterTitle: "הזמנה", table: "שולחן", noTable: "ללא מספר שולחן", waiterHint: "הציגו את המסך למלצר", close: "סגירה", decrease: "הפחתת כמות", increase: "הגדלת כמות", remove: "הסרה" },
 };
+
+export const SELECTION_ADDED_COPY: Record<Lang, string> = {
+  el: "Προστέθηκε",
+  en: "Added",
+  de: "Hinzugefügt",
+  it: "Aggiunto",
+  sv: "Tillagd",
+  he: "נוסף",
+};

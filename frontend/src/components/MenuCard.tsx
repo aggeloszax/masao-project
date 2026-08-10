@@ -3,13 +3,14 @@
 import { getLocalized, type MenuItem } from "@/data/menu";
 import { translateTag } from "@/i18n/config";
 import { useLanguage } from "@/i18n/LanguageContext";
-import { SELECTION_COPY } from "@/selection/copy";
+import { SELECTION_ADDED_COPY, SELECTION_COPY } from "@/selection/copy";
 import { useSelection } from "@/selection/SelectionContext";
 
 export function MenuCard({ item }: { item: MenuItem }) {
   const { lang } = useLanguage();
-  const { addItem } = useSelection();
+  const { addItem, items: selectedItems } = useSelection();
   const { name, description } = getLocalized(item, lang);
+  const isSelected = selectedItems.some((selectedItem) => selectedItem.id === item.id);
 
   return (
     <article className="border-b border-hairline pb-5">
@@ -46,10 +47,12 @@ export function MenuCard({ item }: { item: MenuItem }) {
       <button
         type="button"
         onClick={() => addItem({ id: item.id, name, price: item.price })}
-        className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-accent px-3 py-1.5 text-xs font-semibold text-accent transition-colors hover:bg-accent hover:text-white active:scale-95"
+        className={`mt-3 inline-flex items-center gap-1.5 rounded-full border border-accent px-3 py-1.5 text-xs font-semibold transition-colors active:scale-95 ${
+          isSelected ? "bg-accent text-white" : "text-accent hover:bg-accent hover:text-white"
+        }`}
       >
-        <span aria-hidden>+</span>
-        {SELECTION_COPY[lang].add}
+        <span aria-hidden>{isSelected ? "✓" : "+"}</span>
+        {isSelected ? SELECTION_ADDED_COPY[lang] : SELECTION_COPY[lang].add}
       </button>
     </article>
   );
