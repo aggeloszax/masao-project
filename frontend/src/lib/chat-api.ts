@@ -86,7 +86,7 @@ export function getTableNumberFromUrl(): number | null {
 export async function warmChatApi(): Promise<void> {
   try {
     await fetchApi(
-      `${getApiBaseUrl()}/health`,
+      "/api/waiter/health",
       { headers: { Accept: "application/json" } },
       { timeoutMs: WARMUP_TIMEOUT_MS },
     );
@@ -96,7 +96,7 @@ export async function warmChatApi(): Promise<void> {
 }
 
 export async function sendChatMessage(input: SendChatMessageInput): Promise<ChatApiResponse> {
-  const response = await fetchApi(`${getApiBaseUrl()}/api/chat`, {
+  const response = await fetchApi("/api/waiter/chat", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
