@@ -17,6 +17,12 @@ const CHANGE_EVENT = "masao-selection-change";
 const EMPTY_SELECTION: SelectionItem[] = [];
 let selectionSnapshot: SelectionItem[] | null = null;
 
+// Η επιλογή ζει σε sessionStorage: επιβιώνει από refresh μέσα στην ίδια
+// επίσκεψη, αλλά δεν κουβαλιέται σε επόμενες επισκέψεις/πελάτες.
+function selectionStorage(): Storage {
+  return window.sessionStorage;
+}
+
 type SelectionContextValue = {
   items: SelectionItem[];
   count: number;
@@ -82,13 +88,16 @@ function subscribe(callback: () => void): () => void {
 
 function getSnapshot(): SelectionItem[] {
   if (selectionSnapshot === null) {
-    selectionSnapshot = parseStoredSelection(window.localStorage.getItem(STORAGE_KEY));
+    // Παλαιότερες εκδόσεις έγραφαν σε localStorage· καθάρισέ το ώστε να μην
+    // ξαναεμφανίζεται καλάθι από προηγούμενη επίσκεψη.
+    window.localStorage.removeItem(STORAGE_KEY);
+    selectionSnapshot = parseStoredSelection(selectionStorage().getItem(STORAGE_KEY));
   }
   return selectionSnapshot;
 }
 
 function updateSelection(update: (items: SelectionItem[]) => SelectionItem[]): void {
   selectionSnapshot = update(getSnapshot());
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(selectionSnapshot));
+  selectionStorage().setItem(STORAGE_KEY, JSON.stringify(selectionSnapshot));
   window.dispatchEvent(new Event(CHANGE_EVENT));
 }
