@@ -62,8 +62,7 @@ def test_build_persona_prompt_targets_guest_language() -> None:
 
     assert "German" in prompt
     assert "Never invent items" in prompt
-    assert "leave the ingredient out" in prompt
-    assert "never claim that an item is allergen-free or safe" in prompt
+    assert "confirm directly with restaurant staff" in prompt
 
 
 @pytest.mark.asyncio

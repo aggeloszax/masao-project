@@ -84,17 +84,6 @@ class Settings(BaseSettings):
         ge=0,
     )
 
-    # TTL του in-process cache προφίλ αλλεργιών· 0 το απενεργοποιεί.
-    allergy_profile_cache_ttl_seconds: float = Field(
-        default=float(
-            os.getenv(
-                "ALLERGY_PROFILE_CACHE_TTL_SECONDS",
-                _yaml_config.get("allergy", {}).get("profile_cache_ttl_seconds", 60.0),
-            )
-        ),
-        ge=0,
-    )
-
     chat_history_limit: int = Field(default=_yaml_config.get("chat", {}).get("history_limit", 20))
     chat_max_user_message_chars: int = Field(default=_yaml_config.get("chat", {}).get("max_user_message_chars", 1000))
     chat_default_table_number: int = Field(default=_yaml_config.get("chat", {}).get("default_table_number", 1))

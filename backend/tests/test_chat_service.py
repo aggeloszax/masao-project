@@ -27,7 +27,7 @@ def test_fallback_texts_have_identical_keys_in_every_language() -> None:
 
 def test_fallback_texts_cover_every_supported_language() -> None:
     # Guard: μια γλώσσα που μπαίνει στο LanguageCode χωρίς fallback κείμενα
-    # θα σέρβιρε σιωπηλά ελληνικά (μαζί με το allergy warning) στον guest.
+    # θα σέρβιρε σιωπηλά ελληνικά στον guest.
     from typing import get_args
 
     from api.schemas.menu import LanguageCode

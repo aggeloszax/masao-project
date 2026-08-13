@@ -15,8 +15,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.config import settings
 from api.schemas.chat import ChatMessageResponse, ChatRequest, ChatResponse, MenuItemResponse
-from api.services.allergens import format_allergen_names, match_allergens
-from api.services.allergy_service import AllergyService
 from api.services.llm_service import LlmUnavailableError, get_llm_chat_service
 from api.services.menu_service import MenuCandidate, MenuService
 from api.utils import device_log_hash
@@ -178,10 +176,6 @@ FALLBACK_TEXTS: dict[str, dict[str, str]] = {
         "overview_intro": "Στα ποτά υπάρχουν οι εξής επιλογές: ",
         "overview_sample": "Ενδεικτικά",
         "overview_empty": "Δεν βρήκα διαθέσιμες επιλογές σε αυτή την κατηγορία.",
-        "allergy_warning": (
-            " Προσοχή: το {name} περιέχει {allergens} που έχεις δηλώσει ως αλλεργία. "
-            "Ρώτησε το προσωπικό αν γίνεται χωρίς, αλλιώς προτίμησε κάτι άλλο."
-        ),
     },
     "en": {
         "no_match": (
@@ -198,10 +192,6 @@ FALLBACK_TEXTS: dict[str, dict[str, str]] = {
         "overview_intro": "Here are the drink options: ",
         "overview_sample": "For example",
         "overview_empty": "I couldn't find available options in that category.",
-        "allergy_warning": (
-            " Warning: {name} contains {allergens}, which you have declared as an allergy. "
-            "Ask the staff if you can have it without, or choose something else."
-        ),
     },
     "fr": {
         "no_match": "Je peux vous aider avec les sushis, baos, nouilles, burgers, cocktails ou la chicha. Dites-moi si vous préférez quelque chose d’épicé, vegan, aux crevettes, au poulet ou sucré.",
@@ -212,7 +202,6 @@ FALLBACK_TEXTS: dict[str, dict[str, str]] = {
         "overview_intro": "Voici les boissons disponibles : ",
         "overview_sample": "Par exemple",
         "overview_empty": "Je n’ai trouvé aucune option disponible dans cette catégorie.",
-        "allergy_warning": " Attention : {name} contient {allergens}, que vous avez signalé comme allergène. Demandez au personnel s’il est possible de le retirer ou choisissez autre chose.",
     },
     "ru": {
         "no_match": "Я могу помочь с суши, бао, лапшой, бургерами, коктейлями или кальяном. Скажите, хотите ли вы острое, веганское, с креветками, с курицей или сладкое.",
@@ -223,7 +212,6 @@ FALLBACK_TEXTS: dict[str, dict[str, str]] = {
         "overview_intro": "Доступны следующие напитки: ",
         "overview_sample": "Например",
         "overview_empty": "В этой категории нет доступных вариантов.",
-        "allergy_warning": " Внимание: {name} содержит {allergens}, который вы указали как аллерген. Уточните у персонала, можно ли убрать этот ингредиент, или выберите другое блюдо.",
     },
     "de": {
         "no_match": (
@@ -240,11 +228,6 @@ FALLBACK_TEXTS: dict[str, dict[str, str]] = {
         "overview_intro": "Bei den Getränken gibt es folgende Optionen: ",
         "overview_sample": "Zum Beispiel",
         "overview_empty": "Ich habe in dieser Kategorie keine verfügbaren Optionen gefunden.",
-        "allergy_warning": (
-            " Achtung: {name} enthält {allergens}, was Sie als Allergie angegeben haben. "
-            "Fragen Sie das Personal, ob es auch ohne geht, "
-            "oder wählen Sie lieber etwas anderes."
-        ),
     },
     "it": {
         "no_match": (
@@ -261,10 +244,6 @@ FALLBACK_TEXTS: dict[str, dict[str, str]] = {
         "overview_intro": "Per le bevande ci sono queste opzioni: ",
         "overview_sample": "Ad esempio",
         "overview_empty": "Non ho trovato opzioni disponibili in questa categoria.",
-        "allergy_warning": (
-            " Attenzione: {name} contiene {allergens}, che hai dichiarato come allergia. "
-            "Chiedi al personale se si può fare senza, oppure scegli qualcos'altro."
-        ),
     },
     "sv": {
         "no_match": (
@@ -281,10 +260,6 @@ FALLBACK_TEXTS: dict[str, dict[str, str]] = {
         "overview_intro": "Bland dryckerna finns följande alternativ: ",
         "overview_sample": "Till exempel",
         "overview_empty": "Jag hittade inga tillgängliga alternativ i den kategorin.",
-        "allergy_warning": (
-            " Varning: {name} innehåller {allergens}, som du har angett som allergi. "
-            "Fråga personalen om det går att få utan, eller välj något annat."
-        ),
     },
     "he": {
         "no_match": (
@@ -301,10 +276,6 @@ FALLBACK_TEXTS: dict[str, dict[str, str]] = {
         "overview_intro": "במשקאות יש את האפשרויות הבאות: ",
         "overview_sample": "לדוגמה",
         "overview_empty": "לא מצאתי אפשרויות זמינות בקטגוריה הזו.",
-        "allergy_warning": (
-            " שימו לב: {name} מכיל {allergens}, שהצהרתם עליהם כאלרגיה. "
-            "שאלו את הצוות אם אפשר בלי, או בחרו משהו אחר."
-        ),
     },
     "tr": {
         "no_match": (
@@ -321,10 +292,6 @@ FALLBACK_TEXTS: dict[str, dict[str, str]] = {
         "overview_intro": "İçeceklerde şu seçenekler var: ",
         "overview_sample": "Örneğin",
         "overview_empty": "Bu kategoride uygun seçenek bulamadım.",
-        "allergy_warning": (
-            " Dikkat: {name}, alerjiniz olarak bildirdiğiniz {allergens} içerir. "
-            "Personele bunsuz yapılıp yapılamayacağını sorun ya da başka bir şey seçin."
-        ),
     },
 }
 
@@ -664,7 +631,6 @@ def build_category_overview_reply(
     groups: set[str],
     menu_items: list[MenuCandidate],
     language_code: str = "el",
-    customer_allergens: set[str] | None = None,
 ) -> str:
     """Build a category overview for drinks/cocktails/wines style questions.
 
@@ -672,8 +638,6 @@ def build_category_overview_reply(
         groups: Requested high-level group ids.
         menu_items: Available menu candidates.
         language_code: Guest language code.
-        customer_allergens: Declared guest allergens; sampled items that match
-            get a warning appended (π.χ. θειώδη στα κρασιά).
 
     Returns:
         str: Assistant reply with category names and sample items.
@@ -683,7 +647,6 @@ def build_category_overview_reply(
     """
     texts = fallback_texts(language_code)
     lines = []
-    sampled_items: list[MenuCandidate] = []
     for group in ("cocktails", "drinks", "wines", "shisha"):
         if group not in groups:
             continue
@@ -692,48 +655,12 @@ def build_category_overview_reply(
             continue
         categories = sorted({item.category for item in grouped_items})
         samples = grouped_items[:3]
-        sampled_items.extend(samples)
         sample_names = ", ".join(item.name for item in samples)
         lines.append(f"{GROUP_LABELS[group]}: {', '.join(categories)}. {texts['overview_sample']}: {sample_names}.")
 
     if not lines:
         return texts["overview_empty"]
-    reply = texts["overview_intro"] + " ".join(lines)
-    return append_allergy_warnings(reply, sampled_items, customer_allergens or set(), language_code=language_code)
-
-
-def append_allergy_warnings(
-    reply: str,
-    items: list[MenuCandidate],
-    customer_allergens: set[str],
-    language_code: str = "el",
-) -> str:
-    """Append localized allergy warnings for flagged recommended items.
-
-    Args:
-        reply: Assistant reply built so far.
-        items: Menu items mentioned or recommended in the reply.
-        customer_allergens: Canonical allergen codes declared by the guest.
-        language_code: Guest language code.
-
-    Returns:
-        str: Reply with one warning sentence per flagged item.
-
-    Raises:
-        None.
-    """
-    if not customer_allergens:
-        return reply
-
-    texts = fallback_texts(language_code)
-    for item in items:
-        matched = match_allergens(item.allergens, customer_allergens)
-        if matched:
-            reply += texts["allergy_warning"].format(
-                name=item.name,
-                allergens=format_allergen_names(matched, language_code),
-            )
-    return reply
+    return texts["overview_intro"] + " ".join(lines)
 
 
 def answer_menu_query(
@@ -741,7 +668,6 @@ def answer_menu_query(
     menu_items: list[MenuCandidate],
     limit: int = 3,
     language_code: str = "el",
-    customer_allergens: set[str] | None = None,
 ) -> ChatAnswer:
     """Answer a menu query using deterministic intent handling.
 
@@ -750,7 +676,6 @@ def answer_menu_query(
         menu_items: Available menu candidates.
         limit: Maximum recommendation count.
         language_code: Guest language code.
-        customer_allergens: Declared guest allergens for reply warnings.
 
     Returns:
         ChatAnswer: Intent, assistant reply and recommended items.
@@ -758,12 +683,10 @@ def answer_menu_query(
     Raises:
         None.
     """
-    declared = customer_allergens or set()
     if is_item_detail_question(user_message):
         item = find_item_detail_match(user_message, menu_items)
         if item is not None:
             reply = build_item_detail_reply(item, language_code=language_code)
-            reply = append_allergy_warnings(reply, [item], declared, language_code=language_code)
             return ChatAnswer(intent="item_detail", reply=reply, recommendations=[item])
 
     groups = requested_groups(user_message)
@@ -774,14 +697,12 @@ def answer_menu_query(
                 groups,
                 menu_items,
                 language_code=language_code,
-                customer_allergens=declared,
             ),
             recommendations=[],
         )
 
     recommendations = choose_recommendations(user_message, menu_items, limit=limit)
     reply = build_assistant_reply(user_message, recommendations, language_code=language_code)
-    reply = append_allergy_warnings(reply, recommendations, declared, language_code=language_code)
     return ChatAnswer(intent="recommendation", reply=reply, recommendations=recommendations)
 
 
@@ -849,7 +770,6 @@ class ChatService:
                 request.conversation_id,
             )
             await self._insert_message(session_id, "user", request.user_message)
-            customer_allergens = await self._fetch_customer_allergens(request.device_id)
             history = await self._fetch_messages(session_id)
             # Επιστροφή της σύνδεσης στο pool πριν το LLM: η κλήση κρατά
             # δευτερόλεπτα, το pool έχει 30 slots — με ανοιχτό transaction
@@ -860,7 +780,6 @@ class ChatService:
                 request=request,
                 menu_items=menu_items,
                 history=history,
-                customer_allergens=customer_allergens,
             )
             assistant_message = await self._insert_message(session_id, "assistant", assistant_content)
             # Το history περιέχει ήδη το τρέχον user μήνυμα· χτίζουμε τη λίστα
@@ -889,9 +808,7 @@ class ChatService:
             language_code=request.language_code,
             assistant_message=assistant_message,
             messages=messages,
-            recommended_items=[
-                self._menu_response(item, customer_allergens) for item in recommendations
-            ],
+            recommended_items=[self._menu_response(item) for item in recommendations],
         )
 
     async def _generate_answer(
@@ -899,7 +816,6 @@ class ChatService:
         request: ChatRequest,
         menu_items: list[MenuCandidate],
         history: list[ChatMessageResponse],
-        customer_allergens: set[str] | None = None,
     ) -> tuple[str, list[MenuCandidate]]:
         """Produce the assistant reply, preferring the LLM over keyword matching.
 
@@ -907,7 +823,6 @@ class ChatService:
             request: Validated chat request.
             menu_items: Available menu candidates in the guest's language.
             history: Recent conversation messages ending with the current user message.
-            customer_allergens: Declared guest allergens for warnings.
 
         Returns:
             tuple[str, list[MenuCandidate]]: Reply text and recommended items.
@@ -915,7 +830,6 @@ class ChatService:
         Raises:
             None. LLM failures fall back to the deterministic answer.
         """
-        declared = customer_allergens or set()
         llm = get_llm_chat_service()
         if llm.is_configured():
             try:
@@ -923,7 +837,6 @@ class ChatService:
                     history=[(message.role, message.content) for message in history],
                     menu_items=menu_items,
                     language_code=request.language_code,
-                    customer_allergens=sorted(declared),
                 )
             except LlmUnavailableError:
                 logger.exception("LLM answer failed; using deterministic fallback")
@@ -934,22 +847,12 @@ class ChatService:
                     for item_id in llm_answer.recommended_item_ids
                     if item_id in items_by_id
                 ]
-                # Εγγυημένη προειδοποίηση και στο LLM path: το prompt ζητά
-                # warning αλλά η ασφάλεια δεν αφήνεται στη συμμόρφωση του
-                # μοντέλου. Τυχόν διπλή αναφορά είναι αποδεκτό κόστος.
-                reply = append_allergy_warnings(
-                    llm_answer.reply,
-                    recommendations,
-                    declared,
-                    language_code=request.language_code,
-                )
-                return reply, recommendations
+                return llm_answer.reply, recommendations
 
         answer = answer_menu_query(
             request.user_message,
             menu_items,
             language_code=request.language_code,
-            customer_allergens=declared,
         )
         return answer.reply, answer.recommendations
 
@@ -1022,9 +925,6 @@ class ChatService:
     async def _fetch_menu_items(self, language_code: str) -> list[MenuCandidate]:
         return await MenuService(self.session).fetch_candidates(language_code=language_code)
 
-    async def _fetch_customer_allergens(self, device_id: str) -> set[str]:
-        return await AllergyService(self.session).try_get_customer_allergens(device_id)
-
     @staticmethod
     def _message_response(row: RowMapping) -> ChatMessageResponse:
         return ChatMessageResponse(
@@ -1036,8 +936,7 @@ class ChatService:
         )
 
     @staticmethod
-    def _menu_response(item: MenuCandidate, customer_allergens: set[str] | None = None) -> MenuItemResponse:
-        matched = match_allergens(item.allergens, customer_allergens or set())
+    def _menu_response(item: MenuCandidate) -> MenuItemResponse:
         return MenuItemResponse(
             id=item.id,
             external_id=item.external_id,
@@ -1048,7 +947,4 @@ class ChatService:
             tags=item.tags,
             is_available=item.is_available,
             language_code=item.language_code,
-            allergens=item.allergens,
-            matched_allergens=matched,
-            allergen_alert=bool(matched),
         )

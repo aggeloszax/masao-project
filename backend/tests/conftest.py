@@ -1,7 +1,6 @@
 import pytest
 
 from api.services import menu_service
-from api.services.allergy_service import profile_cache
 from api.services.menu_service import menu_cache
 
 
@@ -14,9 +13,7 @@ def isolate_process_caches():
     test θα διέρρεε στο loop του επόμενου.
     """
     menu_cache.invalidate()
-    profile_cache.invalidate()
     menu_service._fetch_locks.clear()
     yield
     menu_cache.invalidate()
-    profile_cache.invalidate()
     menu_service._fetch_locks.clear()

@@ -100,8 +100,9 @@ postgresql+asyncpg://USER:PASSWORD@HOST:PORT/DATABASE
 ```bash
 psql "$DATABASE_URL" -f backend/sql/001_init_masao_schema.sql
 psql "$DATABASE_URL" -f backend/sql/002_seed_full_menu_from_frontend.sql
-psql "$DATABASE_URL" -f backend/sql/004_add_allergens.sql  # allergy alerts: menu allergens + customer profiles
+psql "$DATABASE_URL" -f backend/sql/004_add_allergens.sql  # retired no-op, kept for migration history
 psql "$DATABASE_URL" -f backend/sql/004_hash_device_ids_and_chat_retention.sql
+psql "$DATABASE_URL" -f backend/sql/008_remove_allergy_feature.sql
 ```
 
 > `003_remove_hebrew_translations.sql` is a superseded no-op kept for history —
@@ -112,10 +113,10 @@ psql "$DATABASE_URL" -f backend/sql/004_hash_device_ids_and_chat_retention.sql
 > `ON CONFLICT DO NOTHING`, so admin-edited data is never overwritten and the
 > 002 seed never needs to be re-run on a live database.
 
-> ⚠️ Το `004_add_allergens.sql` κάνει best-effort seed των allergens από τις
-> περιγραφές συστατικών. Το εστιατόριο πρέπει να επαληθεύσει τα allergens κάθε
-> πιάτου (μέσω `PATCH /api/admin/menu/items/{id}` με πεδίο `allergens`) πριν
-> θεωρηθούν αξιόπιστα τα alerts.
+> Το παλιό backend σύστημα προφίλ αλλεργιών έχει αποσυρθεί. Το
+> `004_add_allergens.sql` είναι πλέον τεκμηριωμένο no-op και το idempotent
+> `008_remove_allergy_feature.sql` διαγράφει τον παλιό πίνακα προφίλ και τη
+> στήλη του μενού από βάσεις όπου είχε εφαρμοστεί προηγούμενη έκδοση.
 
 On an **existing** database created before Hebrew/Turkish support, apply the language migrations (safe to re-run):
 
@@ -132,6 +133,7 @@ backend/sql/001_init_masao_schema.sql
 backend/sql/002_seed_full_menu_from_frontend.sql
 backend/sql/004_add_allergens.sql
 backend/sql/004_hash_device_ids_and_chat_retention.sql
+backend/sql/008_remove_allergy_feature.sql
 ```
 
 (and, for pre-existing databases only, `005_add_hebrew_translations.sql`, `006_add_french_russian_languages.sql` and `007_add_turkish_language.sql`).
@@ -987,11 +989,12 @@ The backend endpoint is ready. The frontend `MenuApp` has not been changed in th
 | 001_init_masao_schema.sql | backend/sql/ | SQL | Supabase/PostgreSQL schema |
 | 002_seed_full_menu_from_frontend.sql | backend/sql/ | SQL | Full menu seed generated from frontend JSON |
 | 003_remove_hebrew_translations.sql | backend/sql/ | SQL | Superseded no-op kept for history (old Hebrew removal) |
-| 004_add_allergens.sql | backend/sql/ | SQL | Allergy alerts: menu allergens + customer profiles |
+| 004_add_allergens.sql | backend/sql/ | SQL | Retired no-op kept for stable migration history |
 | 004_hash_device_ids_and_chat_retention.sql | backend/sql/ | SQL | Pseudonymizes existing device ids and adds the chat-retention index |
 | 005_add_hebrew_translations.sql | backend/sql/ | SQL | Widens language constraints for Hebrew |
 | 006_add_french_russian_languages.sql | backend/sql/ | SQL | Widens language constraints for French and Russian |
 | 007_add_turkish_language.sql | backend/sql/ | SQL | Self-contained Turkish migration: constraints + `tr` translation rows |
+| 008_remove_allergy_feature.sql | backend/sql/ | SQL | Idempotent removal of the retired profile table and menu column |
 | generate_menu_seed_sql.py | backend/scripts/ | Python | Deterministic SQL seed generator |
 | pipeline/runtime logs | backend/logs/ | Text | Future operational logs; gitignored |
 | API responses | HTTP JSON | JSON | Public menu, chat messages and recommendations for Next.js |
@@ -1124,6 +1127,7 @@ backend/sql/001_init_masao_schema.sql
 backend/sql/002_seed_full_menu_from_frontend.sql
 backend/sql/004_add_allergens.sql
 backend/sql/004_hash_device_ids_and_chat_retention.sql
+backend/sql/008_remove_allergy_feature.sql
 ```
 
 (Pre-existing databases additionally need `005_add_hebrew_translations.sql`,

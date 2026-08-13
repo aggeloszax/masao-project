@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from sqlalchemy import RowMapping, event, text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,7 +10,6 @@ from sqlalchemy.orm import Session as OrmSession
 
 from api.config import settings
 from api.schemas.menu import MenuCategoryPublicResponse, MenuItemPublicResponse, MenuResponse
-from api.services.allergens import match_allergens
 
 
 class MenuCache:
@@ -56,7 +55,7 @@ class MenuCache:
         Args:
             language_code: Menu translation language.
             items: Menu records to reuse across requests. Θεώρησέ τα αμετάβλητα:
-                τα ίδια αντικείμενα (και οι εσωτερικές λίστες tags/allergens)
+                τα ίδια αντικείμενα (και οι εσωτερικές λίστες tags)
                 μοιράζονται σε όλα τα requests μέχρι το invalidate/TTL.
             ttl_seconds: Cache policy; 0 or less disables storing entirely.
 
@@ -160,8 +159,6 @@ class MenuCandidate:
     tags: list[str]
     is_available: bool
     language_code: str
-    # Στο τέλος με default ώστε παλαιότερες positional κατασκευές να μη σπάνε.
-    allergens: list[str] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -179,20 +176,17 @@ class MenuItemRecord:
     is_available: bool
     display_order: int
     language_code: str
-    allergens: list[str] = field(default_factory=list)
 
 
 def group_menu_items(
     items: list[MenuItemRecord],
     include_unavailable: bool = False,
-    customer_allergens: set[str] | None = None,
 ) -> list[MenuCategoryPublicResponse]:
     """Group flat menu rows into frontend-friendly category sections.
 
     Args:
         items: Ordered menu records fetched from PostgreSQL.
         include_unavailable: Whether unavailable items should remain in the response.
-        customer_allergens: Declared guest allergens; matching items get allergen_alert.
 
     Returns:
         list[MenuCategoryPublicResponse]: Categories with nested items, preserving database display order.
@@ -200,7 +194,6 @@ def group_menu_items(
     Raises:
         None.
     """
-    declared = customer_allergens or set()
     categories: dict[int, MenuCategoryPublicResponse] = {}
     for item in items:
         if not include_unavailable and not item.is_available:
@@ -217,7 +210,6 @@ def group_menu_items(
             )
             categories[item.category_id] = category
 
-        matched = match_allergens(item.allergens, declared)
         category.items.append(
             MenuItemPublicResponse(
                 id=item.id,
@@ -229,9 +221,6 @@ def group_menu_items(
                 description=item.description,
                 price=item.price,
                 tags=item.tags,
-                allergens=item.allergens,
-                matched_allergens=matched,
-                allergen_alert=bool(matched),
                 is_available=item.is_available,
                 display_order=item.display_order,
                 language_code=item.language_code,  # type: ignore[arg-type]
@@ -250,7 +239,6 @@ class MenuService:
         restaurant_slug: str,
         language_code: str,
         include_unavailable: bool = False,
-        customer_allergens: set[str] | None = None,
     ) -> MenuResponse:
         """Fetch the public menu grouped for frontend rendering.
 
@@ -258,7 +246,6 @@ class MenuService:
             restaurant_slug: Restaurant identifier requested by the frontend.
             language_code: Requested translation language.
             include_unavailable: Whether unavailable items should be included.
-            customer_allergens: Declared guest allergens for alert annotation.
 
         Returns:
             MenuResponse: Grouped menu categories and items.
@@ -269,19 +256,16 @@ class MenuService:
         if restaurant_slug != settings.restaurant_slug:
             raise ValueError(f"Unsupported restaurant_slug: {restaurant_slug}")
 
-        declared = customer_allergens or set()
         items = await self.fetch_items(language_code=language_code)
         categories = group_menu_items(
             items,
             include_unavailable=include_unavailable,
-            customer_allergens=declared,
         )
         return MenuResponse(
             restaurant_slug=restaurant_slug,
             language_code=language_code,  # type: ignore[arg-type]
             total_categories=len(categories),
             total_items=sum(len(category.items) for category in categories),
-            customer_allergens=sorted(declared),
             categories=categories,
         )
 
@@ -307,7 +291,6 @@ class MenuService:
                 description=item.description,
                 price=item.price,
                 tags=item.tags,
-                allergens=item.allergens,
                 is_available=item.is_available,
                 language_code=item.language_code,
             )
@@ -371,7 +354,6 @@ class MenuService:
                     coalesce(mit.description, mi.description) as description,
                     mi.price,
                     mi.tags,
-                    mi.allergens,
                     mi.is_available,
                     mi.display_order,
                     :language_code as language_code
@@ -403,7 +385,6 @@ class MenuService:
             description=row["description"],
             price=float(row["price"]),
             tags=list(row["tags"] or []),
-            allergens=list(row["allergens"] or []),
             is_available=row["is_available"],
             display_order=row["display_order"],
             language_code=row["language_code"],

@@ -5,7 +5,6 @@ from typing import Any
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from api.schemas.menu import LanguageCode
-from api.services.allergens import normalize_allergens
 
 
 class NonEmptyPatchModel(BaseModel):
@@ -91,8 +90,6 @@ class MenuItemCreateRequest(BaseModel):
     description: str = Field(default="", max_length=4000)
     price: float = Field(..., ge=0)
     tags: list[str] = Field(default_factory=list)
-    # Όριο σε ακατέργαστες τιμές πριν το dedup· το validator εγγυάται ≤ 14.
-    allergens: list[str] = Field(default_factory=list, max_length=50)
     is_available: bool = True
     display_order: int = Field(default=0, ge=0)
 
@@ -117,12 +114,6 @@ class MenuItemCreateRequest(BaseModel):
         tags = [tag.strip() for tag in value if tag.strip()]
         return list(dict.fromkeys(tags))
 
-    @field_validator("allergens")
-    @classmethod
-    def validate_allergens(cls, value: list[str]) -> list[str]:
-        return normalize_allergens(value)
-
-
 class MenuItemUpdateRequest(NonEmptyPatchModel):
     category_id: int | None = Field(default=None, gt=0)
     external_id: str | None = Field(default=None, min_length=1, max_length=32)
@@ -130,7 +121,6 @@ class MenuItemUpdateRequest(NonEmptyPatchModel):
     description: str | None = Field(default=None, max_length=4000)
     price: float | None = Field(default=None, ge=0)
     tags: list[str] | None = None
-    allergens: list[str] | None = Field(default=None, max_length=50)
     is_available: bool | None = None
     display_order: int | None = Field(default=None, ge=0)
 
@@ -159,14 +149,6 @@ class MenuItemUpdateRequest(NonEmptyPatchModel):
         tags = [tag.strip() for tag in value if tag.strip()]
         return list(dict.fromkeys(tags))
 
-    @field_validator("allergens")
-    @classmethod
-    def validate_optional_allergens(cls, value: list[str] | None) -> list[str] | None:
-        if value is None:
-            return None
-        return normalize_allergens(value)
-
-
 class MenuItemAdminResponse(BaseModel):
     id: int
     external_id: str | None
@@ -175,7 +157,6 @@ class MenuItemAdminResponse(BaseModel):
     description: str
     price: float
     tags: list[str]
-    allergens: list[str]
     is_available: bool
     display_order: int
 

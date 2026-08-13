@@ -28,7 +28,6 @@ def make_record(item_id: int = 1) -> MenuItemRecord:
         is_available=True,
         display_order=1,
         language_code="en",
-        allergens=["fish"],
     )
 
 
@@ -123,7 +122,6 @@ MENU_ROW = {
     "description": "salmon",
     "price": 9.5,
     "tags": ["fresh"],
-    "allergens": ["fish"],
     "is_available": True,
     "display_order": 1,
     "language_code": "en",
@@ -158,7 +156,6 @@ async def test_admin_item_update_invalidates_menu_cache_after_commit() -> None:
         "description": "salmon",
         "price": 10.5,
         "tags": ["fresh"],
-        "allergens": ["fish"],
         "is_available": True,
         "display_order": 1,
     }

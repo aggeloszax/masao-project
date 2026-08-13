@@ -36,9 +36,6 @@ chat:
   default_table_number: 1
   retention_days: 30
 
-allergy:
-  profile_cache_ttl_seconds: 60.0
-
 rate_limit:
   backend: "memory"
   chat_requests: 20

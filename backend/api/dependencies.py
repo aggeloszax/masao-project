@@ -8,7 +8,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.config import settings
 from api.services.admin_menu_service import AdminMenuService
-from api.services.allergy_service import AllergyService
 from api.services.chat_service import ChatService
 from api.services.menu_service import MenuService
 from api.services.rate_limiter import InMemoryRateLimiter, RateLimiter, RedisRateLimiter
@@ -104,21 +103,6 @@ async def get_menu_service(session: AsyncSession = Depends(get_db_session)) -> M
         None.
     """
     return MenuService(session=session)
-
-
-async def get_allergy_service(session: AsyncSession = Depends(get_db_session)) -> AllergyService:
-    """Create an AllergyService bound to the current async DB session.
-
-    Args:
-        session: Async SQLAlchemy session injected by FastAPI.
-
-    Returns:
-        AllergyService: Service object for customer allergy profiles.
-
-    Raises:
-        None.
-    """
-    return AllergyService(session=session)
 
 
 async def get_admin_menu_service(session: AsyncSession = Depends(get_db_session)) -> AdminMenuService:

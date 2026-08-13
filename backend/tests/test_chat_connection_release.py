@@ -29,7 +29,6 @@ MENU_ROW = {
     "description": "salmon",
     "price": 9.5,
     "tags": ["fresh"],
-    "allergens": ["fish"],
     "is_available": True,
     "display_order": 1,
     "language_code": "en",
@@ -108,8 +107,6 @@ class ScriptedSession:
                     }
                 ]
             )
-        if "from customer_allergy_profiles" in sql:
-            return FakeResult([])
         if "from menu_items" in sql:
             self.calls.append("menu-select")
             return FakeResult([MENU_ROW])
@@ -127,7 +124,7 @@ async def test_handle_chat_commits_before_calling_the_llm(monkeypatch) -> None:
         def is_configured(self) -> bool:
             return True
 
-        async def answer(self, history, menu_items, language_code, customer_allergens=None):
+        async def answer(self, history, menu_items, language_code):
             calls.append("llm")
             return LlmAnswer(reply="Enjoy!", recommended_item_ids=[])
 

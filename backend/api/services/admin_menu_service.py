@@ -186,7 +186,6 @@ class AdminMenuService:
                     description,
                     price,
                     tags,
-                    allergens,
                     is_available,
                     display_order
                 )
@@ -197,11 +196,10 @@ class AdminMenuService:
                     :description,
                     :price,
                     :tags,
-                    :allergens,
                     :is_available,
                     :display_order
                 )
-                returning id, external_id, category_id, name, description, price, tags, allergens, is_available, display_order
+                returning id, external_id, category_id, name, description, price, tags, is_available, display_order
                 """
             ),
             request.model_dump(),
@@ -234,7 +232,6 @@ class AdminMenuService:
                 "description",
                 "price",
                 "tags",
-                "allergens",
                 "is_available",
                 "display_order",
             },
@@ -246,7 +243,7 @@ class AdminMenuService:
                 update menu_items
                 set {assignments}
                 where id = :item_id
-                returning id, external_id, category_id, name, description, price, tags, allergens, is_available, display_order
+                returning id, external_id, category_id, name, description, price, tags, is_available, display_order
                 """
             ),
             params,
@@ -338,7 +335,6 @@ class AdminMenuService:
             description=row["description"],
             price=float(row["price"]),
             tags=list(row["tags"] or []),
-            allergens=list(row["allergens"] or []),
             is_available=row["is_available"],
             display_order=row["display_order"],
         )
