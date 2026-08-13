@@ -10,7 +10,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[2]
 MENU_JSON = ROOT / "frontend" / "src" / "data" / "menu-mock.json"
 OUTPUT_SQL = ROOT / "backend" / "sql" / "002_seed_full_menu_from_frontend.sql"
-LANGUAGES = ("el", "en", "de", "it", "sv", "he")
+LANGUAGES = ("el", "en", "de", "it", "sv", "fr", "ru", "he")
 
 
 def sql_quote(value: str) -> str:

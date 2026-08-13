@@ -1,4 +1,6 @@
-export type Lang = "el" | "en" | "de" | "it" | "sv" | "he";
+import tagTranslationsFrRu from "@/data/tag-translations-fr-ru.json";
+
+export type Lang = "el" | "en" | "de" | "it" | "sv" | "fr" | "ru" | "he";
 
 export const DEFAULT_LANG: Lang = "el";
 
@@ -9,6 +11,8 @@ export const LANGUAGES: { code: Lang; label: string; flag: string; rtl?: boolean
   { code: "de", label: "Deutsch", flag: "🇩🇪" },
   { code: "it", label: "Italiano", flag: "🇮🇹" },
   { code: "sv", label: "Svenska", flag: "🇸🇪" },
+  { code: "fr", label: "Français", flag: "🇫🇷" },
+  { code: "ru", label: "Русский", flag: "🇷🇺" },
   { code: "he", label: "עברית", flag: "🇮🇱", rtl: true },
 ];
 
@@ -132,6 +136,42 @@ export const UI: Record<Lang, UIStrings> = {
     privacyPolicy: "Integritetspolicy",
     footer: (n) => `${n} rätter & drycker · Masao`,
   },
+  fr: {
+    tagline: "Asian Fusion Lounge",
+    selectLanguage: "Choisir la langue",
+    chatLauncher: "Discuter avec le serveur IA",
+    chatBadge: "Serveur IA",
+    chatSubtitle: "Votre serveur IA",
+    chatGreeting: "Bienvenue chez Masao ! Je suis votre serveur numérique. Posez-moi vos questions sur le menu ou dites-moi ce qui vous fait envie et je vous proposerai quelque chose.",
+    chatPlaceholder: "Écrivez un message…",
+    chatSend: "Envoyer",
+    chatClose: "Fermer",
+    chatTyping: "Le serveur écrit…",
+    menuLoading: "Chargement du menu…",
+    menuFallback: "Affichage temporaire du menu enregistré.",
+    allergyNotice: "Les informations sur les allergènes et les réponses de l’IA peuvent être incomplètes. En cas d’allergie ou d’intolérance, informez toujours le personnel et confirmez avec lui avant de commander.",
+    chatPrivacyNotice: "Le chat est traité par une IA et les messages sont conservés jusqu’à 30 jours. N’indiquez pas votre nom, votre numéro de téléphone ni d’autres informations permettant de vous identifier.",
+    privacyPolicy: "Politique de confidentialité",
+    footer: (n) => `${n} plats et boissons · Masao`,
+  },
+  ru: {
+    tagline: "Asian Fusion Lounge",
+    selectLanguage: "Выбрать язык",
+    chatLauncher: "Чат с ИИ-официантом",
+    chatBadge: "ИИ-официант",
+    chatSubtitle: "Ваш ИИ-официант",
+    chatGreeting: "Добро пожаловать в Masao! Я ваш цифровой официант. Спросите меня о меню или расскажите, чего вам хочется, и я что-нибудь порекомендую.",
+    chatPlaceholder: "Введите сообщение…",
+    chatSend: "Отправить",
+    chatClose: "Закрыть",
+    chatTyping: "Официант печатает…",
+    menuLoading: "Загрузка меню…",
+    menuFallback: "Временно показываем сохранённое меню.",
+    allergyNotice: "Информация об аллергенах и ответы ИИ могут быть неполными. При аллергии или непереносимости обязательно сообщите персоналу и уточните информацию перед заказом.",
+    chatPrivacyNotice: "Чат обрабатывается ИИ, а сообщения хранятся до 30 дней. Не указывайте имя, номер телефона и другие идентифицирующие данные.",
+    privacyPolicy: "Политика конфиденциальности",
+    footer: (n) => `${n} блюд и напитков · Masao`,
+  },
   he: {
     tagline: "Asian Fusion Lounge",
     selectLanguage: "בחירת שפה",
@@ -155,18 +195,18 @@ export const UI: Record<Lang, UIStrings> = {
 
 /** Localized labels for the high-level nav groups, keyed by group id. */
 export const GROUP_LABELS: Record<string, Record<Lang, string>> = {
-  sushi: { el: "Σούσι", en: "Sushi", de: "Sushi", it: "Sushi", sv: "Sushi", he: "סושי" },
-  bites: { el: "Ορεκτικά", en: "Bites", de: "Häppchen", it: "Stuzzichini", sv: "Tilltugg", he: "נשנושים" },
-  bao: { el: "Μπάο", en: "Bao", de: "Bao", it: "Bao", sv: "Bao", he: "באו" },
-  noodles: { el: "Νουντλς", en: "Noodles", de: "Nudeln", it: "Noodles", sv: "Nudlar", he: "נודלס" },
-  burgers: { el: "Μπέργκερ", en: "Burgers", de: "Burger", it: "Burger", sv: "Burgare", he: "המבורגרים" },
-  poke: { el: "Πόκε", en: "Poke", de: "Poke", it: "Poke", sv: "Poke", he: "פוקי" },
-  salads: { el: "Σαλάτες", en: "Salads", de: "Salate", it: "Insalate", sv: "Sallader", he: "סלטים" },
-  desserts: { el: "Επιδόρπια", en: "Desserts", de: "Desserts", it: "Dolci", sv: "Efterrätter", he: "קינוחים" },
-  cocktails: { el: "Κοκτέιλ", en: "Cocktails", de: "Cocktails", it: "Cocktail", sv: "Cocktails", he: "קוקטיילים" },
-  drinks: { el: "Ποτά", en: "Drinks", de: "Getränke", it: "Bevande", sv: "Drycker", he: "משקאות" },
-  wines: { el: "Κρασιά", en: "Wines", de: "Weine", it: "Vini", sv: "Viner", he: "יינות" },
-  shisha: { el: "Ναργιλές", en: "Shisha", de: "Shisha", it: "Shisha", sv: "Shisha", he: "נרגילה" },
+  sushi: { el: "Σούσι", en: "Sushi", de: "Sushi", it: "Sushi", sv: "Sushi", fr: "Sushi", ru: "Суши", he: "סושי" },
+  bites: { el: "Ορεκτικά", en: "Bites", de: "Häppchen", it: "Stuzzichini", sv: "Tilltugg", fr: "Entrées", ru: "Закуски", he: "נשנושים" },
+  bao: { el: "Μπάο", en: "Bao", de: "Bao", it: "Bao", sv: "Bao", fr: "Bao", ru: "Бао", he: "באו" },
+  noodles: { el: "Νουντλς", en: "Noodles", de: "Nudeln", it: "Noodles", sv: "Nudlar", fr: "Nouilles", ru: "Лапша", he: "נודלס" },
+  burgers: { el: "Μπέργκερ", en: "Burgers", de: "Burger", it: "Burger", sv: "Burgare", fr: "Burgers", ru: "Бургеры", he: "המבורגרים" },
+  poke: { el: "Πόκε", en: "Poke", de: "Poke", it: "Poke", sv: "Poke", fr: "Poke", ru: "Поке", he: "פוקי" },
+  salads: { el: "Σαλάτες", en: "Salads", de: "Salate", it: "Insalate", sv: "Sallader", fr: "Salades", ru: "Салаты", he: "סלטים" },
+  desserts: { el: "Επιδόρπια", en: "Desserts", de: "Desserts", it: "Dolci", sv: "Efterrätter", fr: "Desserts", ru: "Десерты", he: "קינוחים" },
+  cocktails: { el: "Κοκτέιλ", en: "Cocktails", de: "Cocktails", it: "Cocktail", sv: "Cocktails", fr: "Cocktails", ru: "Коктейли", he: "קוקטיילים" },
+  drinks: { el: "Ποτά", en: "Drinks", de: "Getränke", it: "Bevande", sv: "Drycker", fr: "Boissons", ru: "Напитки", he: "משקאות" },
+  wines: { el: "Κρασιά", en: "Wines", de: "Weine", it: "Vini", sv: "Viner", fr: "Vins", ru: "Вина", he: "יינות" },
+  shisha: { el: "Ναργιλές", en: "Shisha", de: "Shisha", it: "Shisha", sv: "Shisha", fr: "Chicha", ru: "Кальян", he: "נרגילה" },
 };
 
 /**
@@ -263,7 +303,12 @@ export const TAG_TRANSLATIONS: Record<string, Partial<Record<Lang, string>>> = {
 
 /** Translate a Greek tag token to the active language, falling back to the token. */
 export function translateTag(tag: string, lang: Lang): string {
-  return TAG_TRANSLATIONS[tag]?.[lang] ?? tag;
+  const translations = TAG_TRANSLATIONS[tag];
+  if (lang === "fr" || lang === "ru") {
+    const localized = tagTranslationsFrRu[tag as keyof typeof tagTranslationsFrRu];
+    return localized?.[lang] ?? translations?.en ?? tag;
+  }
+  return translations?.[lang] ?? tag;
 }
 
 /** Chatbot reply templates per language. */
@@ -309,6 +354,16 @@ export const REPLY: Record<
     also: (list) => ` Du kan också prova: ${list}.`,
     fallback:
       "Ursäkta, jag är inte riktigt säker på vad du letar efter. Föredrar du sushi, nudlar, burgare, cocktails eller shisha? Berätta vad du gillar så föreslår jag något!",
+  },
+  fr: {
+    suggest: (name, price, desc) => `Bien sûr ! Je vous conseille ${name} (${price} €), ${desc}. Qu’en pensez-vous ?`,
+    also: (list) => ` Vous pourriez également apprécier : ${list}.`,
+    fallback: "Désolé, je ne suis pas certain de ce que vous recherchez. Préférez-vous des sushis, des nouilles, un burger, un cocktail ou une chicha ? Dites-moi ce que vous aimez et je vous proposerai quelque chose !",
+  },
+  ru: {
+    suggest: (name, price, desc) => `Конечно! Рекомендую ${name} (${price} €), ${desc}. Как вам?`,
+    also: (list) => ` Вам также могут понравиться: ${list}.`,
+    fallback: "Извините, я не совсем понял, что вы ищете. Вы предпочитаете суши, лапшу, бургеры, коктейли или кальян? Расскажите, что вам нравится, и я что-нибудь порекомендую!",
   },
   he: {
     suggest: (name, price, desc) =>

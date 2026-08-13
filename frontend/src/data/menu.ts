@@ -29,7 +29,7 @@ export function getLocalized(item: MenuItem, lang: Lang): Translation {
       category: item.category,
     };
   }
-  const t = item.translations[lang];
+  const t = item.translations[lang] ?? ((lang === "fr" || lang === "ru") ? item.translations.en : undefined);
   return {
     name: t?.name ?? item.name,
     description: t?.description ?? splitDescription(item.description).primary,

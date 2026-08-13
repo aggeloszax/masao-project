@@ -60,7 +60,7 @@ def test_chat_request_rejects_unknown_language_code() -> None:
             table_number=12,
             device_id="device-12345",
             user_message="hello",
-            language_code="fr",
+            language_code="es",
         )
 
 

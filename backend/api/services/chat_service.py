@@ -203,6 +203,28 @@ FALLBACK_TEXTS: dict[str, dict[str, str]] = {
             "Ask the staff if you can have it without, or choose something else."
         ),
     },
+    "fr": {
+        "no_match": "Je peux vous aider avec les sushis, baos, nouilles, burgers, cocktails ou la chicha. Dites-moi si vous préférez quelque chose d’épicé, vegan, aux crevettes, au poulet ou sucré.",
+        "suggest": "Je vous recommande {name} ({price:.2f} €). {description}",
+        "also": " Ces choix correspondent aussi : {names}.",
+        "detail": "Le plat {name} ({price:.2f} €) contient : {description}.",
+        "detail_generic": "Pour {name} ({price:.2f} €), le menu indique : {description}. Je n’ai pas le détail complet des ingrédients et je préfère ne rien inventer.",
+        "overview_intro": "Voici les boissons disponibles : ",
+        "overview_sample": "Par exemple",
+        "overview_empty": "Je n’ai trouvé aucune option disponible dans cette catégorie.",
+        "allergy_warning": " Attention : {name} contient {allergens}, que vous avez signalé comme allergène. Demandez au personnel s’il est possible de le retirer ou choisissez autre chose.",
+    },
+    "ru": {
+        "no_match": "Я могу помочь с суши, бао, лапшой, бургерами, коктейлями или кальяном. Скажите, хотите ли вы острое, веганское, с креветками, с курицей или сладкое.",
+        "suggest": "Рекомендую {name} ({price:.2f} €). {description}",
+        "also": " Также подойдут: {names}.",
+        "detail": "В состав {name} ({price:.2f} €) входит: {description}.",
+        "detail_generic": "Для {name} ({price:.2f} €) в меню указано: {description}. У меня нет полного списка ингредиентов, поэтому я не буду ничего придумывать.",
+        "overview_intro": "Доступны следующие напитки: ",
+        "overview_sample": "Например",
+        "overview_empty": "В этой категории нет доступных вариантов.",
+        "allergy_warning": " Внимание: {name} содержит {allergens}, который вы указали как аллерген. Уточните у персонала, можно ли убрать этот ингредиент, или выберите другое блюдо.",
+    },
     "de": {
         "no_match": (
             "Ich kann mit Sushi, Bao, Noodles, Burgern, Cocktails oder Shisha helfen. "

@@ -227,7 +227,7 @@ async def test_llm_answer_puts_allergy_block_after_cached_menu_block() -> None:
     assert "cache_control" not in system_blocks[2]
 
 
-@pytest.mark.parametrize("lang", ["el", "en", "de", "it", "sv", "he"])
+@pytest.mark.parametrize("lang", ["el", "en", "de", "it", "sv", "fr", "ru", "he"])
 def test_allergy_warning_keeps_format_placeholders(lang: str) -> None:
     from api.services.chat_service import FALLBACK_TEXTS
 

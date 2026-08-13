@@ -32,7 +32,7 @@ create table if not exists menu_category_translations (
     created_at timestamp with time zone not null default now(),
     updated_at timestamp with time zone not null default now(),
     constraint uq_menu_category_translations_language unique (category_id, language_code),
-    constraint ck_menu_category_translations_language check (language_code in ('el', 'en', 'de', 'it', 'sv', 'he'))
+    constraint ck_menu_category_translations_language check (language_code in ('el', 'en', 'de', 'it', 'sv', 'fr', 'ru', 'he'))
 );
 
 create table if not exists menu_item_translations (
@@ -44,7 +44,7 @@ create table if not exists menu_item_translations (
     created_at timestamp with time zone not null default now(),
     updated_at timestamp with time zone not null default now(),
     constraint uq_menu_item_translations_language unique (menu_item_id, language_code),
-    constraint ck_menu_item_translations_language check (language_code in ('el', 'en', 'de', 'it', 'sv', 'he'))
+    constraint ck_menu_item_translations_language check (language_code in ('el', 'en', 'de', 'it', 'sv', 'fr', 'ru', 'he'))
 );
 
 create table if not exists chat_sessions (

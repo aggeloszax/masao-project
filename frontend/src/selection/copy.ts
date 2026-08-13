@@ -28,6 +28,8 @@ export const SELECTION_COPY: Record<Lang, SelectionCopy> = {
   de: { add: "Hinzufügen", selection: "Meine Auswahl", title: "Meine Auswahl", empty: "Sie haben noch nichts hinzugefügt.", note: "Hinweis", notePlaceholder: "z. B. ohne Zwiebeln", total: "Gesamt", clear: "Leeren", clearConfirm: "Ihre gesamte Auswahl löschen?", showWaiter: "Bestellbereit", edit: "Bearbeiten", waiterTitle: "Bestellung", table: "Tisch", noTable: "Keine Tischnummer", waiterHint: "Zeigen Sie diese Ansicht dem Kellner", close: "Schließen", decrease: "Menge verringern", increase: "Menge erhöhen", remove: "Entfernen" },
   it: { add: "Aggiungi", selection: "La mia scelta", title: "La mia scelta", empty: "Non hai ancora aggiunto nulla.", note: "Nota", notePlaceholder: "es. senza cipolla", total: "Totale", clear: "Svuota", clearConfirm: "Vuoi cancellare tutta la selezione?", showWaiter: "Pronto per ordinare", edit: "Modifica", waiterTitle: "Ordine", table: "Tavolo", noTable: "Nessun numero di tavolo", waiterHint: "Mostra questa schermata al cameriere", close: "Chiudi", decrease: "Riduci quantità", increase: "Aumenta quantità", remove: "Rimuovi" },
   sv: { add: "Lägg till", selection: "Mitt val", title: "Mitt val", empty: "Du har inte lagt till något ännu.", note: "Anteckning", notePlaceholder: "t.ex. utan lök", total: "Totalt", clear: "Rensa", clearConfirm: "Rensa hela ditt val?", showWaiter: "Redo att beställa", edit: "Redigera", waiterTitle: "Beställning", table: "Bord", noTable: "Inget bordsnummer", waiterHint: "Visa den här skärmen för kyparen", close: "Stäng", decrease: "Minska antal", increase: "Öka antal", remove: "Ta bort" },
+  fr: { add: "Ajouter", selection: "Ma sélection", title: "Ma sélection", empty: "Vous n’avez encore rien ajouté.", note: "Note", notePlaceholder: "ex. sans oignon", total: "Total", clear: "Vider", clearConfirm: "Vider toute votre sélection ?", showWaiter: "Prêt à commander", edit: "Modifier", waiterTitle: "Commande", table: "Table", noTable: "Aucun numéro de table", waiterHint: "Montrez cet écran à votre serveur", close: "Fermer", decrease: "Diminuer la quantité", increase: "Augmenter la quantité", remove: "Retirer" },
+  ru: { add: "Добавить", selection: "Мой выбор", title: "Мой выбор", empty: "Вы пока ничего не добавили.", note: "Примечание", notePlaceholder: "например, без лука", total: "Итого", clear: "Очистить", clearConfirm: "Очистить весь список?", showWaiter: "Готово к заказу", edit: "Изменить", waiterTitle: "Заказ", table: "Стол", noTable: "Без номера стола", waiterHint: "Покажите этот экран официанту", close: "Закрыть", decrease: "Уменьшить количество", increase: "Увеличить количество", remove: "Удалить" },
   he: { add: "הוספה", selection: "הבחירה שלי", title: "הבחירה שלי", empty: "עדיין לא הוספתם פריטים.", note: "הערה", notePlaceholder: "למשל ללא בצל", total: "סה״כ", clear: "ניקוי", clearConfirm: "למחוק את כל הבחירה?", showWaiter: "מוכן להזמנה", edit: "עריכה", waiterTitle: "הזמנה", table: "שולחן", noTable: "ללא מספר שולחן", waiterHint: "הציגו את המסך למלצר", close: "סגירה", decrease: "הפחתת כמות", increase: "הגדלת כמות", remove: "הסרה" },
 };
 
@@ -37,5 +39,7 @@ export const SELECTION_ADDED_COPY: Record<Lang, string> = {
   de: "Hinzugefügt",
   it: "Aggiunto",
   sv: "Tillagd",
+  fr: "Ajouté",
+  ru: "Добавлено",
   he: "נוסף",
 };
