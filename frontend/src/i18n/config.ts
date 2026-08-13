@@ -2,7 +2,15 @@ import tagTranslationsFrRu from "@/data/tag-translations-fr-ru.json";
 
 export type Lang = "el" | "en" | "de" | "it" | "sv" | "fr" | "ru" | "he" | "tr";
 
-export const DEFAULT_LANG: Lang = "el";
+/** Initial UI language for guests who have not picked one yet. */
+export const DEFAULT_LANG: Lang = "en";
+
+/**
+ * Canonical language of the menu records: item name/description/category are
+ * stored in Greek and every other language lives under `translations`. This
+ * is a data-model fact — independent of which UI language greets the guest.
+ */
+export const BASE_LANG: Lang = "el";
 
 /**
  * Languages offered in the selector. `flagCode` is the ISO country code used

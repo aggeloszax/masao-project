@@ -59,7 +59,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="el"
+      lang="en"
       className={`${inter.variable} ${notoHebrew.variable} ${playfair.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>

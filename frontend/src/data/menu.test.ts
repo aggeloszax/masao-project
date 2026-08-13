@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_LANG, LANGUAGES, type Lang } from "@/i18n/config";
+import { BASE_LANG, LANGUAGES, type Lang } from "@/i18n/config";
 import { menu } from "./menu";
 
 // Derived from the selector so a language added to LANGUAGES cannot ship
-// without menu translations.
+// without menu translations. Greek is the base record, not a translation.
 const REQUIRED_TRANSLATION_LANGS = LANGUAGES.map((l) => l.code).filter(
-  (code): code is Exclude<Lang, "el"> => code !== DEFAULT_LANG,
+  (code): code is Exclude<Lang, "el"> => code !== BASE_LANG,
 );
 
 describe("menu data invariants", () => {
