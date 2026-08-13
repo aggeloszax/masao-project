@@ -31,6 +31,7 @@ export const SELECTION_COPY: Record<Lang, SelectionCopy> = {
   fr: { add: "Ajouter", selection: "Ma sélection", title: "Ma sélection", empty: "Vous n’avez encore rien ajouté.", note: "Note", notePlaceholder: "ex. sans oignon", total: "Total", clear: "Vider", clearConfirm: "Vider toute votre sélection ?", showWaiter: "Prêt à commander", edit: "Modifier", waiterTitle: "Commande", table: "Table", noTable: "Aucun numéro de table", waiterHint: "Montrez cet écran à votre serveur", close: "Fermer", decrease: "Diminuer la quantité", increase: "Augmenter la quantité", remove: "Retirer" },
   ru: { add: "Добавить", selection: "Мой выбор", title: "Мой выбор", empty: "Вы пока ничего не добавили.", note: "Примечание", notePlaceholder: "например, без лука", total: "Итого", clear: "Очистить", clearConfirm: "Очистить весь список?", showWaiter: "Готово к заказу", edit: "Изменить", waiterTitle: "Заказ", table: "Стол", noTable: "Без номера стола", waiterHint: "Покажите этот экран официанту", close: "Закрыть", decrease: "Уменьшить количество", increase: "Увеличить количество", remove: "Удалить" },
   he: { add: "הוספה", selection: "הבחירה שלי", title: "הבחירה שלי", empty: "עדיין לא הוספתם פריטים.", note: "הערה", notePlaceholder: "למשל ללא בצל", total: "סה״כ", clear: "ניקוי", clearConfirm: "למחוק את כל הבחירה?", showWaiter: "מוכן להזמנה", edit: "עריכה", waiterTitle: "הזמנה", table: "שולחן", noTable: "ללא מספר שולחן", waiterHint: "הציגו את המסך למלצר", close: "סגירה", decrease: "הפחתת כמות", increase: "הגדלת כמות", remove: "הסרה" },
+  tr: { add: "Ekle", selection: "Seçimim", title: "Seçimim", empty: "Henüz bir şey eklemediniz.", note: "Not", notePlaceholder: "örn. soğansız", total: "Toplam", clear: "Temizle", clearConfirm: "Tüm seçiminiz silinsin mi?", showWaiter: "Sipariş için hazır", edit: "Düzenle", waiterTitle: "Sipariş", table: "Masa", noTable: "Masa numarası yok", waiterHint: "Bu ekranı garsona gösterin", close: "Kapat", decrease: "Adedi azalt", increase: "Adedi artır", remove: "Kaldır" },
 };
 
 export const SELECTION_ADDED_COPY: Record<Lang, string> = {
@@ -42,4 +43,5 @@ export const SELECTION_ADDED_COPY: Record<Lang, string> = {
   fr: "Ajouté",
   ru: "Добавлено",
   he: "נוסף",
+  tr: "Eklendi",
 };

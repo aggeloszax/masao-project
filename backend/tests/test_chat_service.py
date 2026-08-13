@@ -25,6 +25,19 @@ def test_fallback_texts_have_identical_keys_in_every_language() -> None:
         assert set(texts) == reference_keys, f"key mismatch for {language_code}"
 
 
+def test_fallback_texts_cover_every_supported_language() -> None:
+    # Guard: μια γλώσσα που μπαίνει στο LanguageCode χωρίς fallback κείμενα
+    # θα σέρβιρε σιωπηλά ελληνικά (μαζί με το allergy warning) στον guest.
+    from typing import get_args
+
+    from api.schemas.menu import LanguageCode
+    from api.services.llm_service import LANGUAGE_NAMES
+
+    supported = set(get_args(LanguageCode))
+    assert set(FALLBACK_TEXTS) == supported
+    assert set(LANGUAGE_NAMES) == supported
+
+
 def test_device_storage_hash_is_stable_and_does_not_expose_raw_id() -> None:
     raw_device_id = "device-12345678"
 

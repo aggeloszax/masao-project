@@ -35,6 +35,7 @@ const ERROR_COPY: Record<Lang, string> = {
   fr: "Le serveur n’est pas disponible pour le moment. Veuillez réessayer dans un instant.",
   ru: "Официант сейчас недоступен. Попробуйте ещё раз через некоторое время.",
   he: "המלצר אינו זמין כרגע. נסו שוב בעוד רגע.",
+  tr: "Garson şu anda müsait değil. Lütfen birazdan tekrar deneyin.",
 };
 
 const RATE_LIMIT_COPY: Record<Lang, string> = {
@@ -46,6 +47,7 @@ const RATE_LIMIT_COPY: Record<Lang, string> = {
   fr: "Veuillez patienter un instant avant d’envoyer un autre message.",
   ru: "Подождите немного, прежде чем отправить следующее сообщение.",
   he: "המתינו רגע לפני שליחת הודעה נוספת.",
+  tr: "Yeni bir mesaj göndermeden önce lütfen biraz bekleyin.",
 };
 
 const SUGGESTIONS_COPY: Record<Lang, string> = {
@@ -57,6 +59,7 @@ const SUGGESTIONS_COPY: Record<Lang, string> = {
   fr: "Suggestions du menu",
   ru: "Предложения из меню",
   he: "הצעות מהתפריט",
+  tr: "Menüden öneriler",
 };
 
 export function Chat() {
@@ -131,6 +134,13 @@ export function Chat() {
       behavior: "smooth",
     });
   }, [messages, typing, open]);
+
+  // Language-stamped snapshots (server replies, recommendation cards) would
+  // otherwise keep showing the previous language after a switch.
+  useEffect(() => {
+    setMessages([]);
+    setRecommendedItems([]);
+  }, [lang]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -293,8 +303,8 @@ function Bubble({ role, text }: { role: "user" | "bot"; text: string }) {
       <p
         className={`max-w-[82%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
           isUser
-            ? "rounded-br-sm bg-accent text-white"
-            : "rounded-bl-sm bg-surface text-foreground"
+            ? "rounded-ee-sm bg-accent text-white"
+            : "rounded-es-sm bg-surface text-foreground"
         }`}
       >
         {text}
@@ -318,7 +328,7 @@ function RecommendedItems({ items, title }: { items: ChatApiMenuItem[]; title: s
         return (
           <div
             key={item.id}
-            className="rounded-2xl rounded-bl-sm border border-hairline bg-surface px-3.5 py-2.5"
+            className="rounded-2xl rounded-es-sm border border-hairline bg-surface px-3.5 py-2.5"
           >
             <div className="flex items-baseline justify-between gap-3">
               <p className="text-sm font-semibold text-foreground">{item.name}</p>
@@ -347,7 +357,7 @@ function RecommendedItems({ items, title }: { items: ChatApiMenuItem[]; title: s
 function TypingIndicator({ typingLabel }: { typingLabel: string }) {
   return (
     <div className="flex items-center gap-2">
-      <div className="flex items-center gap-1 rounded-2xl rounded-bl-sm bg-surface px-3.5 py-3">
+      <div className="flex items-center gap-1 rounded-2xl rounded-es-sm bg-surface px-3.5 py-3">
         {[0, 150, 300].map((delay) => (
           <span
             key={delay}
@@ -376,7 +386,7 @@ function ChatIcon() {
 
 function SendIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden className="rtl:-scale-x-100">
       <path
         d="M4 12l16-7-7 16-2.5-6.5L4 12z"
         stroke="currentColor"

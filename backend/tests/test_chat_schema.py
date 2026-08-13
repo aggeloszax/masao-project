@@ -1,7 +1,10 @@
+from typing import get_args
+
 import pytest
 from pydantic import ValidationError
 
 from api.schemas.chat import ChatRequest
+from api.schemas.menu import LanguageCode
 
 
 def test_chat_request_accepts_nextjs_payload() -> None:
@@ -17,16 +20,17 @@ def test_chat_request_accepts_nextjs_payload() -> None:
     assert request.language_code == "el"
 
 
-def test_chat_request_accepts_language_code_from_nextjs() -> None:
+@pytest.mark.parametrize("code", get_args(LanguageCode))
+def test_chat_request_accepts_every_supported_language_code(code: str) -> None:
     request = ChatRequest(
         restaurant_slug="masao",
         table_number=12,
         device_id="device-12345",
         user_message="I want sushi",
-        language_code="en",
+        language_code=code,
     )
 
-    assert request.language_code == "en"
+    assert request.language_code == code
 
 
 def test_chat_request_accepts_conversation_id_from_nextjs() -> None:
@@ -39,18 +43,6 @@ def test_chat_request_accepts_conversation_id_from_nextjs() -> None:
     )
 
     assert request.conversation_id == "conversation-12345"
-
-
-def test_chat_request_accepts_hebrew_language_code() -> None:
-    request = ChatRequest(
-        restaurant_slug="masao",
-        table_number=12,
-        device_id="device-12345",
-        user_message="hello",
-        language_code="he",
-    )
-
-    assert request.language_code == "he"
 
 
 def test_chat_request_rejects_unknown_language_code() -> None:

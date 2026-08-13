@@ -306,6 +306,26 @@ FALLBACK_TEXTS: dict[str, dict[str, str]] = {
             "שאלו את הצוות אם אפשר בלי, או בחרו משהו אחר."
         ),
     },
+    "tr": {
+        "no_match": (
+            "Suşi, bao, noodle, burger, kokteyl veya nargile konusunda yardımcı olabilirim. "
+            "Acılı, vegan, karidesli, tavuklu ya da tatlı bir şey isterseniz söyleyin."
+        ),
+        "suggest": "Size {name} ({price:.2f}€) öneririm. {description}",
+        "also": " Şunlar da uygun: {names}.",
+        "detail": "{name} ({price:.2f}€) şunları içerir: {description}.",
+        "detail_generic": (
+            "{name} ({price:.2f}€) için menüde şu yazıyor: {description}. "
+            "Bu ürün için ayrıntılı içerik bilgim yok, bu yüzden uydurmayacağım."
+        ),
+        "overview_intro": "İçeceklerde şu seçenekler var: ",
+        "overview_sample": "Örneğin",
+        "overview_empty": "Bu kategoride uygun seçenek bulamadım.",
+        "allergy_warning": (
+            " Dikkat: {name}, alerjiniz olarak bildirdiğiniz {allergens} içerir. "
+            "Personele bunsuz yapılıp yapılamayacağını sorun ya da başka bir şey seçin."
+        ),
+    },
 }
 
 
@@ -331,6 +351,19 @@ class ChatAnswer:
     recommendations: list[MenuCandidate]
 
 
+# Τελικές μορφές γραμμάτων -> βασικές, ώστε το substring matching να μην
+# εξαρτάται από τη θέση του γράμματος στη λέξη (ελληνικό ς και τα 5 εβραϊκά
+# τελικά γράμματα ך ם ן ף ץ).
+FINAL_LETTER_FOLDS = str.maketrans({
+    "ς": "σ",
+    "ך": "כ",
+    "ם": "מ",
+    "ן": "נ",
+    "ף": "פ",
+    "ץ": "צ",
+})
+
+
 def normalize_text(value: str) -> str:
     """Normalize user/menu text for multilingual matching.
 
@@ -338,18 +371,18 @@ def normalize_text(value: str) -> str:
         value: Raw text from the user or menu database.
 
     Returns:
-        str: Lowercase text without accents and with final sigma normalized.
+        str: Lowercase text without accents and with final letter forms folded.
 
     Raises:
         None.
     """
     normalized = unicodedata.normalize("NFD", value.lower())
     without_marks = "".join(ch for ch in normalized if unicodedata.category(ch) != "Mn")
-    return without_marks.replace("ς", "σ")
+    return without_marks.translate(FINAL_LETTER_FOLDS)
 
 
 def tokenize(value: str) -> list[str]:
-    """Tokenize Latin and Greek text.
+    """Tokenize Latin, Greek, Hebrew and Turkish text.
 
     Args:
         value: Raw text to tokenize.
@@ -360,7 +393,9 @@ def tokenize(value: str) -> list[str]:
     Raises:
         None.
     """
-    tokens = re.findall(r"[0-9A-Za-zΑ-Ωα-ω]+", normalize_text(value))
+    # ı (dotless i) επιβιώνει του NFD folding στα τουρκικά· το εβραϊκό block
+    # (U+0590-U+05FF) δεν καλύπτεται από καμία λατινική/ελληνική κλάση.
+    tokens = re.findall(r"[0-9A-Za-zıΑ-Ωα-ω֐-׿]+", normalize_text(value))
     return [token for token in tokens if len(token) >= 2 and token not in STOPWORDS]
 
 

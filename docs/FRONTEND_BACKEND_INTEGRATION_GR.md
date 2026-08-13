@@ -140,11 +140,12 @@ Chat.tsx κάνει render τα returned messages σαν chat bubbles
 Υποστηριζόμενες τιμές:
 
 ```text
-el, en, de, it, sv, he
+el, en, de, it, sv, fr, ru, he, tr
 ```
 
 Τα εβραϊκά (`he`) είναι RTL γλώσσα: το frontend γυρίζει αυτόματα το layout σε
-`dir="rtl"` μέσω του `isRtl()` στο `frontend/src/i18n/config.ts`.
+`dir="rtl"` μέσω του `isRtl()` στο `frontend/src/i18n/config.ts`. Τα τουρκικά
+(`tr`) είναι LTR όπως οι υπόλοιπες γλώσσες.
 
 Το backend χρησιμοποιεί αυτό το `language_code` για να κάνει `LEFT JOIN` στα translation tables:
 
@@ -163,10 +164,10 @@ el, en, de, it, sv, he
 nycfqostjdjaynstaloo
 ```
 
-Το cleanup migration για αφαίρεση Hebrew (`backend/sql/003_remove_hebrew_translations.sql`) είχε εφαρμοστεί στο Supabase, αλλά τα Εβραϊκά επανήλθαν ως υποστηριζόμενη γλώσσα. Σε υπάρχουσες βάσεις πρέπει να τρέξει το `backend/sql/004_add_hebrew_language.sql` και μετά ξανά το `002_seed_full_menu_from_frontend.sql` (για τα Hebrew rows). Τα constraints των translation tables δέχονται πλέον:
+Το παλιό cleanup migration αφαίρεσης Hebrew (`backend/sql/003_remove_hebrew_translations.sql`) είναι πλέον κενό (superseded no-op). Σε υπάρχουσες βάσεις που δεν έχουν τις νέες γλώσσες τρέχουν τα migrations `backend/sql/005_add_hebrew_translations.sql`, `backend/sql/006_add_french_russian_languages.sql` και `backend/sql/007_add_turkish_language.sql`. Το 007 είναι αυτόνομο: περιέχει και τα constraints και τα translation rows με `ON CONFLICT DO NOTHING`, ώστε να μη χρειάζεται re-run του 002 seed και να μην πειράζονται δεδομένα που έχουν αλλάξει μέσω admin API. Τα constraints των translation tables δέχονται πλέον:
 
 ```text
-el, en, de, it, sv, he
+el, en, de, it, sv, fr, ru, he, tr
 ```
 
 Τα production tables είναι:
@@ -180,20 +181,21 @@ chat_sessions
 chat_messages
 ```
 
-Το full menu seed έχει μπει στη βάση και έχει γίνει verification. Το καθαρό SQL αρχείο, χωρίς Hebrew, είναι εδώ:
+Το full menu seed έχει μπει στη βάση και έχει γίνει verification. Το SQL αρχείο (7 γλώσσες, μαζί με Hebrew και Turkish) είναι εδώ:
 
 ```text
 backend/sql/002_seed_full_menu_from_frontend.sql
 ```
 
-Verified counts στο Supabase:
+Αναμενόμενα counts στο Supabase (130 items × 9 γλώσσες, 24 κατηγορίες × 9):
 
 ```text
 menu_categories: 24
 menu_items: 130
-menu_category_translations: 120
-menu_item_translations: 650
-hebrew_item_translations: 0
+menu_category_translations: 216
+menu_item_translations: 1170
+hebrew_item_translations: 130
+turkish_item_translations: 130
 ```
 
 Αν αλλάξει το `frontend/src/data/menu-mock.json`, πρέπει να ξανατρέξει ο generator και να εφαρμοστεί ξανά το seed:

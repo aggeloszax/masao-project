@@ -6,6 +6,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field, field_validator
 
+from api.schemas.menu import LanguageCode
+
 
 class ChatRequest(BaseModel):
     restaurant_slug: str = Field(..., min_length=1, max_length=80)
@@ -13,7 +15,7 @@ class ChatRequest(BaseModel):
     device_id: str = Field(..., min_length=8, max_length=128)
     conversation_id: str | None = Field(default=None, min_length=8, max_length=128)
     user_message: str = Field(..., min_length=1, max_length=1000)
-    language_code: Literal["el", "en", "de", "it", "sv", "fr", "ru", "he"] = "el"
+    language_code: LanguageCode = "el"
 
     @field_validator("restaurant_slug", "device_id", "conversation_id", "user_message")
     @classmethod
@@ -42,7 +44,7 @@ class MenuItemResponse(BaseModel):
     price: float
     tags: list[str]
     is_available: bool
-    language_code: Literal["el", "en", "de", "it", "sv", "fr", "ru", "he"]
+    language_code: LanguageCode
     # Alert πεδία με βάση το allergy profile της συσκευής που στέλνει το chat.
     allergens: list[str] = []
     matched_allergens: list[str] = []
@@ -54,7 +56,7 @@ class ChatResponse(BaseModel):
     restaurant_slug: str
     table_number: int
     device_id: str
-    language_code: Literal["el", "en", "de", "it", "sv", "fr", "ru", "he"]
+    language_code: LanguageCode
     assistant_message: ChatMessageResponse
     messages: list[ChatMessageResponse]
     recommended_items: list[MenuItemResponse]

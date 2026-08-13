@@ -142,6 +142,22 @@ ALLERGEN_LABELS: dict[str, dict[str, str]] = {
         "lupin": "תורמוס",
         "molluscs": "רכיכות",
     },
+    "tr": {
+        "gluten": "Gluten (tahıllar)",
+        "crustaceans": "Kabuklular (karides, yengeç)",
+        "eggs": "Yumurta",
+        "fish": "Balık",
+        "peanuts": "Yer fıstığı",
+        "soybeans": "Soya",
+        "milk": "Süt (laktoz)",
+        "nuts": "Sert kabuklu meyveler",
+        "celery": "Kereviz",
+        "mustard": "Hardal",
+        "sesame": "Susam",
+        "sulphites": "Sülfitler",
+        "lupin": "Acı bakla (lüpen)",
+        "molluscs": "Yumuşakçalar",
+    },
 }
 
 

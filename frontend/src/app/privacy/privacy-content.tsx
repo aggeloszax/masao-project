@@ -107,6 +107,18 @@ const COPY: Record<Lang, PrivacyCopy> = {
       { title: "6. הזכויות שלכם", body: "בהתאם לנסיבות ניתן לבקש מידע, גישה, תיקון, מחיקה או הגבלה, או להתנגד לעיבוד. ניתן גם לפנות לרשות המוסמכת להגנת מידע. ייתכן שיידרש מידע טכני מהמכשיר כדי לאתר בקשה." },
     ], allergyTitle: "מידע חשוב על אלרגיות", allergy: "תשובות ה-AI ומידע התפריט הדיגיטלי עלולים להיות חלקיים או שגויים ואינם מבטיחים בטיחות. בכל אלרגיה או אי-סבילות יש ליידע תמיד את הצוות ולאשר לפני ההזמנה. תיתכן זיהום צולב.",
   },
+  tr: {
+    back: "← Menüye dön", title: "Gizlilik Politikası", updated: "Son güncelleme: 12 Ağustos 2026",
+    summaryTitle: "Kısaca", summary: "Menüyü hesap açmadan kullanabilirsiniz. Yapay zekâ sohbeti rastgele bir cihaz tanımlayıcısı kullanır ve mesajları 30 güne kadar saklar. Adınızı, telefon numaranızı veya diğer kimlik bilgilerinizi yazmayın.",
+    sections: [
+      { title: "1. Veri sorumlusu", body: "Bu hizmetin işletilmesinden Masao Asian Fusion Lounge sorumludur. Gizlilikle ilgili sorularınız veya verilerinize ilişkin talepleriniz için Masao mekânına veya personeline başvurun." },
+      { title: "2. Kullanılan veriler", body: "Hizmet şunları kullanır:", items: ["Yapay zekâ sohbetine göndermeyi seçtiğiniz mesajlar.", "Seçtiğiniz dil ve rastgele, takma adlı bir cihaz tanımlayıcısı.", "Vermeyi seçtiğiniz alerji bilgileri.", "Temel güvenlik ve istek kaynaklı teknik veriler."], after: "Seçtiğiniz yemekler ve notlar cihazınızda yerel olarak saklanır." },
+      { title: "3. Kullanım amaçları", body: "Veriler; dijital menünün çalışması, yapay zekâ asistanının yanıt vermesi, cihazdaki sohbet geçmişinin tutulması, ilgili uyarıların gösterilmesi ve hizmetin kötüye kullanım ile teknik sorunlardan korunması için kullanılır." },
+      { title: "4. Yapay zekâ ve hizmet sağlayıcılar", body: "Sohbet mesajları, yanıt oluşturmak için bir yapay zekâ hizmetine gönderilir. Uygulamanın işletilmesinde altyapı, veritabanı ve kötüye kullanım koruması sağlayan dış sağlayıcılar, tabi oldukları veri koruma yükümlülükleri çerçevesinde kullanılır." },
+      { title: "5. Saklama süresi", body: "Konuşmalar 30 güne kadar saklanır ve ardından silinir. Yerel menü seçimleri, siz temizleyene veya tarayıcı verilerini silene kadar cihazınızda kalır." },
+      { title: "6. Haklarınız", body: "Duruma göre bilgi, erişim, düzeltme, silme veya kısıtlama talep edebilir ya da işlemeye itiraz edebilirsiniz. Yetkili veri koruma otoritesine de şikâyette bulunabilirsiniz. Hizmet hesap veya kimlik bilgisi istemediği için, bir talebin bulunabilmesi amacıyla cihazınızdan teknik bilgiler gerekebilir." },
+    ], allergyTitle: "Alerjiler hakkında önemli bilgi", allergy: "Yapay zekâ yanıtları ve dijital menü bilgileri eksik veya hatalı olabilir ve güvenlik garantisi değildir. Her alerji veya intolerans için sipariş vermeden önce personeli mutlaka bilgilendirin ve teyit edin. Çapraz bulaşma olasılığı vardır.",
+  },
 };
 
 export function PrivacyContent() {

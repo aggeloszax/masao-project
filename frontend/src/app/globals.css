@@ -19,8 +19,8 @@
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
   --color-hairline: var(--hairline);
-  --font-sans: var(--font-sans);
-  --font-serif: var(--font-serif);
+  --font-sans: var(--font-sans), var(--font-hebrew);
+  --font-serif: var(--font-serif), var(--font-hebrew);
 }
 
 html {
@@ -30,7 +30,7 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  font-family: var(--font-sans), var(--font-hebrew), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }

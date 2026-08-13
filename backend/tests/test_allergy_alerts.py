@@ -2,9 +2,11 @@
 
 import json
 from types import SimpleNamespace
+from typing import get_args
 
 import pytest
 
+from api.schemas.menu import LanguageCode
 from api.services.chat_service import ChatService, answer_menu_query, append_allergy_warnings
 from api.services.llm_service import LlmChatService, build_allergy_prompt, build_menu_prompt
 from api.services.menu_service import MenuCandidate, MenuItemRecord, group_menu_items
@@ -227,7 +229,7 @@ async def test_llm_answer_puts_allergy_block_after_cached_menu_block() -> None:
     assert "cache_control" not in system_blocks[2]
 
 
-@pytest.mark.parametrize("lang", ["el", "en", "de", "it", "sv", "fr", "ru", "he"])
+@pytest.mark.parametrize("lang", get_args(LanguageCode))
 def test_allergy_warning_keeps_format_placeholders(lang: str) -> None:
     from api.services.chat_service import FALLBACK_TEXTS
 

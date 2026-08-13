@@ -1,19 +1,26 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
+import { Inter, Noto_Sans_Hebrew, Playfair_Display } from "next/font/google";
 import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 
-// Body: clean, highly readable sans with Greek glyph support for bilingual text.
+// Body: clean, highly readable sans. latin-ext covers Turkish (ğ ş ı İ ç ö ü).
 const inter = Inter({
   variable: "--font-sans",
-  subsets: ["latin", "greek"],
+  subsets: ["latin", "latin-ext", "greek"],
+  display: "swap",
+});
+
+// Inter has no Hebrew glyphs; this fills the gap in the font-family chain.
+const notoHebrew = Noto_Sans_Hebrew({
+  variable: "--font-hebrew",
+  subsets: ["hebrew"],
   display: "swap",
 });
 
 // Headers: sophisticated serif for section titles (e.g. "SIGNATURE ROLLS").
 const playfair = Playfair_Display({
   variable: "--font-serif",
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
   display: "swap",
 });
 
@@ -53,7 +60,7 @@ export default function RootLayout({
   return (
     <html
       lang="el"
-      className={`${inter.variable} ${playfair.variable} h-full antialiased`}
+      className={`${inter.variable} ${notoHebrew.variable} ${playfair.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

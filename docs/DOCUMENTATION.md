@@ -91,32 +91,42 @@ postgresql+asyncpg://USER:PASSWORD@HOST:PORT/DATABASE
 
 ```bash
 psql "$DATABASE_URL" -f backend/sql/001_init_masao_schema.sql
-psql "$DATABASE_URL" -f backend/sql/003_remove_hebrew_translations.sql  # only if old Hebrew-enabled schema exists
 psql "$DATABASE_URL" -f backend/sql/002_seed_full_menu_from_frontend.sql
 psql "$DATABASE_URL" -f backend/sql/004_add_allergens.sql  # allergy alerts: menu allergens + customer profiles
 psql "$DATABASE_URL" -f backend/sql/004_hash_device_ids_and_chat_retention.sql
 ```
+
+> `003_remove_hebrew_translations.sql` is a superseded no-op kept for history —
+> never run it as part of a new install. Databases that ran its old destructive
+> version are repaired by the language migrations below. The newest one,
+> `007_add_turkish_language.sql`, is self-contained: it widens the language
+> constraints **and** inserts the missing translation rows with
+> `ON CONFLICT DO NOTHING`, so admin-edited data is never overwritten and the
+> 002 seed never needs to be re-run on a live database.
 
 > ⚠️ Το `004_add_allergens.sql` κάνει best-effort seed των allergens από τις
 > περιγραφές συστατικών. Το εστιατόριο πρέπει να επαληθεύσει τα allergens κάθε
 > πιάτου (μέσω `PATCH /api/admin/menu/items/{id}` με πεδίο `allergens`) πριν
 > θεωρηθούν αξιόπιστα τα alerts.
 
-If an older schema with Hebrew (`he`) support was already applied, run this cleanup migration before applying the regenerated seed:
+On an **existing** database created before Hebrew/Turkish support, apply the language migrations (safe to re-run):
 
 ```bash
-psql "$DATABASE_URL" -f backend/sql/003_remove_hebrew_translations.sql
+psql "$DATABASE_URL" -f backend/sql/005_add_hebrew_translations.sql
+psql "$DATABASE_URL" -f backend/sql/006_add_french_russian_languages.sql
+psql "$DATABASE_URL" -f backend/sql/007_add_turkish_language.sql
 ```
 
 If using the Supabase dashboard, paste the contents of:
 
 ```text
 backend/sql/001_init_masao_schema.sql
-backend/sql/003_remove_hebrew_translations.sql
 backend/sql/002_seed_full_menu_from_frontend.sql
 backend/sql/004_add_allergens.sql
 backend/sql/004_hash_device_ids_and_chat_retention.sql
 ```
+
+(and, for pre-existing databases only, `005_add_hebrew_translations.sql`, `006_add_french_russian_languages.sql` and `007_add_turkish_language.sql`).
 
 **Frontend environment for backend chat integration:**
 
@@ -214,7 +224,7 @@ This keeps one active chat per anonymous mobile device per physical table. Two c
 
 **Purpose:** Imports the full frontend menu into PostgreSQL.
 
-**What it does:** Inserts 24 categories, 130 menu items, category translations and 650 item translation rows generated from `frontend/src/data/menu-mock.json`.
+**What it does:** Inserts 24 categories, 130 menu items, category translations and 1170 item translation rows (130 items × 9 languages) generated from `frontend/src/data/menu-mock.json`.
 
 **Why it works this way:** The frontend JSON is used only as a source file for a one-time/generated database import. The backend agent does not read frontend files at runtime; it reads from Supabase/PostgreSQL.
 
@@ -453,7 +463,7 @@ The Redis backend uses one atomic Lua script with a sorted set sliding window. L
 **Business logic it triggers:** Delegates Supabase menu reads and grouping to `MenuService`.
 
 **Errors it can return:**
-- `422` if `restaurant_slug` is unsupported or `language_code` is outside `el`, `en`, `de`, `it`, `sv`, `he`.
+- `422` if `restaurant_slug` is unsupported or `language_code` is outside `el`, `en`, `de`, `it`, `sv`, `he`, `tr`.
 - `500` if database operations fail.
 
 #### `backend/api/services/menu_service.py`
@@ -643,7 +653,7 @@ Retry-After: 60       # only when response is 429
 
 ```text
 restaurant_slug=masao       # optional, defaults to masao
-language_code=en            # optional, defaults to el; allowed: el, en, de, it, sv, he
+language_code=en            # optional, defaults to el; allowed: el, en, de, it, sv, he, tr
 include_unavailable=false   # optional, defaults to false
 ```
 
@@ -937,8 +947,12 @@ The backend endpoint is ready. The frontend `MenuApp` has not been changed in th
 |------|----------|--------|-------------|
 | 001_init_masao_schema.sql | backend/sql/ | SQL | Supabase/PostgreSQL schema |
 | 002_seed_full_menu_from_frontend.sql | backend/sql/ | SQL | Full menu seed generated from frontend JSON |
-| 003_remove_hebrew_translations.sql | backend/sql/ | SQL | Cleanup migration that removes old Hebrew rows and constraints |
+| 003_remove_hebrew_translations.sql | backend/sql/ | SQL | Superseded no-op kept for history (old Hebrew removal) |
+| 004_add_allergens.sql | backend/sql/ | SQL | Allergy alerts: menu allergens + customer profiles |
 | 004_hash_device_ids_and_chat_retention.sql | backend/sql/ | SQL | Pseudonymizes existing device ids and adds the chat-retention index |
+| 005_add_hebrew_translations.sql | backend/sql/ | SQL | Widens language constraints for Hebrew |
+| 006_add_french_russian_languages.sql | backend/sql/ | SQL | Widens language constraints for French and Russian |
+| 007_add_turkish_language.sql | backend/sql/ | SQL | Self-contained Turkish migration: constraints + `tr` translation rows |
 | generate_menu_seed_sql.py | backend/scripts/ | Python | Deterministic SQL seed generator |
 | pipeline/runtime logs | backend/logs/ | Text | Future operational logs; gitignored |
 | API responses | HTTP JSON | JSON | Public menu, chat messages and recommendations for Next.js |
@@ -1062,9 +1076,14 @@ Use the SQL editor or Supabase migration tooling to apply:
 ```text
 backend/sql/001_init_masao_schema.sql
 backend/sql/002_seed_full_menu_from_frontend.sql
-backend/sql/003_remove_hebrew_translations.sql
+backend/sql/004_add_allergens.sql
 backend/sql/004_hash_device_ids_and_chat_retention.sql
 ```
+
+(Pre-existing databases additionally need `005_add_hebrew_translations.sql`,
+`006_add_french_russian_languages.sql` and `007_add_turkish_language.sql`;
+`003_remove_hebrew_translations.sql` is a superseded no-op and must not be
+part of any new install.)
 
 **Staging (Render):**
 
