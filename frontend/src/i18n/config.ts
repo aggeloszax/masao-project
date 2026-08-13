@@ -4,17 +4,21 @@ export type Lang = "el" | "en" | "de" | "it" | "sv" | "fr" | "ru" | "he" | "tr";
 
 export const DEFAULT_LANG: Lang = "el";
 
-/** Languages offered in the selector. */
-export const LANGUAGES: { code: Lang; label: string; flag: string; rtl?: boolean }[] = [
-  { code: "el", label: "Ελληνικά", flag: "🇬🇷" },
-  { code: "en", label: "English", flag: "🇬🇧" },
-  { code: "de", label: "Deutsch", flag: "🇩🇪" },
-  { code: "it", label: "Italiano", flag: "🇮🇹" },
-  { code: "sv", label: "Svenska", flag: "🇸🇪" },
-  { code: "fr", label: "Français", flag: "🇫🇷" },
-  { code: "ru", label: "Русский", flag: "🇷🇺" },
-  { code: "he", label: "עברית", flag: "🇮🇱", rtl: true },
-  { code: "tr", label: "Türkçe", flag: "🇹🇷" },
+/**
+ * Languages offered in the selector. `flagCode` is the ISO country code used
+ * by the flag-icons SVG set — emoji flags render as bare letter pairs on
+ * Windows, so the selector draws SVG flags instead.
+ */
+export const LANGUAGES: { code: Lang; label: string; flag: string; flagCode: string; rtl?: boolean }[] = [
+  { code: "el", label: "Ελληνικά", flag: "🇬🇷", flagCode: "gr" },
+  { code: "en", label: "English", flag: "🇬🇧", flagCode: "gb" },
+  { code: "de", label: "Deutsch", flag: "🇩🇪", flagCode: "de" },
+  { code: "it", label: "Italiano", flag: "🇮🇹", flagCode: "it" },
+  { code: "sv", label: "Svenska", flag: "🇸🇪", flagCode: "se" },
+  { code: "fr", label: "Français", flag: "🇫🇷", flagCode: "fr" },
+  { code: "ru", label: "Русский", flag: "🇷🇺", flagCode: "ru" },
+  { code: "he", label: "עברית", flag: "🇮🇱", flagCode: "il", rtl: true },
+  { code: "tr", label: "Türkçe", flag: "🇹🇷", flagCode: "tr" },
 ];
 
 export function isRtl(lang: Lang): boolean {

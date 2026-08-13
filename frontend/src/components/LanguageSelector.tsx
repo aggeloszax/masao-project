@@ -1,5 +1,6 @@
 "use client";
 
+import "flag-icons/css/flag-icons.min.css";
 import { useEffect, useRef, useState } from "react";
 import { LANGUAGES } from "@/i18n/config";
 import { useLanguage } from "@/i18n/LanguageContext";
@@ -38,7 +39,7 @@ export function LanguageSelector() {
         aria-label={t.selectLanguage}
         className="flex items-center gap-1.5 rounded-full border border-hairline bg-surface px-3 py-1.5 text-sm text-foreground transition-colors hover:border-accent"
       >
-        <span className="text-base leading-none">{current.flag}</span>
+        <span className={`fi fi-${current.flagCode} rounded-[2px]`} aria-hidden />
         <span className="font-medium uppercase">{current.code}</span>
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden>
           <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -66,7 +67,7 @@ export function LanguageSelector() {
                     active ? "text-accent" : "text-foreground"
                   }`}
                 >
-                  <span className="text-base leading-none">{l.flag}</span>
+                  <span className={`fi fi-${l.flagCode} rounded-[2px]`} aria-hidden />
                   <span className="font-medium">{l.label}</span>
                   {active && (
                     <span className="ms-auto text-accent" aria-hidden>
