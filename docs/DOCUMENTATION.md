@@ -1,7 +1,7 @@
-## Masao Restaurant Chatbot Backend — Technical Documentation
+## Masao Restaurant Menu & Chatbot — Technical Documentation
 
 **Version:** 1.0.0
-**Last updated:** 2026-06-12
+**Last updated:** 2026-08-14
 **Author:** PlanAhead Engineering
 **Status:** Development
 
@@ -17,6 +17,14 @@
 
 ```text
 Next.js client
+     │
+     ├── GET /api/menu ──► localized raw DB categories
+     │                         │
+     │                         ▼
+     │                 frontend/src/lib/menu-api.ts
+     │                         │ canonical category slug mapping
+     │                         ▼
+     │                 12 stable translated nav groups
      │
      │ POST /api/chat
      ▼
@@ -463,7 +471,7 @@ The Redis backend uses one atomic Lua script with a sorted set sliding window. L
 **Business logic it triggers:** Delegates Supabase menu reads and grouping to `MenuService`.
 
 **Errors it can return:**
-- `422` if `restaurant_slug` is unsupported or `language_code` is outside `el`, `en`, `de`, `it`, `sv`, `he`, `tr`.
+- `422` if `restaurant_slug` is unsupported or `language_code` is outside `el`, `en`, `de`, `it`, `sv`, `fr`, `ru`, `he`, `tr`.
 - `500` if database operations fail.
 
 #### `backend/api/services/menu_service.py`
@@ -498,6 +506,37 @@ for item in items:
 ```
 
 This turns flat SQL rows into the grouped structure expected by a menu UI.
+
+#### `frontend/src/lib/menu-api.ts`
+
+**Purpose:** Convert the localized backend menu response into the stable high-level navigation used by the mobile UI.
+
+**Main function: `mapMenuCategories(categories)`**
+
+**What it does:** Maps every raw database category to a canonical high-level group through the category slug. For example, `uramaki-hossomaki-6pcs`, `nigiri-2pcs`, `signature-rolls-8pcs`, `raw`, and `crispy-fried-rolls-6pcs` become one `sushi` navigation group with five localized subsections.
+
+**Why it works this way:** Category names are translated display data and therefore change with `language_code`. Database slugs are canonical and language-independent, so they are safe navigation identifiers. This keeps the selected tab stable when the guest switches language and lets `GROUP_LABELS` translate the 12 high-level labels consistently.
+
+**Edge cases handled:**
+- Empty API categories are excluded from navigation.
+- API categories are ordered by `display_order` before grouping.
+- Unknown future category slugs remain visible as standalone groups after the configured groups.
+- Missing slugs fall back to the API id or a normalized display label.
+
+**Key logic explained:**
+
+```typescript
+const definition = GROUP_BY_CATEGORY_SLUG.get(mapped.slug);
+if (definition) {
+  const group = knownGroups.get(definition.id);
+  group?.sections.push(mapped.section);
+}
+
+// Stable group id drives GROUP_LABELS; translated API names remain section labels.
+return [...groupedMenu, ...unknownGroups];
+```
+
+The bundled fallback menu and the live API menu now share the same group definitions from `frontend/src/data/menu.ts`, preventing the production-only category mismatch shown on mobile.
 
 #### `backend/api/routers/admin_menu.py`
 
@@ -1018,6 +1057,11 @@ cd backend
 pytest tests/ -v
 ```
 
+```bash
+cd frontend
+npm test
+```
+
 **Run with coverage:**
 
 ```bash
@@ -1039,6 +1083,8 @@ pytest tests/ --cov=api --cov-report=term-missing
 | tests/test_security.py | Admin API key behavior and redacted device logging |
 | tests/test_rate_limiter.py | Memory limiter, Redis limiter, fail-open/fail-closed behavior, key scoping and headers |
 | tests/test_chat_rate_limit_route.py | `/api/chat` route returns 429 after configured budget is exceeded |
+| frontend/src/lib/menu-api.test.ts | API category slug grouping, language-independent group ids, localized subsection labels, unknown-category fallback |
+| frontend/src/lib/menu-selection.test.ts | Stable active group selection and localized high-level navigation labels |
 
 Regression cases added for the drink/chat bug:
 
@@ -1049,13 +1095,13 @@ Regression cases added for the drink/chat bug:
 τι περιέχει το cucumber maki -> Cucumber Maki detail, no Shrimp Tempura recommendation
 ```
 
-Current verification on 2026-06-12:
+Current frontend verification on 2026-08-14:
 
 ```text
-python -m compileall . exited 0
-  note: existing .pytest_cache could not be listed because of local permissions
-python -m pytest -p no:cacheprovider tests -v passed: 46 tests
-python main.py --input sql --dry-run passed with batch summary success:1 failed:0 skipped:0
+npm test passed: 7 files, 34 tests
+npm run build passed: production compilation, TypeScript and 10 static/dynamic routes
+mobile viewport 412x915 passed: 12 localized navigation groups in all 9 languages
+npm run lint is blocked by a pre-existing react-hooks/set-state-in-effect error in frontend/src/components/Chat.tsx:141
 ```
 
 ---
@@ -1163,13 +1209,13 @@ No scheduled job is required for the MVP chat endpoint. Future analytics rollups
 - Generic menu rows such as `Long Drinks = Classic Long Drinks` are answered factually as generic because the backend must not invent missing ingredients.
 - The schema is intentionally single-restaurant; adding more restaurants will require a `restaurants` table and FKs.
 - The Supabase schema and full menu seed are applied; future menu changes can use the protected `/api/admin/menu/*` endpoints instead of regenerating the seed.
-- Backend `GET /api/menu` is ready, but the frontend menu page still reads `frontend/src/data/menu-mock.json` until the frontend owner wires it.
+- The frontend reads `GET /api/menu` when available and falls back to `frontend/src/data/menu-mock.json` when the API is unavailable. Both paths share the same 12 high-level navigation groups.
 - Admin menu endpoints exist, but there is no browser admin UI yet.
 - `/api/chat` supports Redis-backed distributed rate limiting, but production deployment must provide managed Redis and set `RATE_LIMIT_BACKEND=redis`.
 - Cloudflare edge rate limiting IaC exists under `infra/cloudflare/`, but it has not been applied to a live Cloudflare zone from this workspace because no zone id/API token is configured here.
 
 **Planned improvements:**
-- Wire frontend `MenuApp` to `GET /api/menu`.
+- Add a browser-level contract test against a disposable PostgreSQL/Supabase branch so the live API grouping path is exercised without production data.
 - Build a small internal admin UI on top of the protected `/api/admin/menu/*` endpoints.
 - Add LLM integration with menu context and strict JSON output.
 - Apply `infra/cloudflare/` Terraform against the production Cloudflare zone and tune thresholds from Cloudflare analytics.

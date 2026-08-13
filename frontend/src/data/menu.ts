@@ -55,7 +55,17 @@ export function splitDescription(description: string): {
  * sticky nav stays short (Sushi, Bao, Cocktails, Shisha…) while preserving the
  * original sub-category headers inside.
  */
-const GROUP_DEFS: { id: string; label: string; categories: string[] }[] = [
+export type MenuGroupDefinition = {
+  id: string;
+  label: string;
+  categories: readonly string[];
+};
+
+/**
+ * Stable frontend navigation groups. API categories are matched through their
+ * canonical slugs, so changing the display language never changes group IDs.
+ */
+export const MENU_GROUP_DEFS: readonly MenuGroupDefinition[] = [
   {
     id: "sushi",
     label: "Sushi",
@@ -104,7 +114,7 @@ const GROUP_DEFS: { id: string; label: string; categories: string[] }[] = [
 export type MenuSection = { category: string; items: MenuItem[] };
 export type MenuGroup = { id: string; label: string; sections: MenuSection[] };
 
-export const menuGroups: MenuGroup[] = GROUP_DEFS.map((group) => ({
+export const menuGroups: MenuGroup[] = MENU_GROUP_DEFS.map((group) => ({
   id: group.id,
   label: group.label,
   sections: group.categories

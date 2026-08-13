@@ -1,4 +1,10 @@
-import type { MenuGroup, MenuItem } from "@/data/menu";
+import {
+  MENU_GROUP_DEFS,
+  type MenuGroup,
+  type MenuGroupDefinition,
+  type MenuItem,
+  type MenuSection,
+} from "@/data/menu";
 import type { Lang } from "@/i18n/config";
 import { fetchApi } from "@/lib/fetch-api";
 
@@ -6,7 +12,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
 const MENU_ENDPOINT = "/api/menu";
 const MENU_TIMEOUT_MS = 30_000;
 
-type ApiMenuResponse = {
+export type ApiMenuResponse = {
   restaurant_slug: string;
   language_code: Lang;
   total_categories: number;
@@ -14,7 +20,7 @@ type ApiMenuResponse = {
   categories: ApiMenuCategory[];
 };
 
-type ApiMenuCategory = {
+export type ApiMenuCategory = {
   id?: number | string;
   slug?: string;
   name?: string;
@@ -24,7 +30,7 @@ type ApiMenuCategory = {
   items?: ApiMenuItem[];
 };
 
-type ApiMenuItem = {
+export type ApiMenuItem = {
   id?: number | string;
   external_id?: string;
   name: string;
@@ -53,7 +59,7 @@ export async function fetchMenuGroups(lang: Lang): Promise<MenuGroup[]> {
   }
 
   const data = (await response.json()) as ApiMenuResponse;
-  return data.categories.map(mapCategory).filter((group) => group.sections.length > 0);
+  return mapMenuCategories(data.categories);
 }
 
 function apiBaseUrl(): string {
@@ -62,20 +68,77 @@ function apiBaseUrl(): string {
   return "http://localhost:8000";
 }
 
-function mapCategory(category: ApiMenuCategory, index: number): MenuGroup {
+const GROUP_BY_CATEGORY_SLUG = new Map<string, MenuGroupDefinition>(
+  MENU_GROUP_DEFS.flatMap((group) =>
+    group.categories.map((category) => [slugify(category), group] as const),
+  ),
+);
+
+/**
+ * Convert raw API categories to the same stable high-level groups used by the
+ * bundled menu. Category slugs are canonical; translated labels are display
+ * data and must never become navigation identifiers.
+ */
+export function mapMenuCategories(categories: ApiMenuCategory[]): MenuGroup[] {
+  const knownGroups = new Map<string, MenuGroup>();
+  const unknownGroups: MenuGroup[] = [];
+
+  const orderedCategories = [...categories].sort(
+    (left, right) =>
+      (left.display_order ?? Number.MAX_SAFE_INTEGER) -
+      (right.display_order ?? Number.MAX_SAFE_INTEGER),
+  );
+
+  for (const [index, category] of orderedCategories.entries()) {
+    const mapped = mapCategory(category, index);
+    if (mapped.section.items.length === 0) continue;
+
+    const definition = GROUP_BY_CATEGORY_SLUG.get(mapped.slug);
+    if (!definition) {
+      unknownGroups.push({
+        id: mapped.slug,
+        label: mapped.label,
+        sections: [mapped.section],
+      });
+      continue;
+    }
+
+    const existing = knownGroups.get(definition.id);
+    if (existing) {
+      existing.sections.push(mapped.section);
+      continue;
+    }
+
+    knownGroups.set(definition.id, {
+      id: definition.id,
+      label: definition.label,
+      sections: [mapped.section],
+    });
+  }
+
+  const groupedMenu = MENU_GROUP_DEFS.flatMap((definition) => {
+    const group = knownGroups.get(definition.id);
+    return group ? [group] : [];
+  });
+
+  return [...groupedMenu, ...unknownGroups];
+}
+
+function mapCategory(
+  category: ApiMenuCategory,
+  index: number,
+): { slug: string; label: string; section: MenuSection } {
   const label = category.name ?? category.label ?? category.category ?? `Category ${index + 1}`;
-  const id = String(category.slug ?? category.id ?? slugify(label));
+  const slug = String(category.slug ?? category.id ?? slugify(label));
   const items = (category.items ?? []).map((item) => mapItem(item, label));
 
   return {
-    id,
+    slug,
     label,
-    sections: [
-      {
-        category: label,
-        items,
-      },
-    ],
+    section: {
+      category: label,
+      items,
+    },
   };
 }
 
