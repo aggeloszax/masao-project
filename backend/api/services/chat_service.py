@@ -776,7 +776,7 @@ class ChatService:
             # εδώ, ~30 ταυτόχρονα μηνύματα αρκούν για pool exhaustion. Το
             # insert του assistant message ανοίγει νέο transaction μετά.
             await self.session.commit()
-            assistant_content, recommendations = await self._generate_answer(
+            assistant_content, recommendations, items_to_add = await self._generate_answer(
                 request=request,
                 menu_items=menu_items,
                 history=history,
@@ -809,6 +809,7 @@ class ChatService:
             assistant_message=assistant_message,
             messages=messages,
             recommended_items=[self._menu_response(item) for item in recommendations],
+            items_to_add=[self._menu_response(item) for item in items_to_add],
         )
 
     async def _generate_answer(
@@ -816,7 +817,7 @@ class ChatService:
         request: ChatRequest,
         menu_items: list[MenuCandidate],
         history: list[ChatMessageResponse],
-    ) -> tuple[str, list[MenuCandidate]]:
+    ) -> tuple[str, list[MenuCandidate], list[MenuCandidate]]:
         """Produce the assistant reply, preferring the LLM over keyword matching.
 
         Args:
@@ -847,14 +848,19 @@ class ChatService:
                     for item_id in llm_answer.recommended_item_ids
                     if item_id in items_by_id
                 ]
-                return llm_answer.reply, recommendations
+                items_to_add = [
+                    items_by_id[item_id]
+                    for item_id in llm_answer.add_to_selection_item_ids
+                    if item_id in items_by_id
+                ]
+                return llm_answer.reply, recommendations, items_to_add
 
         answer = answer_menu_query(
             request.user_message,
             menu_items,
             language_code=request.language_code,
         )
-        return answer.reply, answer.recommendations
+        return answer.reply, answer.recommendations, []
 
     async def _get_or_create_session(
         self,

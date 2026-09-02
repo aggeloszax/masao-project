@@ -44,6 +44,7 @@ def make_service(response) -> tuple[LlmChatService, FakeMessages]:
 
 
 def make_response(payload: dict, stop_reason: str = "end_turn"):
+    payload = {"add_to_selection_item_ids": [], **payload}
     return SimpleNamespace(
         stop_reason=stop_reason,
         content=[SimpleNamespace(type="text", text=json.dumps(payload))],
@@ -83,6 +84,45 @@ async def test_answer_returns_reply_and_valid_recommendations() -> None:
     sent = fake.calls[0]
     assert sent["messages"] == [{"role": "user", "content": "what do you recommend?"}]
     assert "Salmon Roll" in sent["system"][1]["text"]
+
+
+@pytest.mark.asyncio
+async def test_answer_returns_only_valid_explicit_selection_items() -> None:
+    items = [make_item(1, "Salmon Roll"), make_item(2, "Hidden Roll", available=False)]
+    service, _ = make_service(
+        make_response(
+            {
+                "reply": "Salmon Roll was added to your selection.",
+                "recommended_item_ids": [1],
+                "add_to_selection_item_ids": [1, 2, 999],
+            }
+        )
+    )
+
+    answer = await service.answer(
+        history=[("user", "Add the Salmon Roll")], menu_items=items, language_code="en"
+    )
+
+    assert answer.add_to_selection_item_ids == [1]
+
+
+@pytest.mark.asyncio
+async def test_answer_rejects_internal_format_correction_leak() -> None:
+    service, _ = make_service(
+        make_response(
+            {
+                "reply": ", let me correct format }}}} Sorry.",
+                "recommended_item_ids": [],
+            }
+        )
+    )
+
+    with pytest.raises(LlmUnavailableError, match="format-leaking"):
+        await service.answer(
+            history=[("user", "hello")],
+            menu_items=[make_item(1, "Salmon Roll")],
+            language_code="en",
+        )
 
 
 @pytest.mark.asyncio

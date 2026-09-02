@@ -64,6 +64,7 @@ const SUGGESTIONS_COPY: Record<Lang, string> = {
 
 export function Chat() {
   const { lang, t } = useLanguage();
+  const { addItem } = useSelection();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [recommendedItems, setRecommendedItems] = useState<ChatApiMenuItem[]>([]);
@@ -167,6 +168,13 @@ export function Chat() {
       });
       setMessages((prev) => [...prev, mapApiMessage(response.assistant_message)]);
       setRecommendedItems(response.recommended_items);
+      (response.items_to_add ?? []).forEach((item) =>
+        addItem({
+          id: String(item.external_id ?? item.id),
+          name: item.name,
+          price: item.price,
+        }),
+      );
     } catch (error) {
       const text =
         error instanceof ChatApiError && error.status === 429

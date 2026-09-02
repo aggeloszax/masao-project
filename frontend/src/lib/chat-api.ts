@@ -38,6 +38,7 @@ export type ChatApiResponse = {
   assistant_message: ChatApiMessage;
   messages: ChatApiMessage[];
   recommended_items: ChatApiMenuItem[];
+  items_to_add: ChatApiMenuItem[];
 };
 
 export class ChatApiError extends Error {

@@ -56,3 +56,4 @@ class ChatResponse(BaseModel):
     assistant_message: ChatMessageResponse
     messages: list[ChatMessageResponse]
     recommended_items: list[MenuItemResponse]
+    items_to_add: list[MenuItemResponse] = []

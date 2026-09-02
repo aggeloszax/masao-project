@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import json
 import logging
-from dataclasses import dataclass
+import re
+from dataclasses import dataclass, field
 
 from anthropic import AsyncAnthropic
 
@@ -35,8 +36,13 @@ RESPONSE_SCHEMA = {
             "items": {"type": "integer"},
             "description": "Menu item ids being recommended or discussed. Empty when none apply.",
         },
+        "add_to_selection_item_ids": {
+            "type": "array",
+            "items": {"type": "integer"},
+            "description": "Available menu item ids the guest explicitly asked to add to their selection.",
+        },
     },
-    "required": ["reply", "recommended_item_ids"],
+    "required": ["reply", "recommended_item_ids", "add_to_selection_item_ids"],
     "additionalProperties": False,
 }
 
@@ -49,6 +55,20 @@ class LlmUnavailableError(Exception):
 class LlmAnswer:
     reply: str
     recommended_item_ids: list[int]
+    add_to_selection_item_ids: list[int] = field(default_factory=list)
+
+
+UNSAFE_REPLY_PATTERNS = (
+    re.compile(r"\b(let me|i need to|i should)\s+(correct|fix|reformat)\b", re.IGNORECASE),
+    re.compile(r"\b(correct|fix)(ing|ed)?\s+(the\s+)?(json|format|schema)\b", re.IGNORECASE),
+    re.compile(r"\bjson\b|```|[{}]", re.IGNORECASE),
+    re.compile(r"^\s*[,}\]]"),
+)
+
+
+def is_safe_guest_reply(reply: str) -> bool:
+    """Reject formatting artefacts before they can reach the guest."""
+    return bool(reply.strip()) and not any(pattern.search(reply) for pattern in UNSAFE_REPLY_PATTERNS)
 
 
 def build_persona_prompt(language_code: str) -> str:
@@ -86,6 +106,11 @@ def build_persona_prompt(language_code: str) -> str:
         "- Recommend at most 3 items at a time and put their ids in recommended_item_ids. "
         "When the guest asks about a specific item, include that item's id. "
         "Leave the list empty for greetings or general questions.\n"
+        "- The guest has a selection basket used to collect choices for showing to staff. "
+        "Only when the guest explicitly asks to add a clearly identified menu item, put its id "
+        "in add_to_selection_item_ids and confirm it was added. Include all explicitly requested "
+        "items. If an item is ambiguous, ask which one and leave the list empty. Never claim an "
+        "item was added unless its id is in that list.\n"
         "- Ask a short follow-up question when it helps (spice preference, "
         "food vs drink), like a real waiter would.\n"
         "- The application has no verified allergen database. If the guest asks about an "
@@ -96,9 +121,9 @@ def build_persona_prompt(language_code: str) -> str:
         "reason why it pairs well (and vice versa: suggest food to a drink order). "
         "A single natural suggestion, never pushy. If the guest declines or ignores "
         "it, drop it and don't suggest again.\n"
-        "- You can recommend and answer questions, but you CANNOT place orders, "
-        "reserve tables or call anyone. When the guest is ready to order, warmly tell "
-        "them to signal the staff. Never offer to add items to an order.\n"
+        "- You can recommend, answer questions and add explicit choices to the selection basket, "
+        "but you CANNOT place or send orders, reserve tables or call anyone. Make clear that the "
+        "selection must still be shown to restaurant staff.\n"
         "- If the guest asks something unrelated to the restaurant, answer briefly and "
         "politely steer the conversation back to the menu.\n"
     )
@@ -230,11 +255,15 @@ class LlmChatService:
             data = json.loads(text)
             reply = str(data["reply"]).strip()
             raw_ids = data["recommended_item_ids"]
+            raw_add_ids = data["add_to_selection_item_ids"]
         except (json.JSONDecodeError, KeyError, TypeError) as exc:
             raise LlmUnavailableError(f"Model returned malformed JSON: {exc}") from exc
 
-        if not reply:
-            raise LlmUnavailableError("Model returned an empty reply")
+        if not is_safe_guest_reply(reply):
+            raise LlmUnavailableError("Model returned an unsafe or format-leaking reply")
+
+        if not isinstance(raw_ids, list) or not isinstance(raw_add_ids, list):
+            raise LlmUnavailableError("Model returned invalid item id lists")
 
         available_ids = {item.id for item in menu_items if item.is_available}
         valid_ids = [
@@ -243,8 +272,19 @@ class LlmChatService:
         # dict.fromkeys: το μοντέλο μπορεί να επαναλάβει id — χωρίς dedup θα
         # διπλασιάζονταν τα recommended items.
         recommended_ids = list(dict.fromkeys(valid_ids))[:3]
+        add_ids = list(
+            dict.fromkeys(
+                item_id
+                for item_id in raw_add_ids
+                if isinstance(item_id, int) and item_id in available_ids
+            )
+        )[:10]
 
-        return LlmAnswer(reply=reply, recommended_item_ids=recommended_ids)
+        return LlmAnswer(
+            reply=reply,
+            recommended_item_ids=recommended_ids,
+            add_to_selection_item_ids=add_ids,
+        )
 
 
 _llm_chat_service = LlmChatService()
