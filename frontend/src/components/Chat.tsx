@@ -137,11 +137,14 @@ export function Chat() {
   }, [messages, typing, open]);
 
   // Language-stamped snapshots (server replies, recommendation cards) would
-  // otherwise keep showing the previous language after a switch.
-  useEffect(() => {
+  // otherwise keep showing the previous language after a switch. Reset during
+  // render rather than in an effect, so the stale messages never paint.
+  const [messagesLang, setMessagesLang] = useState(lang);
+  if (lang !== messagesLang) {
+    setMessagesLang(lang);
     setMessages([]);
     setRecommendedItems([]);
-  }, [lang]);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
