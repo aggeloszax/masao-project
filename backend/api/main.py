@@ -14,7 +14,7 @@ from sqlalchemy import text
 
 from api.config import settings
 from api.dependencies import check_chat_rate_limiter_ready, close_chat_rate_limiter
-from api.routers import admin_menu, chat, menu
+from api.routers import admin_menu, chat, menu, orders
 from database import close_database, engine
 
 logging.basicConfig(
@@ -52,6 +52,7 @@ app.add_middleware(
 
 app.include_router(chat.router, prefix="/api", tags=["Chat"])
 app.include_router(menu.router, prefix="/api", tags=["Menu"])
+app.include_router(orders.router, prefix="/api", tags=["Orders"])
 app.include_router(admin_menu.router, prefix="/api/admin", tags=["Admin Menu"])
 
 

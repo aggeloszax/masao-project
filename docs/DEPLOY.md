@@ -54,9 +54,16 @@ plan ($7/μήνα) το κρατάει πάντα ζεστό.
 
 1. vercel.com → Add New → Project → διάλεξε το repo.
 2. **Root Directory: `frontend`** (σημαντικό — το Next.js app δεν είναι στη ρίζα).
-3. Environment variable:
+3. Environment variables:
    - `NEXT_PUBLIC_API_BASE_URL` = `https://<service>.onrender.com`
+   - `ADMIN_PASSWORD` = μεγάλη τυχαία φράση (ο κωδικός για το `/admin`)
+   - `INTERNAL_API_KEY` = **ακριβώς το ίδιο** με του backend (Βήμα 2)
+   - `ADMIN_SESSION_SECRET` = προαιρετικό ξεχωριστό κλειδί υπογραφής του
+     session cookie· αν λείπει, υπογράφει ο `ADMIN_PASSWORD`
 4. Deploy.
+
+> Τα `ADMIN_PASSWORD` και `INTERNAL_API_KEY` **δεν** έχουν πρόθεμα
+> `NEXT_PUBLIC_`: μένουν server-side και δεν φτάνουν ποτέ στον browser.
 
 ## Βήμα 4 — Κλείσιμο του κύκλου
 
@@ -65,7 +72,52 @@ plan ($7/μήνα) το κρατάει πάντα ζεστό.
    `CORS_ALLOWED_ORIGINS=https://masao.vercel.app` → redeploy.
 3. Δοκίμασε το chat από το Vercel URL.
 
-## Βήμα 5 — QR codes
+## Βήμα 5 — Πίνακας διαχείρισης
+
+Ο πίνακας ζει στο `https://<vercel-url>/admin` και κλειδώνει με τον
+`ADMIN_PASSWORD`. Από εκεί γίνονται:
+
+- διαθεσιμότητα, τιμές, περιγραφές και σειρά εμφάνισης πιάτων
+- δημιουργία/διαγραφή πιάτων και κατηγοριών
+- οι μεταφράσεις και στις 9 γλώσσες, με αυτόματη συμπλήρωση από το Claude
+
+Οι αλλαγές φαίνονται αμέσως στο μενού των πελατών: κάθε admin write ακυρώνει
+το menu cache μετά το commit.
+
+## Βήμα 6 — Take-away παραγγελίες
+
+Ο πελάτης διαλέγει στο καλάθι «Στο κατάστημα» ή «Take away». Το dine-in μένει
+ως έχει (δείχνει την οθόνη στον σερβιτόρο). Το take-away ζητά όνομα, τηλέφωνο
+και ώρα παραλαβής, και με την επιβεβαίωση στέλνει email.
+
+1. brevo.com → δημιούργησε δωρεάν λογαριασμό (300 email/ημέρα).
+2. Settings → Senders, Domains & Dedicated IPs → Senders → **Add a sender**.
+   Πάτα το link στο email επιβεβαίωσης. Domain/DNS δεν χρειάζεται.
+3. SMTP & API → API Keys → **Generate a new API key**.
+4. Security → Authorized IPs: αν είναι ενεργό, **απενεργοποίησέ το**. Το Render
+   δεν έχει σταθερή IP και το Brevo θα απέρριπτε τις κλήσεις (401).
+5. Render dashboard → masao-backend → Environment:
+   - `BREVO_API_KEY` = το κλειδί
+   - `ORDER_FROM_EMAIL` = η διεύθυνση του βήματος 2
+   - `ORDER_NOTIFICATION_EMAIL` = το email που λαμβάνει τις παραγγελίες
+6. Redeploy.
+
+> Αν ο αποστολέας είναι Gmail/Yahoo, το Brevo τον ξαναγράφει σε
+> `...@<id>.t-sender-sib.com`. Το email φτάνει κανονικά και το Reply-To δείχνει
+> στην πραγματική διεύθυνση. Την πρώτη φορά έλεγξε τα Spam και σήμανέ το
+> «Δεν είναι spam». Για αλλαγή παραλήπτη αλλάζεις μόνο το
+> `ORDER_NOTIFICATION_EMAIL`, χωρίς νέα επαλήθευση.
+
+Η παραγγελία γράφεται στον πίνακα `takeaway_orders` **πριν** σταλεί το email.
+Αν το email αποτύχει, ο πελάτης βλέπει μήνυμα να τηλεφωνήσει και η γραμμή
+μένει με `notified_at = null` και τον λόγο στο `email_error`:
+
+```sql
+select created_at, customer_name, customer_phone, total, email_error
+from takeaway_orders where notified_at is null order by created_at desc;
+```
+
+## Βήμα 7 — QR codes
 
 Κάθε τραπέζι δείχνει σε `https://<vercel-url>/?table=N` (N = 1-999).
 
@@ -76,3 +128,7 @@ plan ($7/μήνα) το κρατάει πάντα ζεστό.
 - [ ] Rate limit δουλεύει (21ο μήνυμα σε 1 λεπτό → 429)
 - [ ] Spend limit στο console.anthropic.com (π.χ. $25/μήνα)
 - [ ] Admin endpoints απαντούν 403 χωρίς το X-API-Key
+- [ ] Το `/admin` ανακατευθύνει στο login χωρίς συνεδρία
+- [ ] Το `/admin` δεν εμφανίζεται στο `/robots.txt` ως allowed
+- [ ] Δοκιμαστική take-away παραγγελία φτάνει στο inbox
+- [ ] `select count(*) from takeaway_orders where notified_at is null` = 0

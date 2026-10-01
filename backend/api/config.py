@@ -111,6 +111,36 @@ class Settings(BaseSettings):
 
     internal_api_key: str = Field(default=os.getenv("INTERNAL_API_KEY", "change-this-for-internal-admin-endpoints"))
 
+    brevo_api_key: str | None = Field(default=os.getenv("BREVO_API_KEY"))
+    order_notification_email: str | None = Field(
+        default=os.getenv("ORDER_NOTIFICATION_EMAIL", _yaml_config.get("orders", {}).get("notification_email"))
+    )
+    order_from_email: str | None = Field(
+        default=os.getenv("ORDER_FROM_EMAIL", _yaml_config.get("orders", {}).get("from_email"))
+    )
+    order_from_name: str = Field(
+        default=os.getenv("ORDER_FROM_NAME", _yaml_config.get("orders", {}).get("from_name", "Masao"))
+    )
+    order_max_items: int = Field(default=_yaml_config.get("orders", {}).get("max_items", 40), gt=0)
+    order_max_quantity_per_item: int = Field(
+        default=_yaml_config.get("orders", {}).get("max_quantity_per_item", 20), gt=0
+    )
+    order_rate_limit_requests: int = Field(
+        default=int(
+            os.getenv("ORDER_RATE_LIMIT_REQUESTS", _yaml_config.get("orders", {}).get("rate_limit_requests", 5))
+        ),
+        gt=0,
+    )
+    order_rate_limit_window_seconds: int = Field(
+        default=int(
+            os.getenv(
+                "ORDER_RATE_LIMIT_WINDOW_SECONDS",
+                _yaml_config.get("orders", {}).get("rate_limit_window_seconds", 600),
+            )
+        ),
+        gt=0,
+    )
+
     anthropic_api_key: str | None = Field(default=os.getenv("ANTHROPIC_API_KEY", _yaml_config.get("ai", {}).get("api_key")))
     anthropic_model: str = Field(default=os.getenv("ANTHROPIC_MODEL", _yaml_config.get("ai", {}).get("model", "claude-opus-4-8")))
     anthropic_max_tokens: int = Field(default=int(os.getenv("ANTHROPIC_MAX_TOKENS", _yaml_config.get("ai", {}).get("max_tokens", 1024))), gt=0)

@@ -199,3 +199,73 @@ def patch_payload(model: BaseModel) -> dict[str, Any]:
         None.
     """
     return model.model_dump(exclude_unset=True, exclude_none=True)
+
+
+class MenuCategoryAdminDetailResponse(MenuCategoryAdminResponse):
+    item_count: int
+    translations: dict[str, str] = Field(default_factory=dict)
+
+
+class MenuCategoryListResponse(BaseModel):
+    total: int
+    categories: list[MenuCategoryAdminDetailResponse]
+
+
+class MenuItemTranslationValue(BaseModel):
+    name: str
+    description: str = ""
+
+
+class MenuItemAdminDetailResponse(MenuItemAdminResponse):
+    category_name: str
+    translations: dict[str, MenuItemTranslationValue] = Field(default_factory=dict)
+
+
+class MenuItemListResponse(BaseModel):
+    total: int
+    items: list[MenuItemAdminDetailResponse]
+
+
+class MenuReorderRequest(BaseModel):
+    ids: list[int] = Field(..., min_length=1)
+
+    @field_validator("ids")
+    @classmethod
+    def reject_duplicate_ids(cls, value: list[int]) -> list[int]:
+        if any(item_id <= 0 for item_id in value):
+            raise ValueError("Ids must be positive")
+        if len(set(value)) != len(value):
+            raise ValueError("Ids must be unique")
+        return value
+
+
+class MenuReorderResponse(BaseModel):
+    updated: int
+
+
+class TranslateRequest(BaseModel):
+    """Auto-translate options; `language_codes=None` means every non-Greek language."""
+
+    language_codes: list[LanguageCode] | None = None
+    overwrite: bool = False
+
+    @field_validator("language_codes")
+    @classmethod
+    def reject_empty_selection(cls, value: list[str] | None) -> list[str] | None:
+        if value is not None and not value:
+            raise ValueError("language_codes cannot be empty")
+        return value
+
+
+class TranslateItemResponse(BaseModel):
+    menu_item_id: int
+    translated: list[LanguageCode]
+    skipped: list[LanguageCode]
+    translations: dict[str, MenuItemTranslationValue]
+
+
+class TranslateCategoryResponse(BaseModel):
+    category_id: int
+    translated: list[LanguageCode]
+    skipped: list[LanguageCode]
+    translations: dict[str, str]

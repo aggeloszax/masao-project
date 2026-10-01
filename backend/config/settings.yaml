@@ -46,3 +46,15 @@ rate_limit:
   redis_key_prefix: "masao"
   redis_socket_timeout_seconds: 1.0
   fail_closed: true
+
+orders:
+  # Παραλήπτης των take-away παραγγελιών. Ορίζεται με ORDER_NOTIFICATION_EMAIL.
+  notification_email:
+  # Ο αποστολέας πρέπει να είναι επαληθευμένος sender στο Brevo (ένα κλικ σε
+  # email επιβεβαίωσης, χωρίς domain). Ορίζεται με ORDER_FROM_EMAIL.
+  from_email:
+  from_name: "Masao"
+  max_items: 40
+  max_quantity_per_item: 20
+  rate_limit_requests: 5
+  rate_limit_window_seconds: 600

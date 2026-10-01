@@ -10,6 +10,7 @@ from api.config import settings
 from api.services.admin_menu_service import AdminMenuService
 from api.services.chat_service import ChatService
 from api.services.menu_service import MenuService
+from api.services.order_service import OrderService
 from api.services.rate_limiter import InMemoryRateLimiter, RateLimiter, RedisRateLimiter
 # Re-export για τους routers που ήδη το εισάγουν από εδώ.
 from api.utils import device_log_hash  # noqa: F401
@@ -56,6 +57,46 @@ def create_chat_rate_limiter(limit: int | None = None) -> RateLimiter:
 
 chat_rate_limiter = create_chat_rate_limiter()
 chat_ip_rate_limiter = create_chat_rate_limiter(limit=settings.chat_ip_rate_limit_requests)
+
+
+def create_order_rate_limiter() -> RateLimiter:
+    """Create the limiter guarding the public take-away endpoint.
+
+    Ξεχωριστό από το chat: μια παραγγελία στέλνει email, οπότε το παράθυρο
+    είναι πολύ πιο αυστηρό (λίγες ανά δεκάλεπτο ανά IP).
+
+    Args:
+        None.
+
+    Returns:
+        RateLimiter: Configured limiter for order submissions.
+
+    Raises:
+        RuntimeError: If the configured backend is unsupported or misconfigured.
+    """
+    if settings.chat_rate_limit_backend == "redis":
+        if not settings.redis_url:
+            raise RuntimeError("RATE_LIMIT_BACKEND=redis requires REDIS_URL")
+        return RedisRateLimiter(
+            redis_url=settings.redis_url,
+            limit=settings.order_rate_limit_requests,
+            window_seconds=settings.order_rate_limit_window_seconds,
+            key_prefix=f"{settings.redis_key_prefix}:orders",
+            socket_timeout_seconds=settings.redis_socket_timeout_seconds,
+            fail_closed=settings.rate_limit_fail_closed,
+        )
+
+    if settings.chat_rate_limit_backend == "memory":
+        return InMemoryRateLimiter(
+            limit=settings.order_rate_limit_requests,
+            window_seconds=settings.order_rate_limit_window_seconds,
+            max_buckets=settings.chat_rate_limit_max_buckets,
+        )
+
+    raise RuntimeError(f"Unsupported RATE_LIMIT_BACKEND: {settings.chat_rate_limit_backend}")
+
+
+order_rate_limiter = create_order_rate_limiter()
 
 
 async def verify_internal_api_key(api_key: str = Security(api_key_header)) -> str:
@@ -120,6 +161,36 @@ async def get_admin_menu_service(session: AsyncSession = Depends(get_db_session)
     return AdminMenuService(session=session)
 
 
+async def get_order_service(session: AsyncSession = Depends(get_db_session)) -> OrderService:
+    """Create an OrderService bound to the current async DB session.
+
+    Args:
+        session: Async SQLAlchemy session injected by FastAPI.
+
+    Returns:
+        OrderService: Service object for take-away orders.
+
+    Raises:
+        None.
+    """
+    return OrderService(session=session)
+
+
+async def get_order_rate_limiter() -> RateLimiter:
+    """Return the shared take-away order rate limiter.
+
+    Args:
+        None.
+
+    Returns:
+        RateLimiter: Configured limiter for order submissions.
+
+    Raises:
+        None.
+    """
+    return order_rate_limiter
+
+
 async def get_chat_rate_limiter() -> RateLimiter:
     """Return the shared chat rate limiter.
 
@@ -152,7 +223,7 @@ async def close_chat_rate_limiter() -> None:
     Raises:
         Exception: If the configured limiter close operation fails.
     """
-    for limiter in (chat_rate_limiter, chat_ip_rate_limiter):
+    for limiter in (chat_rate_limiter, chat_ip_rate_limiter, order_rate_limiter):
         close = getattr(limiter, "aclose", None)
         if close is not None:
             await close()
@@ -170,7 +241,7 @@ async def check_chat_rate_limiter_ready() -> None:
     Raises:
         Exception: If the limiter backend is unavailable.
     """
-    for limiter in (chat_rate_limiter, chat_ip_rate_limiter):
+    for limiter in (chat_rate_limiter, chat_ip_rate_limiter, order_rate_limiter):
         healthcheck = getattr(limiter, "healthcheck", None)
         if healthcheck is not None:
             await healthcheck()
