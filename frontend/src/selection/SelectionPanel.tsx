@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { getTableNumberFromUrl } from "@/lib/chat-api";
 import { OrderError, submitTakeawayOrder } from "@/lib/orders-api";
-import { ORDER_COPY, pickupLabel, type PickupSlot } from "@/selection/order-copy";
+import { ORDER_COPY } from "@/selection/order-copy";
 import { SELECTION_COPY } from "@/selection/copy";
 import { useSelection } from "@/selection/SelectionContext";
 
@@ -214,8 +214,6 @@ function ModeChooser({
   );
 }
 
-const PICKUP_SLOTS: PickupSlot[] = ["asap", "in_30", "in_60"];
-
 function TakeawayForm({ onBack, onSent }: { onBack: () => void; onSent: (total: number) => void }) {
   const { lang } = useLanguage();
   const orderCopy = ORDER_COPY[lang];
@@ -223,7 +221,6 @@ function TakeawayForm({ onBack, onSent }: { onBack: () => void; onSent: (total: 
   const { items, total } = useSelection();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [pickupSlot, setPickupSlot] = useState<PickupSlot>("asap");
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -242,7 +239,6 @@ function TakeawayForm({ onBack, onSent }: { onBack: () => void; onSent: (total: 
       const result = await submitTakeawayOrder({
         customerName: name.trim(),
         customerPhone: phone.trim(),
-        pickupSlot,
         language: lang,
         items: items.map((item) => ({ itemRef: item.id, quantity: item.quantity, note: item.note })),
       });
@@ -292,27 +288,6 @@ function TakeawayForm({ onBack, onSent }: { onBack: () => void; onSent: (total: 
             className="mt-1.5 w-full rounded-xl border border-hairline bg-surface px-3 py-3 text-base font-normal normal-case tracking-normal text-foreground outline-none focus:border-accent"
           />
         </label>
-
-        <fieldset className="mt-5">
-          <legend className="text-[11px] font-semibold uppercase tracking-wide text-muted">{orderCopy.pickup}</legend>
-          <div className="mt-2 space-y-2">
-            {PICKUP_SLOTS.map((slot) => (
-              <button
-                key={slot}
-                type="button"
-                onClick={() => setPickupSlot(slot)}
-                aria-pressed={pickupSlot === slot}
-                className={`w-full rounded-xl border px-4 py-3 text-start text-sm font-medium transition-colors ${
-                  pickupSlot === slot
-                    ? "border-accent bg-accent text-white"
-                    : "border-hairline bg-surface text-foreground hover:border-accent"
-                }`}
-              >
-                {pickupLabel(orderCopy, slot)}
-              </button>
-            ))}
-          </div>
-        </fieldset>
 
         <div className="mt-6 flex items-baseline justify-between border-t border-hairline pt-4">
           <span className="font-semibold text-foreground">{selectionCopy.total}</span>

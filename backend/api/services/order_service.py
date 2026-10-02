@@ -160,7 +160,9 @@ class OrderService:
             {
                 "customer_name": request.customer_name,
                 "customer_phone": request.customer_phone,
-                "pickup_slot": request.pickup_slot,
+                # Η επιλογή ώρας αφαιρέθηκε· η στήλη είναι not null, οπότε κάθε
+                # παραγγελία καταγράφεται ως "το συντομότερο".
+                "pickup_slot": "asap",
                 "language_code": request.language_code,
                 "items": json.dumps([line.model_dump() for line in lines], ensure_ascii=False),
                 "total": total,

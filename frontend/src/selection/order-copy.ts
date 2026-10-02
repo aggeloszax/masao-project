@@ -1,7 +1,5 @@
 import type { Lang } from "@/i18n/config";
 
-export type PickupSlot = "asap" | "in_30" | "in_60";
-
 export type OrderCopy = {
   modeTitle: string;
   dineIn: string;
@@ -13,10 +11,6 @@ export type OrderCopy = {
   namePlaceholder: string;
   phone: string;
   phonePlaceholder: string;
-  pickup: string;
-  pickupAsap: string;
-  pickup30: string;
-  pickup60: string;
   confirm: string;
   sending: string;
   successTitle: string;
@@ -39,14 +33,10 @@ export const ORDER_COPY: Record<Lang, OrderCopy> = {
     namePlaceholder: "Το όνομά σας",
     phone: "Τηλέφωνο",
     phonePlaceholder: "π.χ. 6912345678",
-    pickup: "Ώρα παραλαβής",
-    pickupAsap: "Το συντομότερο",
-    pickup30: "Σε 30 λεπτά",
-    pickup60: "Σε 60 λεπτά",
     confirm: "Επιβεβαίωση παραγγελίας",
     sending: "Αποστολή…",
     successTitle: "Η παραγγελία στάλθηκε",
-    successBody: "Θα είναι έτοιμη την ώρα που επιλέξατε. Θα σας καλέσουμε αν χρειαστεί.",
+    successBody: "Πήραμε την παραγγελία σας! Θα σας πάρουμε τηλέφωνο μόλις είναι έτοιμη.",
     errorRequired: "Συμπληρώστε όνομα και τηλέφωνο.",
     errorSend: "Η παραγγελία δεν στάλθηκε. Δοκιμάστε ξανά ή καλέστε μας.",
     back: "Πίσω",
@@ -63,14 +53,10 @@ export const ORDER_COPY: Record<Lang, OrderCopy> = {
     namePlaceholder: "Your name",
     phone: "Phone",
     phonePlaceholder: "e.g. +30 691 234 5678",
-    pickup: "Pickup time",
-    pickupAsap: "As soon as possible",
-    pickup30: "In 30 minutes",
-    pickup60: "In 60 minutes",
     confirm: "Confirm order",
     sending: "Sending…",
     successTitle: "Order sent",
-    successBody: "It will be ready at the time you chose. We'll call you if we need to.",
+    successBody: "We've received your order! We'll give you a call as soon as it's ready.",
     errorRequired: "Please fill in your name and phone number.",
     errorSend: "The order was not sent. Please try again or call us.",
     back: "Back",
@@ -87,14 +73,10 @@ export const ORDER_COPY: Record<Lang, OrderCopy> = {
     namePlaceholder: "Ihr Name",
     phone: "Telefon",
     phonePlaceholder: "z. B. +30 691 234 5678",
-    pickup: "Abholzeit",
-    pickupAsap: "So bald wie möglich",
-    pickup30: "In 30 Minuten",
-    pickup60: "In 60 Minuten",
     confirm: "Bestellung bestätigen",
     sending: "Wird gesendet…",
     successTitle: "Bestellung gesendet",
-    successBody: "Sie ist zur gewählten Zeit fertig. Wir rufen an, falls nötig.",
+    successBody: "Wir haben Ihre Bestellung erhalten! Wir rufen Sie an, sobald sie fertig ist.",
     errorRequired: "Bitte Name und Telefonnummer angeben.",
     errorSend: "Die Bestellung wurde nicht gesendet. Bitte erneut versuchen oder anrufen.",
     back: "Zurück",
@@ -111,14 +93,10 @@ export const ORDER_COPY: Record<Lang, OrderCopy> = {
     namePlaceholder: "Il tuo nome",
     phone: "Telefono",
     phonePlaceholder: "es. +30 691 234 5678",
-    pickup: "Orario di ritiro",
-    pickupAsap: "Il prima possibile",
-    pickup30: "Tra 30 minuti",
-    pickup60: "Tra 60 minuti",
     confirm: "Conferma ordine",
     sending: "Invio…",
     successTitle: "Ordine inviato",
-    successBody: "Sarà pronto all'orario scelto. Ti chiameremo se necessario.",
+    successBody: "Abbiamo ricevuto il tuo ordine! Ti chiameremo appena sarà pronto.",
     errorRequired: "Inserisci nome e numero di telefono.",
     errorSend: "L'ordine non è stato inviato. Riprova o chiamaci.",
     back: "Indietro",
@@ -135,14 +113,10 @@ export const ORDER_COPY: Record<Lang, OrderCopy> = {
     namePlaceholder: "Ditt namn",
     phone: "Telefon",
     phonePlaceholder: "t.ex. +30 691 234 5678",
-    pickup: "Avhämtningstid",
-    pickupAsap: "Så snart som möjligt",
-    pickup30: "Om 30 minuter",
-    pickup60: "Om 60 minuter",
     confirm: "Bekräfta beställning",
     sending: "Skickar…",
     successTitle: "Beställningen är skickad",
-    successBody: "Den är klar vid vald tid. Vi ringer om det behövs.",
+    successBody: "Vi har tagit emot din beställning! Vi ringer dig så snart den är klar.",
     errorRequired: "Fyll i namn och telefonnummer.",
     errorSend: "Beställningen skickades inte. Försök igen eller ring oss.",
     back: "Tillbaka",
@@ -159,14 +133,10 @@ export const ORDER_COPY: Record<Lang, OrderCopy> = {
     namePlaceholder: "Votre nom",
     phone: "Téléphone",
     phonePlaceholder: "ex. +30 691 234 5678",
-    pickup: "Heure de retrait",
-    pickupAsap: "Dès que possible",
-    pickup30: "Dans 30 minutes",
-    pickup60: "Dans 60 minutes",
     confirm: "Confirmer la commande",
     sending: "Envoi…",
     successTitle: "Commande envoyée",
-    successBody: "Elle sera prête à l'heure choisie. Nous vous appellerons si besoin.",
+    successBody: "Nous avons bien reçu votre commande ! Nous vous appellerons dès qu'elle sera prête.",
     errorRequired: "Veuillez indiquer votre nom et votre téléphone.",
     errorSend: "La commande n'a pas été envoyée. Réessayez ou appelez-nous.",
     back: "Retour",
@@ -183,14 +153,10 @@ export const ORDER_COPY: Record<Lang, OrderCopy> = {
     namePlaceholder: "Ваше имя",
     phone: "Телефон",
     phonePlaceholder: "напр. +30 691 234 5678",
-    pickup: "Время получения",
-    pickupAsap: "Как можно скорее",
-    pickup30: "Через 30 минут",
-    pickup60: "Через 60 минут",
     confirm: "Подтвердить заказ",
     sending: "Отправка…",
     successTitle: "Заказ отправлен",
-    successBody: "Он будет готов к выбранному времени. Мы позвоним, если понадобится.",
+    successBody: "Мы получили ваш заказ! Позвоним вам, как только он будет готов.",
     errorRequired: "Укажите имя и номер телефона.",
     errorSend: "Заказ не отправлен. Попробуйте снова или позвоните нам.",
     back: "Назад",
@@ -207,14 +173,10 @@ export const ORDER_COPY: Record<Lang, OrderCopy> = {
     namePlaceholder: "השם שלכם",
     phone: "טלפון",
     phonePlaceholder: "לדוגמה ‎+30 691 234 5678",
-    pickup: "שעת איסוף",
-    pickupAsap: "בהקדם האפשרי",
-    pickup30: "בעוד 30 דקות",
-    pickup60: "בעוד 60 דקות",
     confirm: "אישור הזמנה",
     sending: "שולח…",
     successTitle: "ההזמנה נשלחה",
-    successBody: "היא תהיה מוכנה בשעה שבחרתם. נתקשר אם יהיה צורך.",
+    successBody: "קיבלנו את ההזמנה שלכם! נתקשר אליכם ברגע שהיא תהיה מוכנה.",
     errorRequired: "יש למלא שם וטלפון.",
     errorSend: "ההזמנה לא נשלחה. נסו שוב או התקשרו אלינו.",
     back: "חזרה",
@@ -231,23 +193,13 @@ export const ORDER_COPY: Record<Lang, OrderCopy> = {
     namePlaceholder: "Adınız",
     phone: "Telefon",
     phonePlaceholder: "örn. +30 691 234 5678",
-    pickup: "Teslim alma saati",
-    pickupAsap: "En kısa sürede",
-    pickup30: "30 dakika içinde",
-    pickup60: "60 dakika içinde",
     confirm: "Siparişi onayla",
     sending: "Gönderiliyor…",
     successTitle: "Sipariş gönderildi",
-    successBody: "Seçtiğiniz saatte hazır olacak. Gerekirse sizi arayacağız.",
+    successBody: "Siparişinizi aldık! Hazır olduğunda sizi arayacağız.",
     errorRequired: "Lütfen ad ve telefon numarası girin.",
     errorSend: "Sipariş gönderilemedi. Tekrar deneyin veya bizi arayın.",
     back: "Geri",
     done: "Kapat",
   },
 };
-
-export function pickupLabel(copy: OrderCopy, slot: PickupSlot): string {
-  if (slot === "in_30") return copy.pickup30;
-  if (slot === "in_60") return copy.pickup60;
-  return copy.pickupAsap;
-}

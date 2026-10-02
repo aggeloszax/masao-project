@@ -13,15 +13,26 @@ logger = logging.getLogger(__name__)
 BREVO_ENDPOINT = "https://api.brevo.com/v3/smtp/email"
 EMAIL_TIMEOUT_SECONDS = 15.0
 
-PICKUP_LABELS = {
-    "asap": "Το συντομότερο δυνατό",
-    "in_30": "Σε 30 λεπτά",
-    "in_60": "Σε 60 λεπτά",
-}
 
 
 class EmailUnavailableError(Exception):
     """Raised when the take-away notification could not be delivered."""
+
+
+def notification_recipients() -> list[str]:
+    """Split ORDER_NOTIFICATION_EMAIL into individual addresses.
+
+    Args:
+        None.
+
+    Returns:
+        list[str]: Every non-empty, comma-separated address, without duplicates.
+
+    Raises:
+        None.
+    """
+    raw = settings.order_notification_email or ""
+    return list(dict.fromkeys(address.strip() for address in raw.split(",") if address.strip()))
 
 
 def is_email_configured() -> bool:
@@ -39,7 +50,7 @@ def is_email_configured() -> bool:
     return (
         bool(settings.brevo_api_key)
         and bool(settings.order_from_email)
-        and bool(settings.order_notification_email)
+        and bool(notification_recipients())
     )
 
 
@@ -62,7 +73,6 @@ def build_order_subject(customer_name: str, total: float) -> str:
 def build_order_text(
     customer_name: str,
     customer_phone: str,
-    pickup_slot: str,
     items: list[TakeawayOrderLine],
     total: float,
 ) -> str:
@@ -71,7 +81,6 @@ def build_order_text(
     Args:
         customer_name: Name the guest supplied.
         customer_phone: Phone the guest supplied.
-        pickup_slot: One of the PickupSlot values.
         items: Priced order lines.
         total: Order total in euro.
 
@@ -86,7 +95,6 @@ def build_order_text(
         "",
         f"Όνομα:    {customer_name}",
         f"Τηλέφωνο: {customer_phone}",
-        f"Παραλαβή: {PICKUP_LABELS.get(pickup_slot, pickup_slot)}",
         "",
         "ΠΑΡΑΓΓΕΛΙΑ",
     ]
@@ -101,7 +109,6 @@ def build_order_text(
 def build_order_html(
     customer_name: str,
     customer_phone: str,
-    pickup_slot: str,
     items: list[TakeawayOrderLine],
     total: float,
 ) -> str:
@@ -110,7 +117,6 @@ def build_order_html(
     Args:
         customer_name: Name the guest supplied.
         customer_phone: Phone the guest supplied.
-        pickup_slot: One of the PickupSlot values.
         items: Priced order lines.
         total: Order total in euro.
 
@@ -152,8 +158,6 @@ def build_order_html(
           <td style="padding:4px 0;text-align:right">
             <a href="tel:{escape(phone_href)}" style="color:#722f37"><strong>{escape(customer_phone)}</strong></a>
           </td></tr>
-      <tr><td style="padding:4px 0;color:#555">Παραλαβή</td>
-          <td style="padding:4px 0;text-align:right"><strong>{escape(PICKUP_LABELS.get(pickup_slot, pickup_slot))}</strong></td></tr>
     </table>
 
     <table style="width:100%;border-collapse:collapse">{"".join(rows)}</table>
@@ -169,7 +173,6 @@ def build_order_html(
 async def send_takeaway_order_email(
     customer_name: str,
     customer_phone: str,
-    pickup_slot: str,
     items: list[TakeawayOrderLine],
     total: float,
 ) -> None:
@@ -178,7 +181,6 @@ async def send_takeaway_order_email(
     Args:
         customer_name: Name the guest supplied.
         customer_phone: Phone the guest supplied.
-        pickup_slot: One of the PickupSlot values.
         items: Priced order lines.
         total: Order total in euro.
 
@@ -193,10 +195,10 @@ async def send_takeaway_order_email(
 
     payload = {
         "sender": {"name": settings.order_from_name, "email": settings.order_from_email},
-        "to": [{"email": settings.order_notification_email}],
+        "to": [{"email": address} for address in notification_recipients()],
         "subject": build_order_subject(customer_name, total),
-        "textContent": build_order_text(customer_name, customer_phone, pickup_slot, items, total),
-        "htmlContent": build_order_html(customer_name, customer_phone, pickup_slot, items, total),
+        "textContent": build_order_text(customer_name, customer_phone, items, total),
+        "htmlContent": build_order_html(customer_name, customer_phone, items, total),
         # Το Brevo ξαναγράφει αποστολείς Gmail σε @...t-sender-sib.com, οπότε οι
         # απαντήσεις πρέπει να γυρίζουν στην πραγματική διεύθυνση.
         "replyTo": {"email": settings.order_from_email},

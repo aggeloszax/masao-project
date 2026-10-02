@@ -1,14 +1,11 @@
 from __future__ import annotations
 
 import re
-from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, Field, field_validator
 
 from api.schemas.menu import LanguageCode
-
-PickupSlot = Literal["asap", "in_30", "in_60"]
 
 # Επιτρέπονται ψηφία, κενά και τα συνήθη σύμβολα τηλεφώνου. Δεν επιβάλλουμε
 # ελληνικό format: οι πελάτες είναι και τουρίστες με ξένους αριθμούς.
@@ -39,7 +36,6 @@ class TakeawayOrderItemRequest(BaseModel):
 class TakeawayOrderRequest(BaseModel):
     customer_name: str = Field(..., min_length=1, max_length=120)
     customer_phone: str = Field(..., min_length=5, max_length=40)
-    pickup_slot: PickupSlot
     language_code: LanguageCode = "el"
     items: list[TakeawayOrderItemRequest] = Field(..., min_length=1)
 

@@ -54,7 +54,6 @@ def test_request_rejects_a_blank_name() -> None:
         TakeawayOrderRequest(
             customer_name="   ",
             customer_phone="6900000000",
-            pickup_slot="asap",
             items=[TakeawayOrderItemRequest(item_ref="UR001", quantity=1)],
         )
 
@@ -64,7 +63,6 @@ def test_request_rejects_an_implausible_phone() -> None:
         TakeawayOrderRequest(
             customer_name="Άννα",
             customer_phone="abcdef",
-            pickup_slot="asap",
             items=[TakeawayOrderItemRequest(item_ref="UR001", quantity=1)],
         )
 
@@ -73,7 +71,6 @@ def test_request_accepts_an_international_phone() -> None:
     request = TakeawayOrderRequest(
         customer_name="  Anna   Smith ",
         customer_phone=" +49 (30) 123-4567 ",
-        pickup_slot="in_30",
         items=[TakeawayOrderItemRequest(item_ref="UR001", quantity=1)],
     )
 
@@ -86,7 +83,6 @@ def test_request_rejects_duplicate_item_refs() -> None:
         TakeawayOrderRequest(
             customer_name="Άννα",
             customer_phone="6900000000",
-            pickup_slot="asap",
             items=[
                 TakeawayOrderItemRequest(item_ref="UR001", quantity=1),
                 TakeawayOrderItemRequest(item_ref="UR001", quantity=2),
@@ -99,19 +95,20 @@ def test_request_rejects_an_empty_order() -> None:
         TakeawayOrderRequest(
             customer_name="Άννα",
             customer_phone="6900000000",
-            pickup_slot="asap",
             items=[],
         )
 
 
-def test_request_rejects_an_unknown_pickup_slot() -> None:
-    with pytest.raises(ValidationError):
-        TakeawayOrderRequest(
-            customer_name="Άννα",
-            customer_phone="6900000000",
-            pickup_slot="tomorrow",
-            items=[TakeawayOrderItemRequest(item_ref="UR001", quantity=1)],
-        )
+def test_request_ignores_a_pickup_slot_from_older_clients() -> None:
+    # Η επιλογή ώρας αφαιρέθηκε· ένα frontend που δεν έχει ανανεωθεί ακόμα δεν πρέπει να σπάει.
+    request = TakeawayOrderRequest(
+        customer_name="Άννα",
+        customer_phone="6900000000",
+        pickup_slot="in_30",
+        items=[TakeawayOrderItemRequest(item_ref="UR001", quantity=1)],
+    )
+
+    assert not hasattr(request, "pickup_slot")
 
 
 def test_email_is_not_configured_without_a_key(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -161,7 +158,7 @@ async def test_send_uses_the_brevo_request_shape(monkeypatch: pytest.MonkeyPatch
         return httpx.Response(201, json={"messageId": "<abc@brevo>"})
 
     configure_brevo(monkeypatch, handler)
-    await send_takeaway_order_email("Άννα", "6900000000", "asap", [line()], 16.0)
+    await send_takeaway_order_email("Άννα", "6900000000", [line()], 16.0)
 
     assert seen["url"] == "https://api.brevo.com/v3/smtp/email"
     assert seen["key"] == "xkeysib-test"
@@ -173,11 +170,29 @@ async def test_send_uses_the_brevo_request_shape(monkeypatch: pytest.MonkeyPatch
 
 
 @pytest.mark.asyncio
+async def test_send_notifies_every_comma_separated_recipient(monkeypatch: pytest.MonkeyPatch) -> None:
+    seen: dict = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen["body"] = __import__("json").loads(request.content)
+        return httpx.Response(201, json={"messageId": "<abc@brevo>"})
+
+    configure_brevo(monkeypatch, handler)
+    monkeypatch.setattr(
+        "api.services.email_service.settings.order_notification_email",
+        " owner@example.com, kitchen@example.com ,,owner@example.com",
+    )
+    await send_takeaway_order_email("Άννα", "6900000000", [line()], 16.0)
+
+    assert seen["body"]["to"] == [{"email": "owner@example.com"}, {"email": "kitchen@example.com"}]
+
+
+@pytest.mark.asyncio
 async def test_send_raises_when_brevo_rejects(monkeypatch: pytest.MonkeyPatch) -> None:
     configure_brevo(monkeypatch, lambda request: httpx.Response(401, json={"code": "unauthorized"}))
 
     with pytest.raises(EmailUnavailableError, match="401"):
-        await send_takeaway_order_email("Άννα", "6900000000", "asap", [line()], 16.0)
+        await send_takeaway_order_email("Άννα", "6900000000", [line()], 16.0)
 
 
 def test_order_subject_carries_the_name_and_total() -> None:
@@ -188,12 +203,11 @@ def test_order_text_lists_quantities_notes_and_total() -> None:
     body = build_order_text(
         "Άννα",
         "6900000000",
-        "in_30",
         [line(quantity=2, note="χωρίς κρεμμύδι")],
         16.0,
     )
 
-    assert "Σε 30 λεπτά" in body
+    assert "Παραλαβή" not in body
     assert "2x  Cucumber Maki" in body
     assert "Σημείωση: χωρίς κρεμμύδι" in body
     assert "ΣΥΝΟΛΟ: 16.00€" in body
@@ -203,7 +217,6 @@ def test_order_html_escapes_guest_supplied_text() -> None:
     html = build_order_html(
         "<script>alert(1)</script>",
         "6900000000",
-        "asap",
         [line(note="<b>bold</b>")],
         16.0,
     )
@@ -214,7 +227,7 @@ def test_order_html_escapes_guest_supplied_text() -> None:
 
 
 def test_order_html_builds_a_dialable_phone_link() -> None:
-    html = build_order_html("Άννα", "+30 (210) 123-4567", "asap", [line()], 16.0)
+    html = build_order_html("Άννα", "+30 (210) 123-4567", [line()], 16.0)
 
     assert 'href="tel:+302101234567"' in html
 
@@ -268,7 +281,6 @@ def valid_payload(**overrides) -> dict:
     payload = {
         "customer_name": "Άννα",
         "customer_phone": "6900000000",
-        "pickup_slot": "asap",
         "language_code": "el",
         "items": [{"item_ref": "UR001", "quantity": 2, "note": ""}],
     }

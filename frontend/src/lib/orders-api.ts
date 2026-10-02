@@ -1,6 +1,5 @@
 import type { Lang } from "@/i18n/config";
 import { fetchApi } from "@/lib/fetch-api";
-import type { PickupSlot } from "@/selection/order-copy";
 
 const TAKEAWAY_ENDPOINT = "/api/orders/takeaway";
 const ORDER_TIMEOUT_MS = 30_000;
@@ -8,7 +7,6 @@ const ORDER_TIMEOUT_MS = 30_000;
 export type TakeawayOrderInput = {
   customerName: string;
   customerPhone: string;
-  pickupSlot: PickupSlot;
   language: Lang;
   items: { itemRef: string; quantity: number; note: string }[];
 };
@@ -43,7 +41,6 @@ export async function submitTakeawayOrder(
       body: JSON.stringify({
         customer_name: input.customerName,
         customer_phone: input.customerPhone,
-        pickup_slot: input.pickupSlot,
         language_code: input.language,
         items: input.items.map((item) => ({
           item_ref: item.itemRef,
