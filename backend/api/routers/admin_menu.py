@@ -23,6 +23,8 @@ from api.schemas.admin_menu import (
     MenuItemUpdateRequest,
     MenuReorderRequest,
     MenuReorderResponse,
+    SuggestTagsRequest,
+    SuggestTagsResponse,
     TranslateCategoryResponse,
     TranslateItemResponse,
     TranslateRequest,
@@ -39,6 +41,9 @@ from api.services.translation_service import (
 
 logger = logging.getLogger(__name__)
 router = APIRouter(dependencies=[Depends(verify_internal_api_key)])
+
+# Λίγα παραδείγματα από την ίδια κατηγορία κρατούν τα tags συνεπή χωρίς να φουσκώνει το prompt.
+SUGGEST_TAGS_EXAMPLES = 8
 
 
 def plan_translation(request: TranslateRequest, existing: set[str]) -> tuple[list[str], list[str]]:
@@ -263,6 +268,44 @@ async def translate_category(
         skipped=skipped,
         translations=translations,
     )
+
+
+@router.post("/menu/items/suggest-tags", response_model=SuggestTagsResponse)
+async def suggest_item_tags(
+    request: SuggestTagsRequest,
+    service: AdminMenuService = Depends(get_admin_menu_service),
+    translator: TranslationService = Depends(get_translation_service),
+) -> SuggestTagsResponse:
+    """Suggest tags for an item from its unsaved name and description."""
+    category_name = ""
+    examples: list[tuple[str, list[str]]] = []
+    try:
+        vocabulary = await service.list_tags()
+        if request.category_id is not None:
+            try:
+                category_name = (await service.get_category(request.category_id)).name
+            except LookupError:
+                pass
+            else:
+                siblings = await service.list_items(category_id=request.category_id)
+                examples = [(item.name, item.tags) for item in siblings.items if item.tags][:SUGGEST_TAGS_EXAMPLES]
+    except SQLAlchemyError as exc:
+        logger.exception("Admin tag suggestion lookup failed")
+        raise HTTPException(status_code=500, detail="Admin menu service unavailable") from exc
+
+    try:
+        tags = await translator.suggest_tags(
+            name=request.name.strip(),
+            description=request.description.strip(),
+            category_name=category_name,
+            vocabulary=vocabulary,
+            examples=examples,
+        )
+    except TranslationUnavailableError as exc:
+        logger.warning("Automatic tag suggestion failed: %s", exc)
+        raise HTTPException(status_code=503, detail="Automatic tag suggestion is unavailable") from exc
+
+    return SuggestTagsResponse(tags=tags)
 
 
 @router.get("/menu/items", response_model=MenuItemListResponse)

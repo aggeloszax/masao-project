@@ -216,6 +216,20 @@ export async function translateItem(
   );
 }
 
+/** Ask Claude for tags from the existing menu vocabulary; works on unsaved items too. */
+export async function suggestItemTags(input: {
+  name: string;
+  description: string;
+  category_id: number | null;
+}): Promise<string[]> {
+  const result = await adminFetch<{ tags: string[] }>(
+    "/menu/items/suggest-tags",
+    { method: "POST", body: JSON.stringify(input) },
+    TRANSLATE_TIMEOUT_MS,
+  );
+  return result.tags;
+}
+
 export async function listCategories(): Promise<AdminCategory[]> {
   const data = await adminFetch<{ total: number; categories: AdminCategory[] }>("/menu/categories");
   return data.categories;

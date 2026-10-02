@@ -269,3 +269,21 @@ class TranslateCategoryResponse(BaseModel):
     translated: list[LanguageCode]
     skipped: list[LanguageCode]
     translations: dict[str, str]
+
+
+class SuggestTagsRequest(BaseModel):
+    """Unsaved item text the admin wants tags for; works before the item exists."""
+
+    name: str = Field(default="", max_length=160)
+    description: str = Field(default="", max_length=4000)
+    category_id: int | None = Field(default=None, gt=0)
+
+    @model_validator(mode="after")
+    def require_some_text(self) -> "SuggestTagsRequest":
+        if not self.name.strip() and not self.description.strip():
+            raise ValueError("name or description is required")
+        return self
+
+
+class SuggestTagsResponse(BaseModel):
+    tags: list[str]

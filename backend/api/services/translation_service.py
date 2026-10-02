@@ -20,6 +20,8 @@ TRANSLATABLE_LANGUAGES: tuple[str, ...] = tuple(LANGUAGE_NAMES)
 # δεν χωράνε στα 1024 tokens του anthropic_max_tokens.
 TRANSLATION_MAX_TOKENS = 4096
 
+MAX_SUGGESTED_TAGS = 6
+
 
 class TranslationUnavailableError(Exception):
     """Raised when Claude cannot produce usable menu translations."""
@@ -72,6 +74,28 @@ def build_category_schema(language_codes: list[str]) -> dict:
         "type": "object",
         "properties": {code: {"type": "string"} for code in language_codes},
         "required": list(language_codes),
+        "additionalProperties": False,
+    }
+
+
+def build_tags_schema(vocabulary: list[str]) -> dict:
+    """Build the JSON schema restricting suggestions to the existing tags.
+
+    Args:
+        vocabulary: Tags already used on the menu.
+
+    Returns:
+        dict: JSON schema passed to the Anthropic output config.
+
+    Raises:
+        None.
+    """
+    return {
+        "type": "object",
+        "properties": {
+            "tags": {"type": "array", "items": {"type": "string", "enum": list(vocabulary)}},
+        },
+        "required": ["tags"],
         "additionalProperties": False,
     }
 
@@ -217,16 +241,61 @@ class TranslationService:
             translations[code] = translated_name
         return translations
 
-    async def _complete(self, prompt: str, schema: dict, language_codes: list[str]) -> dict:
+    async def suggest_tags(
+        self,
+        name: str,
+        description: str,
+        category_name: str,
+        vocabulary: list[str],
+        examples: list[tuple[str, list[str]]],
+    ) -> list[str]:
+        """Pick tags for one menu item from the existing tag vocabulary.
+
+        Args:
+            name: Item name as typed by the admin.
+            description: Item description, possibly empty.
+            category_name: Category name, or empty when unknown.
+            vocabulary: Tags already used on the menu; the only allowed answers.
+            examples: (name, tags) pairs from the same category, for consistency.
+
+        Returns:
+            list[str]: Suggested tags in vocabulary order of relevance, at most MAX_SUGGESTED_TAGS.
+
+        Raises:
+            TranslationUnavailableError: If the API call fails or returns unusable output.
+        """
+        # Μόνο υπάρχοντα tags: αυτά έχουν μεταφράσεις στο δημόσιο μενού και
+        # τα φιλτράρει ήδη ο AI σερβιτόρος.
+        if not vocabulary:
+            return []
+
+        prompt = SUGGEST_TAGS_PROMPT.format(
+            name=name or "(empty)",
+            description=description or "(empty)",
+            category_name=category_name or "(unknown)",
+            vocabulary="\n".join(f"- {tag}" for tag in vocabulary),
+            examples="\n".join(f"- {item}: {', '.join(tags)}" for item, tags in examples) or "(none)",
+            max_tags=MAX_SUGGESTED_TAGS,
+        )
+        data = await self._complete(prompt, build_tags_schema(vocabulary), ["tags"])
+
+        raw = data["tags"]
+        if not isinstance(raw, list):
+            raise TranslationUnavailableError("Model did not return a tag list")
+        allowed = set(vocabulary)
+        tags = [tag for tag in dict.fromkeys(str(value).strip() for value in raw) if tag in allowed]
+        return tags[:MAX_SUGGESTED_TAGS]
+
+    async def _complete(self, prompt: str, schema: dict, required_keys: list[str]) -> dict:
         """Run one schema-constrained Claude call and parse its JSON payload.
 
         Args:
             prompt: Fully rendered translation instructions.
             schema: JSON schema the model must satisfy.
-            language_codes: Target languages, used to validate the payload.
+            required_keys: Top-level keys the payload must contain.
 
         Returns:
-            dict: Parsed translation payload keyed by language code.
+            dict: Parsed JSON payload.
 
         Raises:
             TranslationUnavailableError: If the API call fails or returns unusable output.
@@ -263,9 +332,9 @@ class TranslationService:
         if not isinstance(data, dict):
             raise TranslationUnavailableError("Model did not return a translation object")
 
-        missing = [code for code in language_codes if code not in data]
+        missing = [key for key in required_keys if key not in data]
         if missing:
-            raise TranslationUnavailableError(f"Missing translations: {', '.join(missing)}")
+            raise TranslationUnavailableError(f"Missing keys in model output: {', '.join(missing)}")
         return data
 
 
@@ -304,6 +373,29 @@ Rules:
 - Preserve Japanese dish names and brand names unchanged.
 - No explanations and no punctuation that the source does not have.
 - When a target language matches the source language, return the source text unchanged.
+""".strip()
+
+
+SUGGEST_TAGS_PROMPT = """
+Choose tags for one restaurant menu item, using only the allowed tags below.
+
+Item:
+name: {name}
+description: {description}
+category: {category_name}
+
+Allowed tags (use them exactly as written):
+{vocabulary}
+
+How other items in the same category are tagged:
+{examples}
+
+Rules:
+- Pick between 2 and {max_tags} tags that the name, description or category clearly support.
+- Prefer the main ingredient or protein, then flavour and texture, then style or origin.
+- Dietary tags (vegan, χορτοφαγικό, alcohol-free) only when the text makes them certain.
+- Never guess ingredients that are not mentioned.
+- Order the tags from most to least relevant.
 """.strip()
 
 

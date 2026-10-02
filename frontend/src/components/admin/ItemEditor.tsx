@@ -9,6 +9,7 @@ import {
   getItem,
   isSessionExpired,
   listCategories,
+  suggestItemTags,
   updateItem,
   type AdminCategory,
   type AdminItem,
@@ -43,6 +44,13 @@ const EMPTY_FORM: FormState = {
   is_available: true,
   display_order: "0",
 };
+
+function parseTags(value: string): string[] {
+  return value
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter(Boolean);
+}
 
 function formFrom(item: AdminItem): FormState {
   return {
@@ -84,10 +92,7 @@ function toPayload(form: FormState): ParseResult {
       name,
       description: form.description.trim(),
       price: Math.round(price * 100) / 100,
-      tags: form.tags
-        .split(",")
-        .map((tag) => tag.trim())
-        .filter(Boolean),
+      tags: parseTags(form.tags),
       is_available: form.is_available,
       display_order: displayOrder,
     },
@@ -104,6 +109,7 @@ export function ItemEditor({ itemId }: { itemId: number | null }) {
   const [tab, setTab] = useState<"details" | "translations">("details");
   const [isLoading, setIsLoading] = useState(!isCreating);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSuggesting, setIsSuggesting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -145,6 +151,37 @@ export function ItemEditor({ itemId }: { itemId: number | null }) {
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((current) => ({ ...current, [key]: value }));
+  }
+
+  async function handleSuggestTags() {
+    setIsSuggesting(true);
+    setError(null);
+    setNotice(null);
+    try {
+      const categoryId = Number(form.category_id);
+      const suggested = await suggestItemTags({
+        name: form.name.trim(),
+        description: form.description.trim(),
+        category_id: Number.isInteger(categoryId) && categoryId > 0 ? categoryId : null,
+      });
+      const added = suggested.filter((tag) => !parseTags(form.tags).includes(tag)).length;
+      // Προσθέτουμε, δεν αντικαθιστούμε: ό,τι έγραψε ήδη ο χρήστης μένει.
+      // Το merge γίνεται στην τρέχουσα τιμή, γιατί μπορεί να άλλαξε όσο περιμέναμε.
+      setForm((current) => {
+        const existing = parseTags(current.tags);
+        const fresh = suggested.filter((tag) => !existing.includes(tag));
+        return { ...current, tags: [...existing, ...fresh].join(", ") };
+      });
+      setNotice(
+        added > 0
+          ? `Προστέθηκαν ${added} tags — ελέγξτε τα πριν την αποθήκευση`
+          : "Δεν βρέθηκαν νέα tags για αυτή την περιγραφή",
+      );
+    } catch (cause) {
+      handleFailure(cause);
+    } finally {
+      setIsSuggesting(false);
+    }
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -272,14 +309,25 @@ export function ItemEditor({ itemId }: { itemId: number | null }) {
             />
           </Field>
 
-          <Field label="Tags" hint="Χωρισμένα με κόμμα, π.χ. vegan, spicy">
-            <input
-              type="text"
-              value={form.tags}
-              onChange={(event) => update("tags", event.target.value)}
-              className={INPUT_CLASS}
-            />
-          </Field>
+          <div className="space-y-1.5">
+            <Field label="Tags" hint="Χωρισμένα με κόμμα, π.χ. vegan, καυτερό">
+              <input
+                type="text"
+                value={form.tags}
+                onChange={(event) => update("tags", event.target.value)}
+                className={INPUT_CLASS}
+              />
+            </Field>
+            <button
+              type="button"
+              onClick={handleSuggestTags}
+              disabled={isSuggesting || (!form.name.trim() && !form.description.trim())}
+              title="Προτείνει tags από το όνομα και την περιγραφή, μόνο από όσα υπάρχουν ήδη στο μενού"
+              className={BUTTON_GHOST}
+            >
+              {isSuggesting ? "Αναζήτηση tags…" : "✨ Αυτόματα tags από την περιγραφή"}
+            </button>
+          </div>
 
           <div className="sm:max-w-[50%]">
             <Field label="Σειρά εμφάνισης" hint="Μικρότερος αριθμός = ψηλότερα στην κατηγορία">

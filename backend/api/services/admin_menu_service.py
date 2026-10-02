@@ -392,6 +392,30 @@ class AdminMenuService:
         items = [self._item_detail_response(row) for row in rows]
         return MenuItemListResponse(total=len(items), items=items)
 
+    async def list_tags(self) -> list[str]:
+        """List every distinct tag used on the menu, most frequent first.
+
+        Args:
+            None.
+
+        Returns:
+            list[str]: Tag vocabulary already present in menu_items.
+
+        Raises:
+            SQLAlchemyError: Propagated by SQLAlchemy if the database query fails.
+        """
+        result = await self.session.execute(
+            text(
+                """
+                select tag
+                from menu_items, unnest(tags) as tag
+                group by tag
+                order by count(*) desc, tag
+                """
+            )
+        )
+        return [row[0] for row in result.all()]
+
     async def get_item(self, item_id: int) -> MenuItemAdminDetailResponse:
         """Fetch one menu item with every stored translation.
 
