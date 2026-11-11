@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import {
   ChatApiError,
@@ -16,7 +16,25 @@ import type { Lang } from "@/i18n/config";
 import { SELECTION_ADDED_COPY, SELECTION_COPY } from "@/selection/copy";
 import { useSelection } from "@/selection/SelectionContext";
 
-type Message = { id: string; role: "user" | "bot"; text: string };
+type Message = {
+  id: string;
+  role: "user" | "bot";
+  text: string;
+  /** Reveal the text word by word (fresh waiter replies only). */
+  reveal?: boolean;
+};
+
+/** Pace of the word-by-word reveal: fast for long replies, never sluggish. */
+const REVEAL_TOTAL_MS = 1400;
+const REVEAL_MIN_STEP_MS = 22;
+const REVEAL_MAX_STEP_MS = 55;
+
+function prefersReducedMotion(): boolean {
+  return (
+    typeof window !== "undefined" &&
+    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true
+  );
+}
 
 const RESTAURANT_SLUG = "masao";
 
@@ -70,6 +88,8 @@ export function Chat() {
   const [recommendedItems, setRecommendedItems] = useState<ChatApiMenuItem[]>([]);
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
+  // Id of the bot reply still being revealed; suggestions wait for it.
+  const [revealingId, setRevealingId] = useState<string | null>(null);
   const [deviceId, setDeviceId] = useState(() =>
     typeof window === "undefined" ? "" : getOrCreateDeviceId(),
   );
@@ -92,7 +112,15 @@ export function Chat() {
 
     const previousBodyOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    inputRef.current?.focus();
+    // On phones/tablets focusing the input pops the keyboard over the chat
+    // before the guest has read anything, so focus the dialog itself there
+    // (screen readers still land inside it). Desktop keeps input focus.
+    const isTouchDevice = window.matchMedia?.("(pointer: coarse)").matches === true;
+    if (isTouchDevice) {
+      dialogRef.current?.focus({ preventScroll: true });
+    } else {
+      inputRef.current?.focus();
+    }
 
     function handleDialogKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
@@ -128,13 +156,23 @@ export function Chat() {
     };
   }, [open]);
 
-  // Auto-scroll to the latest message / typing indicator.
+  // Auto-scroll to the latest message / typing indicator / suggestions.
   useEffect(() => {
     scrollRef.current?.scrollTo({
       top: scrollRef.current.scrollHeight,
-      behavior: "smooth",
+      behavior: prefersReducedMotion() ? "auto" : "smooth",
     });
-  }, [messages, typing, open]);
+  }, [messages, typing, open, revealingId]);
+
+  // While a reply is being revealed, keep its growing bubble in view, but
+  // only if the guest has not scrolled up to read something earlier.
+  function followReveal() {
+    const container = scrollRef.current;
+    if (!container) return;
+    const distanceFromBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight;
+    if (distanceFromBottom < 120) container.scrollTop = container.scrollHeight;
+  }
 
   // Language-stamped snapshots (server replies, recommendation cards) would
   // otherwise keep showing the previous language after a switch. Reset during
@@ -144,6 +182,7 @@ export function Chat() {
     setMessagesLang(lang);
     setMessages([]);
     setRecommendedItems([]);
+    setRevealingId(null);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -157,6 +196,7 @@ export function Chat() {
     const userMsg: Message = { id: `local-${nextId.current++}`, role: "user", text };
     setMessages((prev) => [...prev, userMsg]);
     setRecommendedItems([]);
+    setRevealingId(null);
     setInput("");
     setTyping(true);
 
@@ -169,7 +209,9 @@ export function Chat() {
         userMessage: text,
         languageCode: lang,
       });
-      setMessages((prev) => [...prev, mapApiMessage(response.assistant_message)]);
+      const botMsg: Message = { ...mapApiMessage(response.assistant_message), reveal: true };
+      if (!prefersReducedMotion()) setRevealingId(botMsg.id);
+      setMessages((prev) => [...prev, botMsg]);
       setRecommendedItems(response.recommended_items);
       (response.items_to_add ?? []).forEach((item) =>
         addItem({
@@ -212,14 +254,15 @@ export function Chat() {
 
       {/* Chat panel */}
       {open && (
-        <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/20 px-3 pb-3">
+        <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/20 px-3 pb-3 motion-safe:animate-fade-in">
           <div
             ref={dialogRef}
+            tabIndex={-1}
             role="dialog"
             aria-modal="true"
             aria-labelledby="masao-chat-title"
             aria-describedby="masao-chat-subtitle"
-            className="flex h-[70vh] w-full max-w-md flex-col overflow-hidden rounded-2xl border border-hairline bg-background shadow-2xl"
+            className="flex h-[70vh] w-full max-w-md flex-col overflow-hidden rounded-2xl border border-hairline bg-background shadow-2xl outline-none motion-safe:animate-sheet-up"
           >
             {/* Header */}
             <header className="flex items-center justify-between border-b border-hairline px-4 py-3">
@@ -252,9 +295,18 @@ export function Chat() {
             >
               <Bubble role="bot" text={t.chatGreeting} />
               {messages.map((m) => (
-                <Bubble key={m.id} role={m.role} text={m.text} />
+                <Bubble
+                  key={m.id}
+                  role={m.role}
+                  text={m.text}
+                  reveal={m.reveal}
+                  onRevealProgress={followReveal}
+                  onRevealDone={() =>
+                    setRevealingId((current) => (current === m.id ? null : current))
+                  }
+                />
               ))}
-              {!typing && recommendedItems.length > 0 && (
+              {!typing && revealingId === null && recommendedItems.length > 0 && (
                 <RecommendedItems items={recommendedItems} title={SUGGESTIONS_COPY[lang]} />
               )}
               {typing && <TypingIndicator typingLabel={t.chatTyping} />}
@@ -307,10 +359,24 @@ function mapApiMessage(message: ChatApiMessage): Message {
   };
 }
 
-function Bubble({ role, text }: { role: "user" | "bot"; text: string }) {
+function Bubble({
+  role,
+  text,
+  reveal = false,
+  onRevealProgress,
+  onRevealDone,
+}: {
+  role: "user" | "bot";
+  text: string;
+  reveal?: boolean;
+  onRevealProgress?: () => void;
+  onRevealDone?: () => void;
+}) {
   const isUser = role === "user";
   return (
-    <div className={isUser ? "flex justify-end" : "flex justify-start"}>
+    <div
+      className={`${isUser ? "flex justify-end" : "flex justify-start"} motion-safe:animate-fade-up`}
+    >
       <p
         className={`max-w-[82%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
           isUser
@@ -318,9 +384,75 @@ function Bubble({ role, text }: { role: "user" | "bot"; text: string }) {
             : "rounded-es-sm bg-surface text-foreground"
         }`}
       >
-        {text}
+        {reveal ? (
+          <RevealText text={text} onProgress={onRevealProgress} onDone={onRevealDone} />
+        ) : (
+          text
+        )}
       </p>
     </div>
+  );
+}
+
+/**
+ * Shows a reply word by word, each word fading in, like a waiter talking.
+ * Screen readers get the full sentence at once via the sr-only copy.
+ */
+function RevealText({
+  text,
+  onProgress,
+  onDone,
+}: {
+  text: string;
+  onProgress?: () => void;
+  onDone?: () => void;
+}) {
+  const tokens = useMemo(() => text.split(/(\s+)/).filter(Boolean), [text]);
+  const [shown, setShown] = useState(() => (prefersReducedMotion() ? tokens.length : 0));
+
+  // Latest callbacks without restarting the timer when the parent re-renders.
+  const callbacks = useRef({ onProgress, onDone });
+  useEffect(() => {
+    callbacks.current = { onProgress, onDone };
+  });
+
+  useEffect(() => {
+    if (shown >= tokens.length) {
+      callbacks.current.onDone?.();
+      return;
+    }
+    const wordCount = Math.max(1, Math.ceil(tokens.length / 2));
+    const step = Math.min(
+      REVEAL_MAX_STEP_MS,
+      Math.max(REVEAL_MIN_STEP_MS, REVEAL_TOTAL_MS / wordCount),
+    );
+    const timer = window.setTimeout(() => {
+      // Whitespace tokens ride along with the word before them.
+      setShown((count) => {
+        let next = count + 1;
+        while (next < tokens.length && /^\s+$/.test(tokens[next])) next += 1;
+        return next;
+      });
+      callbacks.current.onProgress?.();
+    }, step);
+    return () => window.clearTimeout(timer);
+  }, [shown, tokens]);
+
+  return (
+    <>
+      <span className="sr-only">{text}</span>
+      <span aria-hidden>
+        {tokens.slice(0, shown).map((token, index) =>
+          /^\s+$/.test(token) ? (
+            token
+          ) : (
+            <span key={index} className="motion-safe:animate-word-in">
+              {token}
+            </span>
+          ),
+        )}
+      </span>
+    </>
   );
 }
 
@@ -328,7 +460,7 @@ function RecommendedItems({ items, title }: { items: ChatApiMenuItem[]; title: s
   const { lang } = useLanguage();
   const { addItem, items: selectedItems } = useSelection();
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 motion-safe:animate-fade-up">
       <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent-soft">
         {title}
       </p>
@@ -367,7 +499,7 @@ function RecommendedItems({ items, title }: { items: ChatApiMenuItem[]; title: s
 
 function TypingIndicator({ typingLabel }: { typingLabel: string }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 motion-safe:animate-fade-up">
       <div className="flex items-center gap-1 rounded-2xl rounded-es-sm bg-surface px-3.5 py-3">
         {[0, 150, 300].map((delay) => (
           <span
