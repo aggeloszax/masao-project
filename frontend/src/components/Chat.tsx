@@ -24,10 +24,15 @@ type Message = {
   reveal?: boolean;
 };
 
-/** Pace of the word-by-word reveal: fast for long replies, never sluggish. */
-const REVEAL_TOTAL_MS = 1400;
-const REVEAL_MIN_STEP_MS = 22;
-const REVEAL_MAX_STEP_MS = 55;
+/**
+ * Reply reveal: each word fades in a little after the previous one, and the
+ * fades overlap, so the text flows in as one continuous motion.
+ * REVEAL_SPREAD_MS is when the last word starts; REVEAL_WORD_MS is how long
+ * one word takes to fade in.
+ */
+const REVEAL_SPREAD_MS = 900;
+const REVEAL_MAX_WORD_DELAY_MS = 45;
+const REVEAL_WORD_MS = 450;
 
 function prefersReducedMotion(): boolean {
   return (
@@ -164,15 +169,6 @@ export function Chat() {
     });
   }, [messages, typing, open, revealingId]);
 
-  // While a reply is being revealed, keep its growing bubble in view, but
-  // only if the guest has not scrolled up to read something earlier.
-  function followReveal() {
-    const container = scrollRef.current;
-    if (!container) return;
-    const distanceFromBottom =
-      container.scrollHeight - container.scrollTop - container.clientHeight;
-    if (distanceFromBottom < 120) container.scrollTop = container.scrollHeight;
-  }
 
   // Language-stamped snapshots (server replies, recommendation cards) would
   // otherwise keep showing the previous language after a switch. Reset during
@@ -300,7 +296,6 @@ export function Chat() {
                   role={m.role}
                   text={m.text}
                   reveal={m.reveal}
-                  onRevealProgress={followReveal}
                   onRevealDone={() =>
                     setRevealingId((current) => (current === m.id ? null : current))
                   }
@@ -363,13 +358,11 @@ function Bubble({
   role,
   text,
   reveal = false,
-  onRevealProgress,
   onRevealDone,
 }: {
   role: "user" | "bot";
   text: string;
   reveal?: boolean;
-  onRevealProgress?: () => void;
   onRevealDone?: () => void;
 }) {
   const isUser = role === "user";
@@ -385,7 +378,7 @@ function Bubble({
         }`}
       >
         {reveal ? (
-          <RevealText text={text} onProgress={onRevealProgress} onDone={onRevealDone} />
+          <RevealText text={text} onDone={onRevealDone} />
         ) : (
           text
         )}
@@ -395,58 +388,51 @@ function Bubble({
 }
 
 /**
- * Shows a reply word by word, each word fading in, like a waiter talking.
- * Screen readers get the full sentence at once via the sr-only copy.
+ * Fades a reply in word by word as one smooth, overlapping wave.
+ * The full text is laid out from the start, so the bubble has its final size
+ * immediately and nothing jumps; the motion is pure CSS (opacity, blur and a
+ * tiny lift), so React does not re-render per word. Screen readers get the
+ * whole sentence at once via the sr-only copy.
  */
-function RevealText({
-  text,
-  onProgress,
-  onDone,
-}: {
-  text: string;
-  onProgress?: () => void;
-  onDone?: () => void;
-}) {
-  const tokens = useMemo(() => text.split(/(\s+)/).filter(Boolean), [text]);
-  const [shown, setShown] = useState(() => (prefersReducedMotion() ? tokens.length : 0));
+function RevealText({ text, onDone }: { text: string; onDone?: () => void }) {
+  // Each token with its word position (-1 for whitespace).
+  const tokens = useMemo(() => {
+    let word = 0;
+    return text
+      .split(/(\s+)/)
+      .filter(Boolean)
+      .map((token) => ({ token, word: /^\s+$/.test(token) ? -1 : word++ }));
+  }, [text]);
+  const wordCount = tokens.filter((t) => t.word >= 0).length;
+  const wordDelay = Math.min(REVEAL_MAX_WORD_DELAY_MS, REVEAL_SPREAD_MS / Math.max(1, wordCount));
 
-  // Latest callbacks without restarting the timer when the parent re-renders.
-  const callbacks = useRef({ onProgress, onDone });
+  const onDoneRef = useRef(onDone);
   useEffect(() => {
-    callbacks.current = { onProgress, onDone };
+    onDoneRef.current = onDone;
   });
 
   useEffect(() => {
-    if (shown >= tokens.length) {
-      callbacks.current.onDone?.();
-      return;
-    }
-    const wordCount = Math.max(1, Math.ceil(tokens.length / 2));
-    const step = Math.min(
-      REVEAL_MAX_STEP_MS,
-      Math.max(REVEAL_MIN_STEP_MS, REVEAL_TOTAL_MS / wordCount),
-    );
-    const timer = window.setTimeout(() => {
-      // Whitespace tokens ride along with the word before them.
-      setShown((count) => {
-        let next = count + 1;
-        while (next < tokens.length && /^\s+$/.test(tokens[next])) next += 1;
-        return next;
-      });
-      callbacks.current.onProgress?.();
-    }, step);
+    const total = prefersReducedMotion() ? 0 : wordDelay * wordCount + REVEAL_WORD_MS;
+    const timer = window.setTimeout(() => onDoneRef.current?.(), total);
     return () => window.clearTimeout(timer);
-  }, [shown, tokens]);
+  }, [wordDelay, wordCount]);
 
   return (
     <>
       <span className="sr-only">{text}</span>
       <span aria-hidden>
-        {tokens.slice(0, shown).map((token, index) =>
-          /^\s+$/.test(token) ? (
+        {tokens.map(({ token, word }, index) =>
+          word < 0 ? (
             token
           ) : (
-            <span key={index} className="motion-safe:animate-word-in">
+            <span
+              key={index}
+              className="inline-block motion-safe:animate-word-in"
+              style={{
+                animationDelay: `${wordDelay * word}ms`,
+                animationDuration: `${REVEAL_WORD_MS}ms`,
+              }}
+            >
               {token}
             </span>
           ),
