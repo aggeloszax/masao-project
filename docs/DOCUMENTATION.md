@@ -126,6 +126,12 @@ psql "$DATABASE_URL" -f backend/sql/006_add_french_russian_languages.sql
 psql "$DATABASE_URL" -f backend/sql/007_add_turkish_language.sql
 ```
 
+On a database seeded before the Greek typo fix, apply (safe to re-run, only touches the row while it still has the typo):
+
+```bash
+psql "$DATABASE_URL" -f backend/sql/010_fix_greek_typos.sql
+```
+
 If using the Supabase dashboard, paste the contents of:
 
 ```text
