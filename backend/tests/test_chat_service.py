@@ -253,7 +253,7 @@ def test_answer_menu_query_returns_long_drinks_detail_without_inventing() -> Non
     assert answer.intent == "item_detail"
     assert answer.recommendations[0].name == "Long Drinks"
     assert "Classic Long Drinks" in answer.reply
-    assert "δεν έχω αναλυτικά συστατικά" in answer.reply
+    assert "Δεν έχω αναλυτικά συστατικά" in answer.reply
     assert "Tea" not in answer.reply
 
 

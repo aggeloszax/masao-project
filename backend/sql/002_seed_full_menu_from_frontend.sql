@@ -969,7 +969,7 @@ from (
     ('DE002', 'fr', 'Baked Cheesecake', 'servi avec glace aux fruits rouges et baies'),
     ('DE002', 'ru', 'Baked Cheesecake', 'подаётся с мороженым из красных фруктов и ягодами'),
     ('DE002', 'tr', 'Baked Cheesecake', 'kırmızı meyveli dondurma ve orman meyveleri ile servis edilir'),
-    ('DE003', 'el', 'Tiramisu', 'σερβίρεται με παγωτό βανίλια και κέμα'),
+    ('DE003', 'el', 'Tiramisu', 'σερβίρεται με παγωτό βανίλια και κρέμα'),
     ('DE003', 'en', 'Tiramisu', 'served with vanilla ice cream and cream'),
     ('DE003', 'de', 'Tiramisu', 'serviert mit Vanilleeis und Sahne'),
     ('DE003', 'it', 'Tiramisu', 'servito con gelato alla vaniglia e panna'),

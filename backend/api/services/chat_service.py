@@ -171,7 +171,7 @@ FALLBACK_TEXTS: dict[str, dict[str, str]] = {
         "detail": "Το {name} ({price:.2f}€) περιέχει: {description}.",
         "detail_generic": (
             "Για το {name} ({price:.2f}€), το μενού γράφει: {description}. "
-            "δεν έχω αναλυτικά συστατικά για αυτό το item, οπότε δεν θα τα επινοήσω."
+            "Δεν έχω αναλυτικά συστατικά για αυτό το πιάτο, οπότε δεν θα τα επινοήσω."
         ),
         "overview_intro": "Στα ποτά υπάρχουν οι εξής επιλογές: ",
         "overview_sample": "Ενδεικτικά",
